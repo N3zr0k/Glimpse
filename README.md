@@ -11,7 +11,7 @@ except provide a settings page, an overview of the installed extensions and a cl
 
 | Addon | What it does |
 | --- | --- |
-| [Glimpse: Keybinds](https://github.com/N3zr0k/Glimpse_Keybinds) | Shows keyboard, mouse and click-cast bindings in spell, item and macro tooltips |
+| [Glimpse: KeybindsTooltip](https://github.com/N3zr0k/Glimpse_KeybindsTooltip) | Shows keyboard, mouse and click-cast bindings in spell, item and macro tooltips |
 | [Glimpse: GatheringDB / GatheringTooltip](https://github.com/N3zr0k/Glimpse_Gathering) | Records gathering and loot data while you play and shows drop chances in tooltips |
 
 ## Installation

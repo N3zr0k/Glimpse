@@ -27,7 +27,7 @@ Titel, Version, Notes, Autor, Icon und Links stehen nur in der TOC. Gelesen wird
 
 ```lua
 Glimpse:GetMeta("Version")                 -- Core
-Glimpse:GetMeta("Notes", "Glimpse_Keybinds") -- eine Erweiterung
+Glimpse:GetMeta("Notes", "Glimpse_KeybindsTooltip") -- eine Erweiterung
 ```
 
 `Notes-deDE` und weitere Sprachen liest der Client selbst. Bei `Title` wird ein angehängter Farbblock
@@ -160,7 +160,7 @@ Glimpse:RegisterCommand("name", "Beschreibung für /gli help", function(glimpse,
 ```
 
 Ein Befehl pro Datei. Im Core liegen sie in `Commands/` und stehen in `Commands/Commands.xml`; eine
-Erweiterung registriert ihren Befehl in einer eigenen Datei (siehe `Glimpse_Keybinds/Commands/`).
+Erweiterung registriert ihren Befehl in einer eigenen Datei (siehe `Glimpse_KeybindsTooltip/Commands/`).
 
 ### Debug (`Core/Debug.lua`)
 

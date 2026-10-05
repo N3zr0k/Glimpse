@@ -10,7 +10,7 @@
 ## X-License: MIT
 
 ## Category: Tooltip
-## IconTexture: Interface\Icons\INV_Misc_Eye_01
+## IconTexture: Interface\AddOns\Glimpse\Media\Icon
 ## SavedVariables: GlimpseDB
 
 # Main XML Loader

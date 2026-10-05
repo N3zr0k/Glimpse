@@ -1,5 +1,7 @@
 # Glimpse
 
+<p align="center"><img src="docs/icon.png" alt="Glimpse icon" width="160"></p>
+
 Minimalistic and powerful tooltip enhancement framework for World of Warcraft (Forever client, interface 16001).
 
 Glimpse is the common base for a family of small tooltip addons. It does nothing visible on its own

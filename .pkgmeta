@@ -14,3 +14,4 @@ ignore:
   - .gitignore
   - DEVELOPER.md
   - README.md
+  - docs

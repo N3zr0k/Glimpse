@@ -10,4 +10,5 @@
 - Tooltip API: line providers, raw handlers, one divider per tooltip, icons in lines, secret-value safe
 - Uniform options page for extensions (`RegisterAddonOptions`, optional tabs)
 - Modifier key option for extensions (`ModifiersHeld`, `BuildModifierOptions`)
+- Addon icon (`Media/Icon.tga`) shown in the addon list
 - `X-Glimpse-MinVersion` check for extensions

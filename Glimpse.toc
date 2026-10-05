@@ -1,0 +1,17 @@
+## Interface: 120100, 16001
+## Title: Glimpse |cff00ff00v0.1.0|r
+## Notes: Minimalistic and powerful tooltip enhancement.
+## Notes-deDE: Minimalistische und leistungsstarke Tooltip-Erweiterung.
+
+## Version: 0.1.0
+## Author: N3zr0k
+## X-Website: https://github.com/N3zr0k/Glimpse
+## X-Repo: https://github.com/N3zr0k/Glimpse
+## X-License: MIT
+
+## Category: Tooltip
+## IconTexture: Interface\Icons\INV_Misc_Eye_01
+## SavedVariables: GlimpseDB
+
+# Main XML Loader
+Glimpse.xml

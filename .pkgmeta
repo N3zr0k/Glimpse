@@ -1,0 +1,16 @@
+package-as: Glimpse
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+# Nur das Addon selbst kommt ins Paket
+ignore:
+  - tests
+  - tools
+  - .github
+  - .luacheckrc
+  - .gitattributes
+  - .gitignore
+  - DEVELOPER.md
+  - README.md

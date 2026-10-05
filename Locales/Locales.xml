@@ -1,0 +1,6 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <!-- enUS muss als Erstes geladen werden, es ist die Default-Locale.
+         Neue Sprache: Datei anlegen (Kopie von deDE.lua) und hier eintragen. -->
+    <Script file="enUS.lua"/>
+    <Script file="deDE.lua"/>
+</Ui>

@@ -1,0 +1,13 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    
+    <!-- 1. Optionale Bibliotheken laden -->
+    <Include file="Libs\Libs.xml"/>
+
+    <!-- 2. Kern-Dateien des Addons laden -->
+    <Include file="Locales\Locales.xml"/>
+    <Include file="Core\Core.xml"/>
+    <Include file="Commands\Commands.xml"/>
+    
+    <!-- 3. Erweiterungen/Module laden -->
+    <Include file="Modules\Modules.xml"/>    
+</Ui>

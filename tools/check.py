@@ -6,14 +6,14 @@
   * jede XML-Datei ist wohlgeformt
   * mit --tag vX.Y.Z: alle TOC-Versionen und der CHANGELOG passen zum Tag
   * mit --tag vX.Y.Z-beta.N (Beta): die TOC-Version muss X.Y.Z sein, im CHANGELOG muss ein Abschnitt
-    "## [X.Y.Z]" stehen (ein richtiges Release, nur als Vorabversion veröffentlicht)
+    "## [X.Y.Z]" stehen (ein richtiges Release, im Titel als Beta gekennzeichnet)
   * mit --tag vX.Y.Z-alpha.N (Alpha): wie Beta, es reicht aber auch "## [Unreleased]"
   * mit --version: gibt die gemeinsame TOC-Version aus (Fehler, wenn die TOCs abweichen)
   * mit --current-tag: gibt das vorhandene Tag der höchsten Stufe zur TOC-Version aus (nichts, wenn es keins gibt)
   * mit --next-tag: gibt das Tag aus, das zur TOC-Version und zum CHANGELOG gehört und noch nicht
     existiert (nichts, wenn es keins anzulegen gibt). Die Stufe steht im CHANGELOG:
       "## [Unreleased]" allein                 -> Alpha  (vX.Y.Z-alpha.1)
-      "## [X.Y.Z] - Datum (beta)"              -> Beta   (vX.Y.Z-beta.1), richtiges Release als Vorabversion
+      "## [X.Y.Z] - Datum (beta)"              -> Beta   (vX.Y.Z-beta.1), richtiges Release, Titel mit Beta
       "## [X.Y.Z] - Datum (beta.2)"            -> Beta   (vX.Y.Z-beta.2), jede weitere Beta mit ihrer Nummer
       "## [X.Y.Z] - Datum"                     -> final  (vX.Y.Z)
     Es entsteht kein Tag, wenn es für die Version schon eines höherer Stufe gibt (Alpha < Beta < final)

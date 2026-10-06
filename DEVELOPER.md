@@ -254,7 +254,7 @@ Die Stufe eines Releases steht im `CHANGELOG.md`:
 | CHANGELOG | Tag | Auf GitHub |
 | --- | --- | --- |
 | nur `## [Unreleased]` | `vX.Y.Z-alpha.1` | Prerelease (Alpha) |
-| `## [X.Y.Z] - Datum (beta)` | `vX.Y.Z-beta.1` | Prerelease (Beta), aber ein richtiges Release mit dem Abschnitt `[X.Y.Z]` |
+| `## [X.Y.Z] - Datum (beta)` | `vX.Y.Z-beta.1` | richtiges Release (kein Prerelease), im Titel als Beta gekennzeichnet; Abschnitt `[X.Y.Z]` nötig |
 | `## [X.Y.Z] - Datum (beta.2)` | `vX.Y.Z-beta.2` | dasselbe als zweite Beta (die Nummer steht in der Überschrift) |
 | `## [X.Y.Z] - Datum` | `vX.Y.Z` | Release |
 
@@ -263,7 +263,7 @@ Die Stufe eines Releases steht im `CHANGELOG.md`:
    dieser oder einer höheren Stufe (Alpha < Beta < final), setzt `ci.yml` das Tag selbst und startet `release.yml` per
    `workflow_dispatch` auf dem Tag (ein mit dem `GITHUB_TOKEN` gepushtes Tag löst keinen Push-Workflow aus).
 3. `release.yml` prüft Tag, TOC-Version und CHANGELOG, baut das ZIP mit dem BigWigs-Packager und legt ein
-   GitHub-Release an. Tags mit `-alpha` oder `-beta` werden als Prerelease veröffentlicht.
+   GitHub-Release an. Alpha-Tags werden als Prerelease veröffentlicht, Beta-Tags als richtiges Release mit „(Beta)“ im Titel.
 
 Eine Version kann so nacheinander als Alpha, Beta (auch mehrere) und final erscheinen: Überschrift im CHANGELOG
 ändern (`[Unreleased]` → `[X.Y.Z] - Datum (beta)` → `(beta.2)` → ohne Zusatz) und pushen. Ein Tag entsteht nur, wenn es

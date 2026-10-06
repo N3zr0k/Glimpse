@@ -2,7 +2,8 @@ name: Release
 
 # Ein Tag wie v0.2.0 baut das Paket und legt ein GitHub-Release an. Das Tag muss zur Version in
 # der TOC und zu einem Abschnitt im CHANGELOG passen (prüft tools/check.py). Tags mit "-beta" oder
-# "-alpha" (z. B. v0.2.1-beta.1) werden als Prerelease veröffentlicht. Beta braucht den Abschnitt
+# "-alpha" (z. B. v0.2.1-beta.1) sind Vorabversionen: Alpha wird als Prerelease veröffentlicht, Beta als
+# richtiges Release mit Beta-Kennzeichnung im Titel. Beta braucht den Abschnitt
 # "## [X.Y.Z]" im CHANGELOG, Alpha reicht "## [Unreleased]".
 #
 # Normalerweise setzt die CI das Tag selbst (ci.yml) und startet diesen Workflow danach per
@@ -59,15 +60,23 @@ jobs:
           fi
           printf 'Zip: %s\n' "${zips[@]}"
 
-      # Sicherheitsnetz: Vorabversionen müssen auf GitHub als Prerelease erscheinen, auch wenn der
-      # Packager das Release nicht selbst angelegt oder markiert hat.
-      - name: Prerelease sicherstellen
+      # Der Packager markiert jedes Tag mit "-alpha" oder "-beta" als Prerelease. Gewollt ist:
+      #   Alpha  -> Prerelease
+      #   Beta   -> richtiges Release mit Beta-Kennzeichnung im Titel (nicht Prerelease, nicht "Latest")
+      #   final  -> richtiges Release (vom Packager)
+      # Hat der Packager das Release nicht angelegt, wird es hier mit dem Zip erzeugt.
+      - name: Alpha und Beta auf GitHub kennzeichnen
         if: contains(env.TAG, '-beta') || contains(env.TAG, '-alpha')
         run: |
           shopt -s nullglob
           zips=(.release/*.zip)
-          if gh release view "$TAG" > /dev/null 2>&1; then
-            gh release edit "$TAG" --prerelease
+          if [[ "$TAG" == *-alpha* ]]; then
+            flags=(--prerelease --title "$TAG")
           else
-            gh release create "$TAG" --prerelease --title "$TAG" --generate-notes "${zips[@]}"
+            flags=(--prerelease=false --latest=false --title "$TAG (Beta)")
+          fi
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release edit "$TAG" "${flags[@]}"
+          else
+            gh release create "$TAG" "${flags[@]}" --generate-notes "${zips[@]}"
           fi

@@ -23,7 +23,7 @@ function stub.reset()
             parts[#parts + 1] = text:sub(pos, from - 1)
             pos = to + 1
         end
-        return table.unpack(parts)
+        return (table.unpack or unpack)(parts)
     end
     _G.strtrim = function(s) return (s:gsub("^%s+", ""):gsub("%s+$", "")) end
 

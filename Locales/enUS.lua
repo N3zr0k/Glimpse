@@ -60,3 +60,4 @@ L["Credits"] = true
 L["Contributors"] = true
 L["Image credits"] = true
 L["Special thanks"] = true
+L["Tester"] = true

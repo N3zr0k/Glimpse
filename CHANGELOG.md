@@ -4,6 +4,7 @@
 
 ### Added
 - "Credits" tab on every options page (author from the TOC, optional contributors, image credits, thanks)
+- Special thanks in the Credits: Flovy and sMash (testers)
 - Module `Locations`: map names and sizes, player position, distances, coordinates and waypoints (TomTom or game marker)
 - Distance unit option (automatic, yards or metres), `FormatDistance(yards)` and `GetDistanceUnit()`
 

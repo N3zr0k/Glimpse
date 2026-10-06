@@ -113,6 +113,21 @@ local function Field(label, value)
     return format("|cffffd100%s:|r %s", label, value)
 end
 
+-- Besonderer Dank, der auf jeder Optionsseite im Credits-Bereich steht (gilt für Glimpse und alle Erweiterungen),
+-- wenn credits.thanks nicht eigene Einträge liefert: { Name, Rolle }, die Rolle wird übersetzt.
+local SPECIAL_THANKS = {
+    { "Flovy", "Tester" },
+    { "sMash", "Tester" },
+}
+
+local function DefaultThanks()
+    local list = {}
+    for _, entry in ipairs(SPECIAL_THANKS) do
+        list[#list + 1] = format("%s (%s)", entry[1], L[entry[2]])
+    end
+    return list
+end
+
 --- Der Bereich "Credits" einer Optionsseite, wie bei TomTom: eine Trennlinie mit Überschrift, darunter goldene
 -- Bezeichnungen mit weißem Text. Der Autor kommt aus der TOC (## Author). credits ist optional:
 --   { contributors = { "Name (wofür)", ... }, thanks = { "..." }, images = { "Pin - Autor (Flaticon)", ... } }
@@ -140,7 +155,7 @@ function Glimpse:BuildCreditsArgs(addonName, credits, order)
                 for _, block in ipairs({
                     { L["Contributors"], credits.contributors },
                     { L["Image credits"], credits.images },
-                    { L["Special thanks"], credits.thanks },
+                    { L["Special thanks"], credits.thanks or DefaultThanks() },
                 }) do
                     local text = List(block[1], block[2])
                     if text then blocks[#blocks + 1] = text end

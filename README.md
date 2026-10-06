@@ -44,7 +44,7 @@ Open them with `/gli config` or in the game options under Addons > Glimpse.
 * **Overview:** all installed extensions with icon and version, and a warning if an extension needs a newer Glimpse.
 * **General:** debug mode and the distance unit for all extensions (automatic by client language, yards or metres).
 * **Profiles:** settings are stored per profile and can be copied, reset and shared between characters.
-* **Credits:** author, contributors and thanks. Every extension page has the same "Credits" tab and shows its
+* **Credits:** author, contributors, image credits and special thanks (Flovy and sMash for testing). Every extension page has the same "Credits" tab and shows its
   version below the page.
 
 Extensions can offer a "Only while a key is held" option: their tooltip additions then appear only while the selected

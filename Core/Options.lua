@@ -113,8 +113,47 @@ local function Field(label, value)
     return format("|cffffd100%s:|r %s", label, value)
 end
 
-function Glimpse:BuildOverview()
+--- Der Bereich "Credits" einer Optionsseite, wie bei TomTom: eine Trennlinie mit Überschrift, darunter goldene
+-- Bezeichnungen mit weißem Text. Der Autor kommt aus der TOC (## Author). credits ist optional:
+--   { contributors = { "Name (wofür)", ... }, thanks = { "..." }, images = { "Pin - Autor (Flaticon)", ... } }
+-- Gibt zwei Optionen zurück (Überschrift und Text) zum Einhängen in args; order = Position.
+function Glimpse:BuildCreditsArgs(addonName, credits, order)
+    credits = credits or {}
+    order = order or 90
+
+    local function List(label, entries)
+        if type(entries) ~= "table" or #entries == 0 then return nil end
+        local lines = { format("|cffffd100%s:|r", label) }
+        for _, entry in ipairs(entries) do lines[#lines + 1] = "- " .. entry end
+        return table.concat(lines, "\n")
+    end
+
     return {
+        creditsHeader = { type = "header", order = order, name = L["Credits"] },
+        credits = {
+            type = "description", order = order + 1, width = "full", fontSize = "medium",
+            name = function()
+                local blocks = {}
+                local author = self:GetMeta("Author", addonName)
+                if author and author ~= "" then blocks[#blocks + 1] = Field(L["Author"], author) end
+                -- einzeln anhängen: eine fehlende Liste (nil) darf die folgenden nicht abschneiden
+                for _, block in ipairs({
+                    { L["Contributors"], credits.contributors },
+                    { L["Image credits"], credits.images },
+                    { L["Special thanks"], credits.thanks },
+                }) do
+                    local text = List(block[1], block[2])
+                    if text then blocks[#blocks + 1] = text end
+                end
+                -- Autor und Listen stehen mit einer Leerzeile Abstand
+                return table.concat(blocks, "\n\n")
+            end,
+        },
+    }
+end
+
+function Glimpse:BuildOverview()
+    local overview = {
         type = "group", order = 1, name = L["Overview"],
         args = {
             title = {
@@ -136,7 +175,6 @@ function Glimpse:BuildOverview()
                     local _, _, _, toc = GetBuildInfo()
                     return table.concat({
                         Field(L["Version"], self:GetMeta("Version") or "?"),
-                        Field(L["Author"], self:GetMeta("Author") or "?"),
                         Field(L["Game version"], "Interface " .. tostring(toc)),
                     }, "\n")
                 end,
@@ -148,6 +186,7 @@ function Glimpse:BuildOverview()
             },
         },
     }
+    return overview
 end
 
 -- ---------------------------------------------------------------------------
@@ -167,17 +206,20 @@ function Glimpse:BuildOptions()
             general = {
                 type = "group", order = 2, name = L["General"],
                 args = {
+                    -- Debug steht immer als erste Option; width = "full" lässt alles untereinander stehen
                     debug = {
-                        type = "toggle", order = 1,
+                        type = "toggle", order = 1, width = "full",
                         name = L["Debug mode"],
                         desc = L["Prints additional diagnostic messages to chat."],
                         get = function() return self.db.profile.debug end,
                         -- über SetDebug, damit die Chat-Meldung auch beim Klick kommt
                         set = function(_, value) self:SetDebug(value) end,
                     },
+                    distanceUnit = self:BuildDistanceOptions(2),
                 },
             },
-            -- "profiles" (Order 100) kommt in SetupOptions dazu, falls AceDBOptions geladen ist
+            credits = { type = "group", order = 110, name = L["Credits"], args = self:BuildCreditsArgs(self.name, nil, 1) },
+            -- "profiles" (Order 100) kommt in SetupOptions dazu, falls AceDBOptions geladen ist; Credits (110) steht dahinter
         },
     }
 end
@@ -186,18 +228,15 @@ end
 --
 --   [Icon] Glimpse: Name        (Titel aus der TOC, wird in RegisterAddonOptions gesetzt)
 --   Beschreibung                (Notes aus der TOC, klein und grau)
---   +-- Optionen -------------+
+--   [Optionen] [...] [Credits]  (Tabs; Credits ist immer der letzte)
+--   +-------------------------+
 --   |  args der Erweiterung   |
 --   +-------------------------+
---   Version x.y.z               (klein und grau)
+--   Version x.y.z               (klein und grau, unter dem ganzen Rahmen)
 --
 -- args sind die Optionen der Erweiterung im AceConfig-Format (nur der Inhalt von "args").
-function Glimpse:BuildAddonPage(addonName, args, tabs)
+function Glimpse:BuildAddonPage(addonName, args, tabs, credits)
     local function Grey(text) return "|cff999999" .. text .. "|r" end
-
-    local function VersionText()
-        return Grey(L["Version"] .. ": " .. (self:GetMeta("Version", addonName) or "?"))
-    end
 
     local page = {
         type = "group",
@@ -216,20 +255,66 @@ function Glimpse:BuildAddonPage(addonName, args, tabs)
         },
     }
 
+    -- Jede Seite hat Tabs, dadurch sehen alle Erweiterungen gleich aus. Mit tabs = true sind args selbst die
+    -- Tab-Gruppen, sonst kommen sie in einen Tab "Optionen". Alles, was keine Gruppe ist, zeichnet AceConfig
+    -- oberhalb der Tabs, deshalb steht die Version nicht in der Seite, sondern unter dem Rahmen (AddVersionFooter).
+    page.childGroups = "tab"
     if tabs then
-        -- Mit Tabs sind args selbst die Tab-Gruppen. Alles, was keine Gruppe ist, zeichnet
-        -- AceConfig oberhalb der Tabs, deshalb steht die Version hier direkt unter der Beschreibung.
-        page.childGroups = "tab"
-        page.args.version = { type = "description", order = 3, width = "full", fontSize = "small", name = VersionText }
         for key, group in pairs(args) do page.args[key] = group end
     else
-        -- eine inline-Gruppe wird mit Rahmen gezeichnet und hebt die Optionen ab
-        page.args.options = { type = "group", inline = true, order = 10, name = L["Options"], args = args }
-        -- AceConfig kann Text nicht rechtsbündig setzen, deshalb steht die Version linksbündig unter dem Rahmen
-        page.args.version = { type = "description", order = 91, width = "full", fontSize = "small", name = VersionText }
+        page.args.options = { type = "group", order = 1, name = L["Options"], args = args }
     end
+    -- als letzter Tab: Credits
+    page.args.creditsTab = { type = "group", order = 900, name = L["Credits"], args = self:BuildCreditsArgs(addonName, credits, 1) }
 
     return page
+end
+
+-- Platz unter dem Rahmen der Optionen in Pixel
+local FOOTER_HEIGHT = 14
+
+--- Setzt die Version in kleiner grauer Schrift unter den ganzen Rahmen des Panels, wie bei Seiten ohne Tabs
+-- (dort steht sie unter dem Rahmen "Optionen"). AceConfig kann Text nicht unter Tabs setzen, deshalb wird das
+-- Panel selbst (AceGUI BlizOptionsGroup) um eine Zeile verkürzt. Gibt false zurück, wenn das nicht geht.
+function Glimpse:AddVersionFooter(widget, addonName)
+    local frame, content = widget and widget.frame, widget and widget.content
+    if not (frame and content and frame.CreateFontString and content.SetPoint) then return false end
+
+    -- der Inhalt endet eine Zeile früher; die Höhe, die AceGUI dem Inhalt gibt, wird entsprechend gekürzt
+    -- AceConfigDialog ruft SetTitle bei jedem Öffnen auf, und SetTitle setzt die Anker zurück: deshalb nach jedem Aufruf neu
+    content:SetPoint("BOTTOMRIGHT", -10, 10 + FOOTER_HEIGHT)
+    local setTitle = widget.SetTitle
+    if setTitle then
+        widget.SetTitle = function(this, ...)
+            setTitle(this, ...)
+            content:SetPoint("BOTTOMRIGHT", -10, 10 + FOOTER_HEIGHT)
+        end
+    end
+    local setHeight = widget.OnHeightSet
+    if setHeight then
+        widget.OnHeightSet = function(this, height) setHeight(this, height - FOOTER_HEIGHT) end
+        local height = frame.GetHeight and frame:GetHeight() or 0
+        if height > 0 then widget:OnHeightSet(height) end
+    end
+
+    -- Der Text liegt auf einem eigenen Rahmen weit über dem Tab-Rahmen, sonst malt dieser seinen Rand und Schatten darüber
+    local holder = frame
+    if CreateFrame then
+        holder = CreateFrame("Frame", nil, frame)
+        holder:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 12, 4)
+        holder:SetSize(300, 16)
+        holder:SetFrameLevel((frame.GetFrameLevel and frame:GetFrameLevel() or 0) + 50)
+    end
+    local text = holder:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    if holder == frame then
+        text:SetPoint("BOTTOMLEFT", 17, 4)
+    else
+        text:SetPoint("LEFT", holder, "LEFT", 5, 0)
+    end
+    text:SetJustifyH("LEFT")
+    text:SetText(L["Version"] .. ": " .. (self:GetMeta("Version", addonName) or "?"))
+
+    return true
 end
 
 --- Registriert die Optionsseite einer Erweiterung im einheitlichen Aufbau (BuildAddonPage).
@@ -237,10 +322,10 @@ end
 -- Überschrift des Panels (mit Icon). Im Einstellungsbaum steht darunter nur "Name" mit Icon,
 -- das "Glimpse: " wird dafür abgeschnitten, weil der Eintrag ohnehin unter Glimpse hängt.
 -- Mit tabs = true sind args keine einzelnen Optionen, sondern Tab-Gruppen (type = "group"),
--- die statt des Rahmens "Optionen" als Tabs angezeigt werden.
-function Glimpse:RegisterAddonOptions(addonName, args, tabs)
+-- sonst stehen sie im Tab "Optionen". Der Tab "Credits" kommt immer als letzter dazu.
+function Glimpse:RegisterAddonOptions(addonName, args, tabs, credits)
     local title = self:GetMeta("Title", addonName) or addonName
-    local page = self:BuildAddonPage(addonName, args, tabs)
+    local page = self:BuildAddonPage(addonName, args, tabs, credits)
 
     local prefix = (self:GetMeta("Title") or self.name) .. ": "
     local treeName = title
@@ -254,6 +339,22 @@ function Glimpse:RegisterAddonOptions(addonName, args, tabs)
     local widget = frame and frame.obj
     if widget and widget.SetTitle then
         widget:SetTitle(self:WithAddonIcon(title, addonName))
+    end
+
+    -- Die Version steht unter dem Rahmen. Geht das nicht, bekommt jeder Tab sie als letzte Zeile.
+    do
+        local ok, done = pcall(self.AddVersionFooter, self, widget, addonName)
+        if not (ok and done) then
+            for _, group in pairs(page.args) do
+                if type(group) == "table" and group.type == "group" then
+                    group.args = group.args or {}
+                    group.args.version = group.args.version or {
+                        type = "description", order = 999, width = "full", fontSize = "small",
+                        name = "|cff999999" .. L["Version"] .. ": " .. (self:GetMeta("Version", addonName) or "?") .. "|r",
+                    }
+                end
+            end
+        end
     end
     return frame
 end

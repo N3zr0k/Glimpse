@@ -45,6 +45,7 @@ Glimpse:SetDefaultModuleLibraries("AceEvent-3.0")
 local defaults = {
     profile = {
         debug = false,
+        distanceUnit = "auto", -- Einheit der Entfernungen: auto (nach Sprache des Clients), yards, meters
     },
 }
 

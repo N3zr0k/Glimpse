@@ -94,4 +94,15 @@ function stub.load(path, addonName)
     return chunk(addonName or "Test")
 end
 
+-- Lädt alle Dateien des Moduls Locations in der Reihenfolge der Locations.xml; gibt das Modul zurück.
+-- Danach ist `Locations.api` leer (ohne Spielfunktionen), Tests setzen, was sie brauchen.
+function stub.loadLocations()
+    for _, file in ipairs({ "Locations", "Maps", "Position", "Distance", "Units", "Coords", "Waypoint" }) do
+        stub.load("Modules/Locations/" .. file .. ".lua", "Glimpse")
+    end
+    local module = LibStub():GetAddon():GetModule("Locations")
+    module.api = {}
+    return module
+end
+
 return stub

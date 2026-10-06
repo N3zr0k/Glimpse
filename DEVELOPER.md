@@ -130,7 +130,7 @@ Der Name steht in der ersten Tooltip-Zeile (`tooltip:GetName() .. "TextLeft1"`).
 | `Glimpse:GetIcon(addonName)` / `Glimpse:WithAddonIcon(text, addonName)` | TOC-Icon holen / vor Text setzen |
 
 `RegisterAddonOptions` baut die Seite immer gleich auf: Überschrift mit Icon, Notes (klein, grau), die
-`args` im Rahmen "Optionen", Version klein darunter. Mit `tabs = true` sind `args` keine Optionen, sondern
+`args` im ersten Tab "Optionen", dazu ein letzter Tab "Credits", die Version klein unter dem ganzen Rahmen. Mit `tabs = true` sind `args` keine Optionen, sondern
 Gruppen (`type = "group"`), die als Tabs erscheinen. Alle Optionen mit `width = "full"` stehen untereinander.
 
 Aufruf frühestens in `OnInitialize` des Moduls, weil das Haupt-Panel vorher noch nicht existiert.
@@ -152,6 +152,59 @@ self:RegisterEvent("MODIFIER_STATE_CHANGED", function()
     if Glimpse:ModifiersRequired(self.db.profile) then self:RefreshTooltip() end
 end)
 ```
+
+### Orte (`Modules/Locations/`)
+
+Das Modul `Locations` bündelt alles rund um Karten, Position, Entfernungen und Wegpunkte, damit Erweiterungen es nicht
+selbst bauen müssen. Es benutzt nur Spielfunktionen; TomTom ist optional (keine harte Abhängigkeit). Schnittstellenversion:
+`Locations.API_VERSION` (aktuell 1).
+
+```lua
+local Locations = Glimpse:GetModule("Locations")
+local yards = Locations:GetDistanceFromPlayer(map, x, y)
+if yards then line = Locations:FormatDistance(yards) end
+```
+
+| Funktion | Beschreibung |
+| --- | --- |
+| `GetMapName(map)` | Name der Karte (Zone) oder nil |
+| `GetMapSize(map)` | Breite, Höhe in Yards oder nil |
+| `GetContinent(map)` | uiMapID des Kontinents oder nil |
+| `GetWorldPosition(map, x, y)` | Welt-ID, a, b (Yards) oder nil |
+| `GetPlayerInstance()` | `{ instance, name }` in einer Instanz, sonst nil |
+| `GetPlayerPosition()` | `{ map, x, y }` (0 bis 1) in der offenen Welt, sonst nil |
+| `GetPlayerArea()` | Instanz oder Position, sonst nil |
+| `DescribeArea(area)` | Kurztext für die Debug-Ausgabe |
+| `GetMapDistance(map, x1, y1, x2, y2)` | Yards auf einer Karte oder nil |
+| `GetDistance(map1, x1, y1, map2, x2, y2)` | Luftlinie in Yards: gleiche Karte oder gleicher Kontinent, sonst nil |
+| `GetDistanceFromPlayer(map, x, y)` | wie `GetDistance`, vom Spieler aus |
+| `FormatDistance(yards)` | Text in der gewählten Einheit: `120 yd`, ab 1760 yd `1.3 mi`; `91 m`, ab 1000 m `3.4 km` (im Deutschen mit Komma) |
+| `GetDistanceUnit()` | `"yards"` oder `"meters"`, wie sie gerade gelten |
+| `FormatCoords(x, y, decimals)` | `"41.2, 56.8"` (Prozent, im Deutschen mit Komma) |
+| `SetWaypoint(map, x, y, title)` | Wegpunkt mit TomTom, sonst mit der Spielmarkierung; true bei Erfolg, false ohne Karte/Koordinaten (Instanzen) |
+| `HasTomTom()` | ist TomTom geladen |
+| `ResetCaches()` | gemerkte Kartengrößen und Kontinente vergessen (Tests) |
+
+Der Spieler stellt die Einheit in den Glimpse-Optionen (Allgemein) ein: automatisch nach der Sprache des Clients
+(Tabelle `Locations.LOCALE_UNITS`), Yards oder Meter. Der Spielwert (`C_Map`, Weltpositionen) ist immer in Yards.
+`Glimpse:FormatDistance`, `Glimpse:GetDistanceUnit` und `Glimpse:BuildDistanceOptions` gibt es weiterhin als Kurzwege.
+Für Tests ersetzt man Einträge in `Locations.api` (die Blizzard-Funktionen).
+
+### Credits (`Glimpse:BuildCreditsArgs`)
+
+Jede Optionsseite (und der Kern) hat einen letzten Tab "Credits" mit einem Bereich wie bei TomTom: Trennlinie mit Überschrift,
+goldene Bezeichnungen, weißer Text. Der Autor kommt automatisch aus der TOC (`## Author`). Weitere Angaben übergibt die
+Erweiterung als vierten Parameter von `RegisterAddonOptions(addonName, args, tabs, credits)`:
+
+```lua
+Glimpse:RegisterAddonOptions(ADDON_NAME, options, false, {
+    contributors = { "Name (wofür)" },
+    images = { "Pin - Autor (Flaticon)" },   -- Bildnachweis
+    thanks = { "..." },
+})
+```
+
+Der Tab "Credits" steht bei jeder Seite ganz hinten. Im Kern steht der Autor nur dort, nicht in der Übersicht.
 
 ### Slash-Befehle (`Core/Commands.lua`)
 

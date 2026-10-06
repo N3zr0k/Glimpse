@@ -45,3 +45,18 @@ L["Show the tooltip additions only while the selected keys are held. If several 
 L["Shift"] = "Umschalt"
 L["Ctrl"] = "Strg"
 L["Alt"] = "Alt"
+
+-- Entfernungen
+L["%d yd"] = "%d yd"
+L["%d m"] = "%d m"
+L["%.1f mi"] = "%.1f mi"
+L["%.1f km"] = "%.1f km"
+L["Distance unit"] = "Einheit der Entfernung"
+L["Unit for distances in all extensions. Automatic uses yards for English clients and metres for all other languages. From one mile (1760 yards) or one kilometre the larger unit is used."] = "Einheit der Entfernungen in allen Erweiterungen. Automatisch nimmt Yards für englische Clients und Meter für alle anderen Sprachen. Ab einer Meile (1760 Yards) bzw. einem Kilometer wird die größere Einheit genommen."
+L["Automatic (by client language)"] = "Automatisch (nach Sprache des Clients)"
+L["Yards"] = "Yards"
+L["Meters"] = "Meter"
+L["Credits"] = "Credits"
+L["Contributors"] = "Mitwirkende"
+L["Image credits"] = "Bildnachweis"
+L["Special thanks"] = "Besonderer Dank"

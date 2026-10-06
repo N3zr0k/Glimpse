@@ -1,0 +1,10 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <!-- Reihenfolge: Locations.lua legt das Modul an, die anderen Dateien erweitern es. -->
+    <Script file="Locations.lua"/>
+    <Script file="Maps.lua"/>
+    <Script file="Position.lua"/>
+    <Script file="Distance.lua"/>
+    <Script file="Units.lua"/>
+    <Script file="Coords.lua"/>
+    <Script file="Waypoint.lua"/>
+</Ui>

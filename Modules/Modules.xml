@@ -1,5 +1,6 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
     <!-- Interne Module. Externe Erweiterungen kommen als eigenes Addon, nicht hierher. -->
+    <Include file="Locations\Locations.xml"/>
     <Script file="Example.lua"/>
     <Script file="TooltipDebug.lua"/>
 </Ui>

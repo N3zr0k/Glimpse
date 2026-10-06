@@ -45,3 +45,18 @@ L["Show the tooltip additions only while the selected keys are held. If several 
 L["Shift"] = true
 L["Ctrl"] = true
 L["Alt"] = true
+
+-- Entfernungen
+L["%d yd"] = true
+L["%d m"] = true
+L["%.1f mi"] = true
+L["%.1f km"] = true
+L["Distance unit"] = true
+L["Unit for distances in all extensions. Automatic uses yards for English clients and metres for all other languages. From one mile (1760 yards) or one kilometre the larger unit is used."] = true
+L["Automatic (by client language)"] = true
+L["Yards"] = true
+L["Meters"] = true
+L["Credits"] = true
+L["Contributors"] = true
+L["Image credits"] = true
+L["Special thanks"] = true

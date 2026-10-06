@@ -3,8 +3,8 @@ name: Release
 # Ein Tag wie v0.2.0 baut das Paket und legt ein GitHub-Release an. Das Tag muss zur Version in
 # der TOC und zu einem Abschnitt im CHANGELOG passen (prüft tools/check.py). Tags mit "-beta" oder
 # "-alpha" (z. B. v0.2.1-beta.1) sind Vorabversionen: Alpha wird als Prerelease veröffentlicht, Beta als
-# richtiges Release mit Beta-Kennzeichnung im Titel. Beta braucht den Abschnitt
-# "## [X.Y.Z]" im CHANGELOG, Alpha reicht "## [Unreleased]".
+# richtiges Release mit Beta-Kennzeichnung im Titel. Die Stufe steht in der
+# TOC-Version (X.Y.Z-beta.N). Beta braucht den Abschnitt "## [X.Y.Z]" im CHANGELOG, Alpha reicht "## [Unreleased]".
 #
 # Normalerweise setzt die CI das Tag selbst (ci.yml) und startet diesen Workflow danach per
 # workflow_dispatch auf dem Tag. Das ist nötig, weil ein mit dem GITHUB_TOKEN gepushtes Tag keinen

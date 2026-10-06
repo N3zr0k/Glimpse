@@ -3,7 +3,7 @@
 ## Notes: Minimalistic and powerful tooltip enhancement.
 ## Notes-deDE: Minimalistische und leistungsstarke Tooltip-Erweiterung.
 
-## Version: 0.2.2
+## Version: 0.2.2-beta.2
 ## Author: N3zr0k
 ## X-Website: https://github.com/N3zr0k/Glimpse
 ## X-Repo: https://github.com/N3zr0k/Glimpse

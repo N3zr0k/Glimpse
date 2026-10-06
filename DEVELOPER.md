@@ -249,28 +249,31 @@ unbekannte Variable, ist es ein Tippfehler oder eine echte API-Funktion, die in 
 
 ## Veröffentlichen
 
-Die Stufe eines Releases steht im `CHANGELOG.md`:
+Die Stufe eines Releases steht in der Version der TOC (`## Version:`), das Tag heißt immer `v` + diese Version:
 
-| CHANGELOG | Tag | Auf GitHub |
+| `## Version:` in der TOC | Tag | Auf GitHub |
 | --- | --- | --- |
-| nur `## [Unreleased]` | `vX.Y.Z-alpha.1` | Prerelease (Alpha) |
-| `## [X.Y.Z] - Datum (beta)` | `vX.Y.Z-beta.1` | richtiges Release (kein Prerelease), im Titel als Beta gekennzeichnet; Abschnitt `[X.Y.Z]` nötig |
-| `## [X.Y.Z] - Datum (beta.2)` | `vX.Y.Z-beta.2` | dasselbe als zweite Beta (die Nummer steht in der Überschrift) |
-| `## [X.Y.Z] - Datum` | `vX.Y.Z` | Release |
+| `X.Y.Z-alpha.N` | `vX.Y.Z-alpha.N` | Prerelease (Alpha) |
+| `X.Y.Z-beta.N` | `vX.Y.Z-beta.N` | richtiges Release (kein Prerelease, nicht „Latest“), im Titel als Beta gekennzeichnet |
+| `X.Y.Z` | `vX.Y.Z` | Release |
 
-1. Version in der TOC erhöhen (SemVer), den CHANGELOG-Abschnitt passend zur gewünschten Stufe schreiben.
-2. Auf `main` pushen. Ist die Pipeline (Struktur, luacheck, Tests) grün und gibt es für die Version noch kein Tag
-   dieser oder einer höheren Stufe (Alpha < Beta < final), setzt `ci.yml` das Tag selbst und startet `release.yml` per
-   `workflow_dispatch` auf dem Tag (ein mit dem `GITHUB_TOKEN` gepushtes Tag löst keinen Push-Workflow aus).
+Alle TOCs eines Repos müssen dieselbe Version haben. Im `CHANGELOG.md` braucht jede Stufe den Abschnitt
+`## [X.Y.Z]`, nur bei Alpha reicht `## [Unreleased]`. Die Stufe steht nicht im CHANGELOG.
+
+1. Version in der TOC setzen (SemVer, bei Vorabversionen mit Stufe und Nummer, z. B. `0.2.3-beta.1`) und den
+   CHANGELOG-Abschnitt schreiben.
+2. Auf `main` pushen. Ist die Pipeline (Struktur, luacheck, Tests) grün und gibt es für die Basisversion noch kein Tag
+   derselben oder einer höheren Stufe (Alpha < Beta < final, bei gleicher Stufe zählt die Nummer), setzt `ci.yml` das
+   Tag selbst und startet `release.yml` per `workflow_dispatch` auf dem Tag (ein mit dem `GITHUB_TOKEN` gepushtes Tag
+   löst keinen Push-Workflow aus).
 3. `release.yml` prüft Tag, TOC-Version und CHANGELOG, baut das ZIP mit dem BigWigs-Packager und legt ein
    GitHub-Release an. Alpha-Tags werden als Prerelease veröffentlicht, Beta-Tags als richtiges Release mit „(Beta)“ im Titel.
 
-Eine Version kann so nacheinander als Alpha, Beta (auch mehrere) und final erscheinen: Überschrift im CHANGELOG
-ändern (`[Unreleased]` → `[X.Y.Z] - Datum (beta)` → `(beta.2)` → ohne Zusatz) und pushen. Ein Tag entsteht nur, wenn es
-für die Version noch keins höherer Stufe und keins derselben Stufe mit gleicher oder höherer Nummer gibt. Von Hand
-geht es auch (`git tag v0.2.3-beta.2 && git push --tags`), das löst `release.yml` direkt aus.
+Eine Version erscheint so nacheinander als Alpha, Beta (auch mehrere) und final: nur die TOC-Version ändern
+(`0.2.3-alpha.1` → `0.2.3-beta.1` → `0.2.3-beta.2` → `0.2.3`) und pushen. Von Hand geht es auch
+(`git tag v0.2.3-beta.2 && git push --tags`), das löst `release.yml` direkt aus.
 
-Was jetzt anstünde, zeigt `python3 tools/check.py --next-tag` (leer: nichts). Fehlt der Abschnitt für die Version
+Was jetzt anstünde, zeigt `python3 tools/check.py --next-tag` (leer: nichts). Fehlt der CHANGELOG-Abschnitt für die Version
 oder weichen TOC-Versionen ab, wird kein Tag gesetzt und der Lauf schlägt fehl. Bleibt die Version gleich, passiert
 nichts. Gibt es ein Tag, aber noch kein Release (ein früherer Lauf ist gescheitert), wird nur das Release gebaut.
 

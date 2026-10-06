@@ -28,10 +28,10 @@ jobs:
       - name: Tests
         run: lua tests/run.lua
 
-  # Neue Version oder neue Stufe und alles grün -> Tag setzen und Release bauen. Die Stufe steht im CHANGELOG:
-  #   nur "## [Unreleased]"                 Alpha   vX.Y.Z-alpha.1  (Prerelease)
-  #   "## [X.Y.Z] - Datum (beta)"           Beta    vX.Y.Z-beta.1   (richtiges Release, im Titel als Beta gekennzeichnet)
-  #   "## [X.Y.Z] - Datum"                  final   vX.Y.Z
+  # Neue Version oder neue Stufe und alles grün -> Tag setzen und Release bauen. Die Stufe steht in der TOC-Version:
+  #   Version X.Y.Z-alpha.N                 Alpha   vX.Y.Z-alpha.N  (Prerelease)
+  #   Version X.Y.Z-beta.N                  Beta    vX.Y.Z-beta.N   (richtiges Release, im Titel als Beta gekennzeichnet)
+  #   Version X.Y.Z                         final   vX.Y.Z
   # Nur auf main; Pull Requests und Stufen, die es für die Version schon gibt (oder höhere), werden übersprungen.
   tag:
     needs: check
@@ -50,7 +50,7 @@ jobs:
       - name: Tag anlegen, wenn die Version oder ihre Stufe neu ist
         id: make
         run: |
-          # Die Stufe steht im CHANGELOG (siehe tools/check.py): Alpha, Beta oder final.
+          # Die Stufe steht in der TOC-Version (siehe tools/check.py): Alpha, Beta oder final.
           tag="$(python3 tools/check.py --next-tag)"
           if [ -z "$tag" ]; then
             # Gibt es das Tag schon, aber noch kein Release (z. B. ein früherer Lauf ist gescheitert), wird nur das

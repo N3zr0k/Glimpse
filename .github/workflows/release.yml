@@ -51,6 +51,8 @@ jobs:
         if: env.CF_API_KEY != ''
         continue-on-error: true
         run: |
+          # Form des Secrets prüfen (ohne den Wert zu zeigen): ein Upload-Token ist eine UUID mit 36 Zeichen
+          echo "CF_API_KEY: ${#CF_API_KEY} Zeichen, UUID-Form: $([[ "$CF_API_KEY" =~ ^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$ ]] && echo ja || echo nein), Leerraum oder Anfuehrungszeichen: $([[ "$CF_API_KEY" =~ [[:space:]\"\'] ]] && echo ja || echo nein)"
           body="$(curl -s -w '\n%{http_code}' -H "x-api-token: $CF_API_KEY" "https://wow.curseforge.com/api/game/wow/versions")"
           code="${body##*$'\n'}"
           text="${body%$'\n'*}"

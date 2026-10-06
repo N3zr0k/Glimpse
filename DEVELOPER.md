@@ -11,7 +11,7 @@ Glimpse.xml          Zentrale Ladeliste, nur Include-Zeilen
 Core/                Init, Debug, Options, Modifiers, Commands, Tooltip
 Commands/            ein Slash-Befehl = eine Datei (Help, Info, Config, Debug)
 Locales/             enUS (Default) und deDE, eingetragen in Locales.xml
-Modules/             interne Module (Example als Vorlage, TooltipDebug)
+Modules/             interne Module (Locations, Example als Vorlage, TooltipDebug)
 Libs/                Ace3 (mitgeliefert, damit ein Klon sofort läuft)
 tests/               Logik-Tests ohne WoW (lua tests/run.lua)
 tools/check.py       Strukturprüfung von TOC und XML
@@ -183,6 +183,7 @@ if yards then line = Locations:FormatDistance(yards) end
 | `FormatCoords(x, y, decimals)` | `"41.2, 56.8"` (Prozent, im Deutschen mit Komma) |
 | `SetWaypoint(map, x, y, title)` | Wegpunkt mit TomTom, sonst mit der Spielmarkierung; true bei Erfolg, false ohne Karte/Koordinaten (Instanzen) |
 | `HasTomTom()` | ist TomTom geladen |
+| `BuildDistanceOptions(order)` | Auswahlfeld für die Einheit (die Allgemein-Seite benutzt es; Kurzweg `Glimpse:BuildDistanceOptions`) |
 | `ResetCaches()` | gemerkte Kartengrößen und Kontinente vergessen (Tests) |
 
 Der Spieler stellt die Einheit in den Glimpse-Optionen (Allgemein) ein: automatisch nach der Sprache des Clients
@@ -217,7 +218,7 @@ Erweiterung registriert ihren Befehl in einer eigenen Datei (siehe `Glimpse_Keyb
 
 ### Debug (`Core/Debug.lua`)
 
-`Glimpse:IsDebug()`, `Glimpse:Debug(...)`, in Modulen `self:Debug(...)` (Ausgabe als `Glimpse(Modul): ...`,
+`Glimpse:IsDebug()`, `Glimpse:SetDebug(enabled)`, `Glimpse:Debug(...)`, in Modulen `self:Debug(...)` (Ausgabe als `Glimpse(Modul): ...`,
 nur bei aktivem Debug-Modus). Der Schalter ist im Profil gespeichert. Auch Tooltip-Provider sollten
 Debug-Ausgaben vor dem Aufbau teurer Strings über `IsDebug()` absichern.
 
@@ -237,7 +238,7 @@ ab. Neue Sprache: Datei kopieren und in `Locales.xml` eintragen.
 ## Prüfen
 
 ```
-lua tests/run.lua          # Logik-Tests mit nachgebauter WoW-Umgebung (Lua 5.4 reicht)
+lua tests/run.lua          # Logik-Tests (Locations, Einheiten, Zusatztasten, Credits) mit nachgebauter WoW-Umgebung
 luacheck .                 # Konfiguration in .luacheckrc
 python3 tools/check.py     # TOC, XML und Dateiverweise
 ```

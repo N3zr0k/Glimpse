@@ -260,8 +260,8 @@ Die Stufe eines Releases steht im `CHANGELOG.md`:
 
 1. Version in der TOC erhöhen (SemVer), den CHANGELOG-Abschnitt passend zur gewünschten Stufe schreiben.
 2. Auf `main` pushen. Ist die Pipeline (Struktur, luacheck, Tests) grün und gibt es für die Version noch kein Tag
-   dieser oder einer höheren Stufe (Alpha < Beta < final), setzt `ci.yml` das Tag selbst und baut daraus das Release
-   (`release.yml`, als wiederverwendbarer Workflow).
+   dieser oder einer höheren Stufe (Alpha < Beta < final), setzt `ci.yml` das Tag selbst und startet `release.yml` per
+   `workflow_dispatch` auf dem Tag (ein mit dem `GITHUB_TOKEN` gepushtes Tag löst keinen Push-Workflow aus).
 3. `release.yml` prüft Tag, TOC-Version und CHANGELOG, baut das ZIP mit dem BigWigs-Packager und legt ein
    GitHub-Release an. Tags mit `-alpha` oder `-beta` werden als Prerelease veröffentlicht.
 

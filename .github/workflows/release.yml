@@ -80,3 +80,10 @@ jobs:
           else
             gh release create "$TAG" "${flags[@]}" --generate-notes "${zips[@]}"
           fi
+          # Ergebnis prüfen und im Log zeigen
+          gh release view "$TAG" --json tagName,name,isPrerelease,isDraft
+          is_pre="$(gh release view "$TAG" --json isPrerelease --jq .isPrerelease)"
+          if [[ "$TAG" == *-alpha* && "$is_pre" != "true" ]] || [[ "$TAG" == *-beta* && "$is_pre" != "false" ]]; then
+            echo "::error::Das Release $TAG hat auf GitHub nicht die gewünschte Kennzeichnung (isPrerelease=$is_pre)."
+            exit 1
+          fi

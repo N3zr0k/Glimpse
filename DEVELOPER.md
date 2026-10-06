@@ -250,7 +250,7 @@ unbekannte Variable, ist es ein Tippfehler oder eine echte API-Funktion, die in 
 
 1. Version in der TOC erhöhen (SemVer), Abschnitt `## [x.y.z]` im `CHANGELOG.md` ergänzen.
 2. Auf `main` pushen. Ist die Pipeline (Struktur, luacheck, Tests) grün und gibt es zur TOC-Version noch
-   kein Tag, setzt `ci.yml` das Tag `vX.Y.Z` selbst und ruft `release.yml` auf.
+   kein Tag, setzt `ci.yml` das Tag `vX.Y.Z` selbst und startet `release.yml` darauf (workflow_dispatch).
 3. `release.yml` prüft Tag, TOC-Version und CHANGELOG, baut das ZIP mit dem BigWigs-Packager und legt ein
    GitHub-Release an.
 

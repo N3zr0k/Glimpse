@@ -1,5 +1,4 @@
 local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
-local L = Glimpse.L
 local Locations = Glimpse:GetModule("Locations")
 
 --- Ist TomTom geladen? (optional, keine harte Abhängigkeit)

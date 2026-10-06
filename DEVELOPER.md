@@ -249,18 +249,29 @@ unbekannte Variable, ist es ein Tippfehler oder eine echte API-Funktion, die in 
 
 ## Veröffentlichen
 
-1. Version in der TOC erhöhen (SemVer), Abschnitt `## [x.y.z]` im `CHANGELOG.md` ergänzen.
-2. Auf `main` pushen. Ist die Pipeline (Struktur, luacheck, Tests) grün und gibt es zur TOC-Version noch
-   kein Tag, setzt `ci.yml` das Tag `vX.Y.Z` selbst und startet `release.yml` darauf (workflow_dispatch).
+Die Stufe eines Releases steht im `CHANGELOG.md`:
+
+| CHANGELOG | Tag | Auf GitHub |
+| --- | --- | --- |
+| nur `## [Unreleased]` | `vX.Y.Z-alpha.1` | Prerelease (Alpha) |
+| `## [X.Y.Z] - Datum (beta)` | `vX.Y.Z-beta.1` | Prerelease (Beta), aber ein richtiges Release mit dem Abschnitt `[X.Y.Z]` |
+| `## [X.Y.Z] - Datum (beta.2)` | `vX.Y.Z-beta.2` | dasselbe als zweite Beta (die Nummer steht in der Überschrift) |
+| `## [X.Y.Z] - Datum` | `vX.Y.Z` | Release |
+
+1. Version in der TOC erhöhen (SemVer), den CHANGELOG-Abschnitt passend zur gewünschten Stufe schreiben.
+2. Auf `main` pushen. Ist die Pipeline (Struktur, luacheck, Tests) grün und gibt es für die Version noch kein Tag
+   dieser oder einer höheren Stufe (Alpha < Beta < final), setzt `ci.yml` das Tag selbst und baut daraus das Release
+   (`release.yml`, als wiederverwendbarer Workflow).
 3. `release.yml` prüft Tag, TOC-Version und CHANGELOG, baut das ZIP mit dem BigWigs-Packager und legt ein
-   GitHub-Release an.
+   GitHub-Release an. Tags mit `-alpha` oder `-beta` werden als Prerelease veröffentlicht.
 
-Steht im CHANGELOG noch kein Abschnitt für die Version, aber `## [Unreleased]`, entsteht stattdessen
-eine Vorabversion `vX.Y.Z-beta.1` (der Packager markiert sie als Prerelease). Pro Version gibt es nur
-eine solche Vorabversion; das richtige Release folgt, sobald der Abschnitt `## [X.Y.Z]` im CHANGELOG steht.
+Eine Version kann so nacheinander als Alpha, Beta (auch mehrere) und final erscheinen: Überschrift im CHANGELOG
+ändern (`[Unreleased]` → `[X.Y.Z] - Datum (beta)` → `(beta.2)` → ohne Zusatz) und pushen. Ein Tag entsteht nur, wenn es
+für die Version noch keins höherer Stufe und keins derselben Stufe mit gleicher oder höherer Nummer gibt. Von Hand
+geht es auch (`git tag v0.2.3-beta.2 && git push --tags`), das löst `release.yml` direkt aus.
 
-Fehlt beides oder weichen TOC-Versionen ab, wird kein Tag gesetzt und der Lauf schlägt
-fehl. Bleibt die Version gleich, passiert nichts. Ein von Hand gepushtes Tag (`git tag v0.2.2 && git push
---tags`) löst `release.yml` weiterhin direkt aus.
+Was jetzt anstünde, zeigt `python3 tools/check.py --next-tag` (leer: nichts). Fehlt der Abschnitt für die Version
+oder weichen TOC-Versionen ab, wird kein Tag gesetzt und der Lauf schlägt fehl. Bleibt die Version gleich, passiert
+nichts. Gibt es ein Tag, aber noch kein Release (ein früherer Lauf ist gescheitert), wird nur das Release gebaut.
 
 Erweiterungen, die neue Core-Funktionen brauchen, tragen `## X-Glimpse-MinVersion` in ihre TOC ein.

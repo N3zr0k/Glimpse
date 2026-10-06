@@ -248,9 +248,18 @@ unbekannte Variable, ist es ein Tippfehler oder eine echte API-Funktion, die in 
 
 ## Veröffentlichen
 
-1. Version in der TOC erhöhen (SemVer), Abschnitt im `CHANGELOG.md` ergänzen.
-2. Committen, Tag setzen und pushen: `git tag v0.2.0 && git push --tags`.
+1. Version in der TOC erhöhen (SemVer), Abschnitt `## [x.y.z]` im `CHANGELOG.md` ergänzen.
+2. Auf `main` pushen. Ist die Pipeline (Struktur, luacheck, Tests) grün und gibt es zur TOC-Version noch
+   kein Tag, setzt `ci.yml` das Tag `vX.Y.Z` selbst und ruft `release.yml` auf.
 3. `release.yml` prüft Tag, TOC-Version und CHANGELOG, baut das ZIP mit dem BigWigs-Packager und legt ein
    GitHub-Release an.
+
+Steht im CHANGELOG noch kein Abschnitt für die Version, aber `## [Unreleased]`, entsteht stattdessen
+eine Vorabversion `vX.Y.Z-beta.1` (der Packager markiert sie als Prerelease). Pro Version gibt es nur
+eine solche Vorabversion; das richtige Release folgt, sobald der Abschnitt `## [X.Y.Z]` im CHANGELOG steht.
+
+Fehlt beides oder weichen TOC-Versionen ab, wird kein Tag gesetzt und der Lauf schlägt
+fehl. Bleibt die Version gleich, passiert nichts. Ein von Hand gepushtes Tag (`git tag v0.2.2 && git push
+--tags`) löst `release.yml` weiterhin direkt aus.
 
 Erweiterungen, die neue Core-Funktionen brauchen, tragen `## X-Glimpse-MinVersion` in ihre TOC ein.

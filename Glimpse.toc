@@ -7,6 +7,7 @@
 ## Author: N3zr0k
 ## X-Website: https://github.com/N3zr0k/Glimpse
 ## X-Repo: https://github.com/N3zr0k/Glimpse
+## X-Curse-Project-ID: 1730173
 ## X-License: MIT
 
 ## Category: Tooltip

@@ -277,4 +277,9 @@ Was jetzt anstünde, zeigt `python3 tools/check.py --next-tag` (leer: nichts). F
 oder weichen TOC-Versionen ab, wird kein Tag gesetzt und der Lauf schlägt fehl. Bleibt die Version gleich, passiert
 nichts. Gibt es ein Tag, aber noch kein Release (ein früherer Lauf ist gescheitert), wird nur das Release gebaut.
 
+**CurseForge:** Die Projekt-ID steht als `## X-Curse-Project-ID` in der TOC (Glimpse 1730173, KeybindsTooltip 1730180,
+Gathering 1730186, dort zusätzlich als `-p` im Packager-Schritt von `release.yml`, weil das Paket keine TOC im
+Hauptordner hat). Hochgeladen wird nur, wenn das Repo-Secret `CF_API_KEY` gesetzt ist (GitHub: Settings > Secrets and
+variables > Actions). Der Token gehört nie ins Repo. Alpha, Beta und final erscheinen dort als Alpha, Beta und Release.
+
 Erweiterungen, die neue Core-Funktionen brauchen, tragen `## X-Glimpse-MinVersion` in ihre TOC ein.

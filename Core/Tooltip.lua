@@ -56,6 +56,16 @@ local function AddSeparator(tooltip)
     tooltip:AddLine(format("|T%s:%d:%d|t", SEPARATOR_TEXTURE, SEPARATOR_HEIGHT, width))
 end
 
+--- Hängt eine Trennlinie an, um Gruppen von Zeilen im Bereich von Glimpse zu trennen. Die erste Trennlinie vor der ersten
+-- Zeile setzt AddTooltipLine von selbst; ist sie noch nicht gesetzt, ist dieser Aufruf genau diese erste Linie (es gibt nie
+-- zwei Linien hintereinander am Anfang).
+function Glimpse:AddTooltipSeparator(tooltip)
+    if pass and pass.tooltip == tooltip and not pass.separator then
+        pass.separator = true
+    end
+    AddSeparator(tooltip)
+end
+
 -- Standardgröße der Symbole vor einer Zeile (in Pixel)
 local ICON_SIZE = 16
 
@@ -70,7 +80,7 @@ end
 --- Hängt eine Zeile (zweispaltig, wenn right gesetzt ist) an den Tooltip.
 -- Farbe ist Weiß, wenn nichts angegeben wird. Mit icon (und optional iconSize) steht links vor
 -- dem Text ein Symbol. Während ein Tooltip von Glimpse verarbeitet wird, setzt die erste Zeile
--- automatisch die Trennlinie davor. Es gibt pro Tooltip nur eine.
+-- automatisch die Trennlinie davor (nur diese erste, weitere mit AddTooltipSeparator).
 function Glimpse:AddTooltipLine(tooltip, left, right, r, g, b, icon, iconSize)
     if pass and pass.tooltip == tooltip and not pass.separator then
         pass.separator = true
@@ -137,6 +147,7 @@ end
 -- Erlaubt sind: nil, "Text", "Text", r, g, b oder eine Tabelle mit Zeilen
 -- ({ "Text", { "Links", "Rechts", r, g, b } }). Eine Zeilen-Tabelle darf zusätzlich die benannten
 -- Felder icon (Texturpfad oder FileDataID) und iconSize haben: { "Links", "Rechts", r, g, b, icon = "..." }
+-- { separator = true } ist eine Trennlinie zwischen zwei Gruppen von Zeilen (am Ende der Liste fällt sie weg).
 local function Collect(out, a, b, c, d)
     if a == nil then return end
 
@@ -146,6 +157,8 @@ local function Collect(out, a, b, c, d)
         for _, line in ipairs(a) do
             if type(line) == "string" then
                 if not IsSecret(line) then tinsert(out, { line }) end
+            elseif type(line) == "table" and line.separator == true then
+                tinsert(out, { separator = true })
             elseif type(line) == "table" and type(line[1]) == "string" and not IsSecret(line[1]) then
                 tinsert(out, line)
             end
@@ -172,6 +185,8 @@ local function AppendLines(tooltip, data, dataType)
             end
         end
     end
+    -- Eine Trennlinie am Ende wäre eine Linie ohne Zeilen dahinter
+    while #collected > 0 and collected[#collected].separator do collected[#collected] = nil end
     if #collected == 0 then return end
 
     -- Tooltip wurde nur erneut verarbeitet: unsere Zeilen stehen schon am Ende
@@ -180,7 +195,11 @@ local function AppendLines(tooltip, data, dataType)
     if LastLineIs(tooltip, WithIcon(last[1], last.icon, last.iconSize)) then return end
 
     for _, line in ipairs(collected) do
-        Glimpse:AddTooltipLine(tooltip, line[1], line[2], line[3], line[4], line[5], line.icon, line.iconSize)
+        if line.separator then
+            Glimpse:AddTooltipSeparator(tooltip)
+        else
+            Glimpse:AddTooltipLine(tooltip, line[1], line[2], line[3], line[4], line[5], line.icon, line.iconSize)
+        end
     end
 end
 

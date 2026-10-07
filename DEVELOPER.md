@@ -92,6 +92,7 @@ beim ersten Provider installiert.
 | `Glimpse:RegisterTooltipHandler(key, dataType, func)` | roher Handler ohne Modul |
 | `Glimpse:UnregisterTooltipHandler(key)` / `...Handlers(prefix)` | Entfernen über den Key |
 | `Glimpse:AddTooltipLine(tooltip, left, right, r, g, b, icon, iconSize)` | eine Zeile direkt setzen (nur in rohen Handlern nötig) |
+| `Glimpse:AddTooltipSeparator(tooltip)` | eine weitere Trennlinie zwischen zwei Gruppen von Zeilen (nur in rohen Handlern nötig) |
 | `Glimpse:IsSecret(value)` | true bei geschützten Werten (`issecretvalue`) |
 
 `dataType` ist ein `Enum.TooltipDataType`-Wert, der Name als String oder `"ALL"`.
@@ -106,12 +107,15 @@ return {
     "Nur links",
     { "Links", "Rechts", r, g, b },          -- zweispaltig, Farbe optional
     { "Mit Icon", nil, 1, 1, 1, icon = "Interface\\Icons\\INV_Misc_Eye_01", iconSize = 14 },
+    { separator = true },                    -- Trennlinie zwischen zwei Gruppen (am Ende der Liste fällt sie weg)
 }
 ```
 
 Regeln, die der Core für dich übernimmt:
 
-* **Eine Trennlinie** pro Tooltip, vor der ersten Zeile von irgendeiner Erweiterung.
+* **Die erste Trennlinie** setzt der Core vor der ersten Zeile von irgendeiner Erweiterung, einmal pro Tooltip.
+  Weitere Linien zwischen deinen eigenen Gruppen kommen mit `{ separator = true }` in der Zeilenliste (oder
+  `Glimpse:AddTooltipSeparator` in rohen Handlern).
 * **`data` ist bereinigt:** nur Felder, die keine Secret-Werte sind (String, Zahl, Boolean). Die Namen der
   entfernten Felder stehen in `hidden`.
 * Ein deaktiviertes Modul liefert keine Zeilen.

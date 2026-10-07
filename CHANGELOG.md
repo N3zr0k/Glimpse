@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.3] - 2026-10-07
+
+### Added
+- Tooltips: `Glimpse:AddTooltipSeparator(tooltip)` and `{ separator = true }` in the lines of a line provider add a further separator line between two groups of lines (the first separator before the first line still comes by itself; a separator at the end of the list is dropped). Needed by extensions that show groups of lines, e.g. Glimpse: Professions
+
 ## [0.2.2] - 2026-10-06
 
 ### Added

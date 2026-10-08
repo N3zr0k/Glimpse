@@ -1,8 +1,7 @@
 local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local L = Glimpse.L
 
--- { Anzeigename (Locale-Key), TOC-Feld }
--- "GitHub" ist ein Eigenname und wird nicht übersetzt.
+-- { Locale-Key, TOC-Feld }. "GitHub" hat keinen Locale-Eintrag, L[] liefert den Key.
 local FIELDS = {
     { "Version", "Version" },
     { "Author", "Author" },
@@ -18,12 +17,11 @@ Glimpse:RegisterCommand("info", L["Shows addon information from the TOC"], funct
     for _, f in ipairs(FIELDS) do
         local value = self:GetMeta(f[2])
         if value and value ~= "" then
-            -- L[f[1]] fällt bei "GitHub" auf den Key zurück, das passt so
             self:Printf("  |cffffd100%s:|r %s", L[f[1]], value)
         end
     end
 
-    -- Hilft bei Support-Anfragen: welcher Client, welches Interface
+    -- für Support-Anfragen
     local version, build, _, toc = GetBuildInfo()
     self:Printf("  |cffffd100%s:|r %s (%s) / Interface %s", L["Game version"], version, build, toc)
 end)

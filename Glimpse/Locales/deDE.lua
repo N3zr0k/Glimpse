@@ -1,7 +1,6 @@
 local ADDON_NAME = ...
 
--- NewLocale liefert nil, wenn der Client nicht deDE ist. Dann ist hier nichts zu tun
--- und L bleibt auf Englisch.
+-- nil, wenn der Client nicht deDE ist
 local L = LibStub("AceLocale-3.0"):NewLocale(ADDON_NAME, "deDE")
 if not L then return end
 

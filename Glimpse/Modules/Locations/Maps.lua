@@ -1,7 +1,7 @@
 local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local Locations = Glimpse:GetModule("Locations")
 
--- Karten: Name, Größe in Yards, Kontinent und Weltposition. Größe und Kontinent werden je Karte gemerkt.
+-- Cache je uiMapID
 local mapSizes, continents = {}, {}
 
 local function PositiveNumber(value)
@@ -9,19 +9,18 @@ local function PositiveNumber(value)
 end
 
 local function ReadMapSize(api, map)
-    -- Blizzard kennt die Größe direkt (nicht in jedem Client)
+    -- nicht in jedem Client vorhanden
     if api.GetMapWorldSize then
         local width, height = api.GetMapWorldSize(map)
         if PositiveNumber(width) and PositiveNumber(height) then return width, height end
     end
 
-    -- sonst aus zwei Weltpositionen der Karte: Ecke oben links und Mitte, Strecke verdoppelt
-    -- (die Ecke unten rechts wird auf manchen Karten ungenau umgerechnet)
+    -- Fallback: Ecke oben links bis Mitte, verdoppelt. Ecke unten rechts ist auf manchen Karten ungenau.
     if api.GetWorldPosFromMapPos and CreateVector2D then
         local _, corner = api.GetWorldPosFromMapPos(map, CreateVector2D(0, 0))
         local _, center = api.GetWorldPosFromMapPos(map, CreateVector2D(0.5, 0.5))
         if corner and center then
-            -- Weltkoordinaten: die erste Zahl läuft in Kartenrichtung "oben", die zweite "links"
+            -- Weltkoordinaten: erste Achse = oben, zweite = links
             local top, left = corner:GetXY()
             local middleTop, middleLeft = center:GetXY()
             local width, height = math.abs(left - middleLeft) * 2, math.abs(top - middleTop) * 2
@@ -38,14 +37,13 @@ function Locations:GetMapName(map)
     return ok and type(info) == "table" and info.name or nil
 end
 
---- Größe einer Karte in Yards: Breite, Höhe. Ohne Angabe (Instanzen, Städte ohne Weltposition, fehlende
--- Kartenfunktionen) nil.
+--- Breite, Höhe in Yards. nil für Instanzen, Städte ohne Weltposition oder ohne Karten-API.
 function Locations:GetMapSize(map)
     if type(map) ~= "number" then return nil end
 
     local known = mapSizes[map]
     if not known then
-        -- nur Erfolge merken: beim Laden kann die Größe noch fehlen, später klappt es
+        -- nur Erfolge cachen, beim Laden fehlt die Größe manchmal noch
         local ok, width, height = pcall(ReadMapSize, self.api, map)
         if not (ok and width) then return nil end
         known = { width, height }
@@ -55,8 +53,7 @@ function Locations:GetMapSize(map)
     return known[1], known[2]
 end
 
---- Der Kontinent einer Karte (uiMapID des Kontinents) über die übergeordneten Karten, oder nil, wenn er sich
--- nicht bestimmen lässt (Karte unbekannt, keine Kartenfunktion).
+--- uiMapID des Kontinents über die Elternkarten, oder nil.
 function Locations:GetContinent(map)
     if type(map) ~= "number" then return nil end
     if continents[map] then return continents[map] end
@@ -80,8 +77,7 @@ function Locations:GetContinent(map)
     end
 end
 
---- Weltposition eines Kartenpunkts (x, y von 0 bis 1): Welt-ID (gleiche ID = gleicher Kontinent) und die zwei
--- Weltkoordinaten in Yards, oder nil, wenn der Client sie nicht liefert.
+--- Welt-ID (gleich = gleicher Kontinent) und zwei Weltkoordinaten in Yards, oder nil.
 function Locations:GetWorldPosition(map, x, y)
     local get = self.api.GetWorldPosFromMapPos
     if not get or not CreateVector2D or type(map) ~= "number" then return nil end
@@ -94,7 +90,7 @@ function Locations:GetWorldPosition(map, x, y)
     return world, a, b
 end
 
---- Gemerkte Kartengrößen und Kontinente vergessen (für Tests)
+--- für Tests
 function Locations:ResetCaches()
     mapSizes, continents = {}, {}
 end

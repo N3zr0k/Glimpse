@@ -6,16 +6,26 @@ Schnittstellen für Erweiterungen und die Arbeitsweise im Repo.
 ## Aufbau
 
 ```
-Glimpse.toc          Einzige Quelle für Titel, Version, Notes, Icon (siehe unten)
-Glimpse.xml          Zentrale Ladeliste, nur Include-Zeilen
-Core/                Init, Debug, Options, Modifiers, Commands, Tooltip
-Commands/            ein Slash-Befehl = eine Datei (Help, Info, Config, Debug)
-Locales/             enUS (Default) und deDE, eingetragen in Locales.xml
-Modules/             interne Module (Locations, Example als Vorlage, TooltipDebug)
-Libs/                Ace3 (mitgeliefert, damit ein Klon sofort läuft)
+Glimpse/             Das Addon, nur was WoW lädt (die Junction im AddOns-Ordner zeigt hierher)
+  Glimpse.toc        Einzige Quelle für Titel, Version, Notes, Icon (siehe unten)
+  Glimpse.xml        Zentrale Ladeliste, nur Include-Zeilen
+  Core/              Init, Debug, Options, Modifiers, Commands, Tooltip
+  Commands/          ein Slash-Befehl = eine Datei (Help, Info, Config, Debug)
+  Locales/           enUS (Default) und deDE, eingetragen in Locales.xml
+  Modules/           interne Module, je Modul ein Ordner (Locations, Example als Vorlage, TooltipDebug)
+  Libs/              Ace3 (mitgeliefert, damit ein Klon sofort läuft)
 tests/               Logik-Tests ohne WoW (lua tests/run.lua)
 tools/check.py       Strukturprüfung von TOC und XML
+.pkgmeta             Paket für den Packager: Addon-Ordner nach oben, Beziehungen für CurseForge
 ```
+
+Alle Glimpse-Repos sind so aufgebaut: ein Ordner je Addon mit dem Namen des Addons, alles für die Entwicklung daneben.
+
+Regeln für den Addon-Ordner (gelten für alle Glimpse-Addons):
+* Die TOC nennt nur eine XML, alle Lua-Dateien werden über XML geladen (Glimpse.xml als Vorbild).
+* Lieber viele kleine Lua-Dateien als eine große, getrennt nach Thema. Helfer heißen nach ihrer Hauptdatei (`Fishing.lua`, `FishingLure.lua`).
+* Oberste Ebene nur: `Core/` (eigentliche Funktionen, Unterordner nach Bedarf), `Libs/` (externe Libraries), `Commands/` (Slash-Befehle),
+  `Locales/` (Übersetzungen), `Modules/` (Erweiterungen nur für dieses Addon, jede in einem eigenen Ordner), `Media/` (Icons, Bilder).
 
 Ladereihenfolge in `Glimpse.xml`: Libs, Locales, Core, Commands, Modules. `Core/Init.lua` legt das
 Addon-Objekt an, alle anderen Core-Dateien erweitern es nur und holen es mit

@@ -1,14 +1,11 @@
 local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local Locations = Glimpse:GetModule("Locations")
 
---- Ist TomTom geladen? (optional, keine harte Abhängigkeit)
 function Locations:HasTomTom()
     return type(TomTom) == "table" and type(TomTom.AddWaypoint) == "function"
 end
 
---- Setzt einen Wegpunkt auf einer Karte (map = uiMapID, x und y von 0 bis 1). Mit TomTom über dessen Pfeil, sonst
--- mit der Markierung des Spiels (falls der Client sie kennt). Gibt true zurück, wenn ein Wegpunkt gesetzt wurde,
--- false ohne gültige Karte und Koordinaten (zum Beispiel Instanzen) oder wenn nichts davon verfügbar ist.
+--- Wegpunkt per TomTom, sonst per Spielmarkierung. x, y von 0 bis 1. true, wenn gesetzt.
 function Locations:SetWaypoint(map, x, y, title)
     if type(map) ~= "number" or type(x) ~= "number" or type(y) ~= "number" then return false end
     if x <= 0 or y <= 0 or x > 1 or y > 1 then return false end

@@ -1,7 +1,7 @@
 local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local L = Glimpse.L
 
--- Seit Dragonflight liegen die Addon-Funktionen in C_AddOns, die alten Globals können weg sein.
+-- Ältere Clients haben nur die Globals
 local AddOns = C_AddOns or {}
 local GetNumAddOns = AddOns.GetNumAddOns or GetNumAddOns
 local GetAddOnInfo = AddOns.GetAddOnInfo or GetAddOnInfo
@@ -20,8 +20,7 @@ function Glimpse:GetIcon(addonName)
     if icon and icon ~= "" then return icon end
 end
 
---- Setzt das TOC-Icon des Addons als kleine Inline-Textur vor den Text.
--- Hat das Addon kein Icon, kommt der Text unverändert zurück.
+--- TOC-Icon als Inline-Textur vor den Text, ohne Icon unverändert.
 function Glimpse:WithAddonIcon(text, addonName)
     local icon = self:GetIcon(addonName)
     if not icon then return text end
@@ -35,7 +34,7 @@ local function ParseVersion(version)
     return tonumber(major), tonumber(minor) or 0, tonumber(patch) or 0
 end
 
--- true, wenn version kleiner als minimum ist. Bei unlesbaren Angaben false (kein Fehlalarm).
+-- Unlesbare Versionen ergeben false (kein Fehlalarm)
 local function IsOlder(version, minimum)
     local a1, a2, a3 = ParseVersion(version)
     local b1, b2, b3 = ParseVersion(minimum)
@@ -50,13 +49,13 @@ end
 -- Übersichtsseite
 -- ---------------------------------------------------------------------------
 
--- Alle Addons, die Glimpse als Abhängigkeit eintragen (also die Erweiterungen), nach Name sortiert
+-- Erweiterungen = Addons mit Glimpse als Abhängigkeit, sortiert
 local function FindExtensions()
     local found = {}
     if not (GetNumAddOns and GetAddOnInfo and GetAddOnDependencies) then return found end
 
     for index = 1, GetNumAddOns() do
-        -- je nach Clientstand liefert GetAddOnInfo eine Tabelle oder mehrere Werte
+        -- GetAddOnInfo liefert je nach Client Tabelle oder Einzelwerte
         local info = GetAddOnInfo(index)
         local name = type(info) == "table" and info.name or info
 
@@ -74,11 +73,9 @@ local function FindExtensions()
     return found
 end
 
--- Ein Eintrag der Addon-Liste: Icon, Titel, Version in Grün, darunter die Beschreibung
 local function ExtensionBlock(addonName)
     local title = Glimpse:GetMeta("Title", addonName) or addonName
     local version = Glimpse:GetMeta("Version", addonName) or "?"
-    -- Titel in Gold, dahinter die Version in Grün: "Glimpse (v0.0.1)"
     local head = format("|cffffd100%s|r |cff40ff40(v%s)|r", title, version)
     local lines = { Glimpse:WithAddonIcon(head, addonName) }
 
@@ -86,7 +83,7 @@ local function ExtensionBlock(addonName)
         tinsert(lines, "    |cff888888" .. L["Not loaded"] .. "|r")
     end
 
-    -- Braucht die Erweiterung ein neueres Glimpse (## X-Glimpse-MinVersion), gibt es einen Hinweis
+    -- ## X-Glimpse-MinVersion
     local minimum = Glimpse:GetMeta("X-Glimpse-MinVersion", addonName)
     if minimum and IsOlder(Glimpse:GetMeta("Version"), minimum) then
         tinsert(lines, "    |cffff4040" .. format(L["Requires Glimpse %s or newer"], minimum) .. "|r")
@@ -98,7 +95,7 @@ local function ExtensionBlock(addonName)
     return table.concat(lines, "\n")
 end
 
--- Nur die Erweiterungen, der Core steht oben auf der Seite und nicht in der Liste
+-- Ohne Core, der steht oben auf der Seite
 local function ExtensionList()
     local names = FindExtensions()
     if #names == 0 then return "|cff888888" .. L["No extensions installed."] .. "|r" end
@@ -108,13 +105,11 @@ local function ExtensionList()
     return table.concat(blocks, "\n\n")
 end
 
--- Zeile "Label: Wert" mit goldenem Label, wie bei /gli info
 local function Field(label, value)
     return format("|cffffd100%s:|r %s", label, value)
 end
 
--- Besonderer Dank, der auf jeder Optionsseite im Credits-Bereich steht (gilt für Glimpse und alle Erweiterungen),
--- wenn credits.thanks nicht eigene Einträge liefert: { Name, Rolle }, die Rolle wird übersetzt.
+-- Standard für credits.thanks auf allen Optionsseiten: { Name, Rolle (Locale-Key) }
 local SPECIAL_THANKS = {
     { "Flovy", "Tester" },
     { "sMash", "Tester" },
@@ -128,10 +123,8 @@ local function DefaultThanks()
     return list
 end
 
---- Der Bereich "Credits" einer Optionsseite, wie bei TomTom: eine Trennlinie mit Überschrift, darunter goldene
--- Bezeichnungen mit weißem Text. Der Autor kommt aus der TOC (## Author). credits ist optional:
+--- Credits-Bereich (Header + Text) zum Einhängen in args. Autor aus ## Author, credits optional:
 --   { contributors = { "Name (wofür)", ... }, thanks = { "..." }, images = { "Pin - Autor (Flaticon)", ... } }
--- Gibt zwei Optionen zurück (Überschrift und Text) zum Einhängen in args; order = Position.
 function Glimpse:BuildCreditsArgs(addonName, credits, order)
     credits = credits or {}
     order = order or 90
@@ -151,7 +144,7 @@ function Glimpse:BuildCreditsArgs(addonName, credits, order)
                 local blocks = {}
                 local author = self:GetMeta("Author", addonName)
                 if author and author ~= "" then blocks[#blocks + 1] = Field(L["Author"], author) end
-                -- einzeln anhängen: eine fehlende Liste (nil) darf die folgenden nicht abschneiden
+                -- Schleife statt Tabellenliteral, ein nil würde die folgenden Listen abschneiden
                 for _, block in ipairs({
                     { L["Contributors"], credits.contributors },
                     { L["Image credits"], credits.images },
@@ -160,7 +153,6 @@ function Glimpse:BuildCreditsArgs(addonName, credits, order)
                     local text = List(block[1], block[2])
                     if text then blocks[#blocks + 1] = text end
                 end
-                -- Autor und Listen stehen mit einer Leerzeile Abstand
                 return table.concat(blocks, "\n\n")
             end,
         },
@@ -177,13 +169,12 @@ function Glimpse:BuildOverview()
                 image = function() return self:GetIcon(self.name) end,
                 imageWidth = 32, imageHeight = 32,
             },
-            -- GetAddOnMetadata liefert "Notes" automatisch in der Clientsprache (Notes-deDE ...)
-            -- und fällt auf das englische Notes zurück, wenn es die Sprache nicht gibt.
+            -- Notes-<locale> mit Fallback auf Notes kommt direkt von GetAddOnMetadata
             notes = {
                 type = "description", order = 2, fontSize = "medium",
                 name = function() return self:GetMeta("Notes") or "" end,
             },
-            -- als Funktionen, damit die Werte erst beim Anzeigen ausgelesen werden
+            -- erst beim Anzeigen auslesen
             info = {
                 type = "description", order = 3, fontSize = "medium",
                 name = function()
@@ -208,40 +199,39 @@ end
 -- Optionen
 -- ---------------------------------------------------------------------------
 
--- Die Options-Tabelle im AceConfig-Format. Wird in SetupOptions registriert.
--- Die Seiten des Core sind Tabs, die Erweiterungen hängen als eigene Einträge darunter.
+-- Core-Seiten als Tabs, Erweiterungen als eigene Einträge darunter
 function Glimpse:BuildOptions()
     return {
         type = "group",
         childGroups = "tab",
-        -- Titel aus der TOC, dadurch ist er automatisch lokalisiert (Title-deDE)
+        -- TOC-Titel ist schon lokalisiert (Title-deDE)
         name = self:GetMeta("Title") or self.name,
         args = {
             overview = self:BuildOverview(),
             general = {
                 type = "group", order = 2, name = L["General"],
                 args = {
-                    -- Debug steht immer als erste Option; width = "full" lässt alles untereinander stehen
+                    -- Debug immer als erste Option
                     debug = {
                         type = "toggle", order = 1, width = "full",
                         name = L["Debug mode"],
                         desc = L["Prints additional diagnostic messages to chat."],
                         get = function() return self.db.profile.debug end,
-                        -- über SetDebug, damit die Chat-Meldung auch beim Klick kommt
+                        -- über SetDebug für die Chat-Meldung
                         set = function(_, value) self:SetDebug(value) end,
                     },
                     distanceUnit = self:BuildDistanceOptions(2),
                 },
             },
             credits = { type = "group", order = 110, name = L["Credits"], args = self:BuildCreditsArgs(self.name, nil, 1) },
-            -- "profiles" (Order 100) kommt in SetupOptions dazu, falls AceDBOptions geladen ist; Credits (110) steht dahinter
+            -- "profiles" (order 100) kommt in SetupOptions dazu
         },
     }
 end
 
---- Baut die einheitliche Optionsseite einer Erweiterung. Alle Erweiterungen sehen dadurch gleich aus:
+--- Einheitliche Optionsseite einer Erweiterung:
 --
---   [Icon] Glimpse: Name        (Titel aus der TOC, wird in RegisterAddonOptions gesetzt)
+--   [Icon] Glimpse: Name        (TOC-Titel, gesetzt in RegisterAddonOptions)
 --   Beschreibung                (Notes aus der TOC, klein und grau)
 --   [Optionen] [...] [Credits]  (Tabs; Credits ist immer der letzte)
 --   +-------------------------+
@@ -249,7 +239,7 @@ end
 --   +-------------------------+
 --   Version x.y.z               (klein und grau, unter dem ganzen Rahmen)
 --
--- args sind die Optionen der Erweiterung im AceConfig-Format (nur der Inhalt von "args").
+-- args = Inhalt von "args" im AceConfig-Format
 function Glimpse:BuildAddonPage(addonName, args, tabs, credits)
     local function Grey(text) return "|cff999999" .. text .. "|r" end
 
@@ -257,7 +247,6 @@ function Glimpse:BuildAddonPage(addonName, args, tabs, credits)
         type = "group",
         name = self:GetMeta("Title", addonName) or addonName,
         args = {
-            -- Das Icon steht links neben der Beschreibung, direkt unter der Panel-Überschrift
             notes = {
                 type = "description", order = 2, width = "full", fontSize = "small",
                 name = function()
@@ -270,33 +259,29 @@ function Glimpse:BuildAddonPage(addonName, args, tabs, credits)
         },
     }
 
-    -- Jede Seite hat Tabs, dadurch sehen alle Erweiterungen gleich aus. Mit tabs = true sind args selbst die
-    -- Tab-Gruppen, sonst kommen sie in einen Tab "Optionen". Alles, was keine Gruppe ist, zeichnet AceConfig
-    -- oberhalb der Tabs, deshalb steht die Version nicht in der Seite, sondern unter dem Rahmen (AddVersionFooter).
+    -- tabs = true: args sind selbst Tab-Gruppen, sonst Tab "Optionen". Nicht-Gruppen zeichnet AceConfig
+    -- über den Tabs, deshalb steht die Version unter dem Rahmen (AddVersionFooter).
     page.childGroups = "tab"
     if tabs then
         for key, group in pairs(args) do page.args[key] = group end
     else
         page.args.options = { type = "group", order = 1, name = L["Options"], args = args }
     end
-    -- als letzter Tab: Credits
     page.args.creditsTab = { type = "group", order = 900, name = L["Credits"], args = self:BuildCreditsArgs(addonName, credits, 1) }
 
     return page
 end
 
--- Platz unter dem Rahmen der Optionen in Pixel
+-- Pixel
 local FOOTER_HEIGHT = 14
 
---- Setzt die Version in kleiner grauer Schrift unter den ganzen Rahmen des Panels, wie bei Seiten ohne Tabs
--- (dort steht sie unter dem Rahmen "Optionen"). AceConfig kann Text nicht unter Tabs setzen, deshalb wird das
--- Panel selbst (AceGUI BlizOptionsGroup) um eine Zeile verkürzt. Gibt false zurück, wenn das nicht geht.
+--- Version unter den Panel-Rahmen setzen. AceConfig kann nichts unter Tabs zeichnen, deshalb wird
+-- der Inhalt der BlizOptionsGroup um eine Zeile gekürzt. false, wenn das Widget nicht passt.
 function Glimpse:AddVersionFooter(widget, addonName)
     local frame, content = widget and widget.frame, widget and widget.content
     if not (frame and content and frame.CreateFontString and content.SetPoint) then return false end
 
-    -- der Inhalt endet eine Zeile früher; die Höhe, die AceGUI dem Inhalt gibt, wird entsprechend gekürzt
-    -- AceConfigDialog ruft SetTitle bei jedem Öffnen auf, und SetTitle setzt die Anker zurück: deshalb nach jedem Aufruf neu
+    -- SetTitle setzt die Anker zurück und wird bei jedem Öffnen aufgerufen, daher nach jedem Aufruf neu setzen
     content:SetPoint("BOTTOMRIGHT", -10, 10 + FOOTER_HEIGHT)
     local setTitle = widget.SetTitle
     if setTitle then
@@ -312,7 +297,7 @@ function Glimpse:AddVersionFooter(widget, addonName)
         if height > 0 then widget:OnHeightSet(height) end
     end
 
-    -- Der Text liegt auf einem eigenen Rahmen weit über dem Tab-Rahmen, sonst malt dieser seinen Rand und Schatten darüber
+    -- Eigener Frame mit hohem Level, sonst malt der Tab-Rahmen Rand und Schatten darüber
     local holder = frame
     if CreateFrame then
         holder = CreateFrame("Frame", nil, frame)
@@ -332,12 +317,9 @@ function Glimpse:AddVersionFooter(widget, addonName)
     return true
 end
 
---- Registriert die Optionsseite einer Erweiterung im einheitlichen Aufbau (BuildAddonPage).
--- Das ist der Normalfall für Erweiterungen. Der TOC-Titel heißt "Glimpse: Name" und ist die
--- Überschrift des Panels (mit Icon). Im Einstellungsbaum steht darunter nur "Name" mit Icon,
--- das "Glimpse: " wird dafür abgeschnitten, weil der Eintrag ohnehin unter Glimpse hängt.
--- Mit tabs = true sind args keine einzelnen Optionen, sondern Tab-Gruppen (type = "group"),
--- sonst stehen sie im Tab "Optionen". Der Tab "Credits" kommt immer als letzter dazu.
+--- Standardweg für Erweiterungen: Seite aus BuildAddonPage registrieren.
+-- Panel-Überschrift = TOC-Titel "Glimpse: Name", im Baum nur "Name" (hängt eh unter Glimpse).
+-- tabs/credits wie bei BuildAddonPage.
 function Glimpse:RegisterAddonOptions(addonName, args, tabs, credits)
     local title = self:GetMeta("Title", addonName) or addonName
     local page = self:BuildAddonPage(addonName, args, tabs, credits)
@@ -346,17 +328,16 @@ function Glimpse:RegisterAddonOptions(addonName, args, tabs, credits)
     local treeName = title
     if strsub(title, 1, #prefix) == prefix then treeName = strsub(title, #prefix + 1) end
 
-    -- Einträge im Einstellungsbaum sind standardmäßig weiß, per Farbcode werden sie gelb
+    -- Baumeintrag gelb statt weiß
     local frame = self:RegisterOptions(addonName, page, "|cffffd100" .. treeName .. "|r", addonName)
 
-    -- AceConfigDialog nimmt für Baumeintrag und Panel-Überschrift denselben Text. Die Überschrift
-    -- setzen wir deshalb danach selbst.
+    -- AceConfigDialog nutzt denselben Text für Baum und Überschrift, Überschrift daher selbst setzen
     local widget = frame and frame.obj
     if widget and widget.SetTitle then
         widget:SetTitle(self:WithAddonIcon(title, addonName))
     end
 
-    -- Die Version steht unter dem Rahmen. Geht das nicht, bekommt jeder Tab sie als letzte Zeile.
+    -- Fallback: Version als letzte Zeile in jedem Tab
     do
         local ok, done = pcall(self.AddVersionFooter, self, widget, addonName)
         if not (ok and done) then
@@ -374,25 +355,22 @@ function Glimpse:RegisterAddonOptions(addonName, args, tabs, credits)
     return frame
 end
 
---- Hängt eine weitere Options-Tabelle als Unterpunkt unter das Haupt-Panel.
--- key muss pro Addon eindeutig sein. Das Haupt-Panel muss schon existieren, also
--- frühestens im OnInitialize eines Moduls aufrufen.
--- addonName ist optional: mit dem Namen der Erweiterung steht ihr TOC-Icon vor dem Eintrag.
+--- Options-Tabelle als Unterpunkt des Haupt-Panels. key eindeutig pro Addon,
+-- frühestens in OnInitialize eines Moduls. Mit addonName steht dessen TOC-Icon davor.
 function Glimpse:RegisterOptions(key, options, displayName, addonName)
     local appName = self.name .. "_" .. key
     LibStub("AceConfig-3.0"):RegisterOptionsTable(appName, options)
 
     local label = displayName or options.name or key
     if addonName then label = self:WithAddonIcon(label, addonName) end
-    -- AceConfigDialog sucht die Elternkategorie über den angezeigten Namen (mit Icon), nicht über den Addon-Namen
+    -- Elternkategorie wird über den angezeigten Namen (mit Icon) gefunden
     return LibStub("AceConfigDialog-3.0"):AddToBlizOptions(appName, label, self.categoryName)
 end
 
 function Glimpse:SetupOptions()
     local options = self:BuildOptions()
 
-    -- AceDBOptions ist optional. Mit true bekommen wir nil statt eines Fehlers,
-    -- falls die Lib in der Ace3-Kopie fehlt. Dann gibt es eben keinen Profil-Tab.
+    -- optional, ohne Lib kein Profil-Tab
     local AceDBOptions = LibStub("AceDBOptions-3.0", true)
     if AceDBOptions then
         local profiles = AceDBOptions:GetOptionsTable(self.db)
@@ -403,8 +381,7 @@ function Glimpse:SetupOptions()
 
     LibStub("AceConfig-3.0"):RegisterOptionsTable(self.name, options)
 
-    -- Der zweite Rückgabewert ist die Kategorie-ID fürs neue Settings-Fenster.
-    -- Je nach Ace3-Version kann das anders aussehen, falls /gli config mal nichts öffnet hier schauen.
+    -- 2. Rückgabe = Kategorie-ID fürs Settings-Fenster. Öffnet /gli config nichts, hier zuerst schauen (Ace3-Version).
     local title = self:WithAddonIcon(self:GetMeta("Title") or self.name, self.name)
     self.categoryName = title
     local _, categoryID = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(self.name, title)
@@ -415,7 +392,6 @@ function Glimpse:OpenOptions()
     if Settings and Settings.OpenToCategory and self.categoryID then
         Settings.OpenToCategory(self.categoryID)
     else
-        -- Fallback: eigenes Ace-Fenster
         LibStub("AceConfigDialog-3.0"):Open(self.name)
     end
 end

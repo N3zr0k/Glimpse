@@ -35,13 +35,14 @@ Glimpse:SetDefaultModuleLibraries("AceEvent-3.0")
 local defaults = {
     profile = {
         debug = false,
+        debugOff = {}, -- [Name][Kategorie] = true: abgeschaltete Debug-Kategorien (Debug/Debugger.lua)
         distanceUnit = "auto", -- auto (nach Client-Sprache), yards, meters
     },
 }
 
 function Glimpse:OnInitialize()
     -- true = Profil "Default" für alle Charaktere
-    self.db = LibStub("AceDB-3.0"):New(ADDON_NAME .. "DB", defaults, true)
+    self.db = LibStub("AceDB-3.0"):New("GlimpseSettings", defaults, true)
 
     -- Optionen-Panel nach Profilwechsel neu zeichnen
     self.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")

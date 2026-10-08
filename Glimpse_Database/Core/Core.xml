@@ -1,0 +1,26 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <!-- Init.lua legt GlimpseDB an, die anderen Dateien erweitern es nur. -->
+    <Script file="Init.lua"/>
+    <Script file="Time.lua"/>
+    <Script file="Characters.lua"/>
+    <Script file="Areas.lua"/>
+
+    <Script file="Namespace\Namespace.lua"/>
+    <Script file="Namespace\Query.lua"/>
+    <Script file="Namespace\Counters.lua"/>
+    <Script file="Namespace\Buckets.lua"/>
+    <Script file="Namespace\Locations.lua"/>
+    <Script file="Namespace\Adapters.lua"/>
+    <Script file="Namespace\Info.lua"/>
+
+    <Script file="Transfer\Async.lua"/>
+    <Script file="Transfer\Codec.lua"/>
+    <Script file="Transfer\Export.lua"/>
+    <Script file="Transfer\Merge.lua"/>
+    <Script file="Transfer\Import.lua"/>
+
+    <!-- Nur in Alpha-Versionen, vor der ersten Beta löschen -->
+    <Script file="AlphaMigration.lua"/>
+
+    <Script file="Events.lua"/>
+</Ui>

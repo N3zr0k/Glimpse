@@ -1,0 +1,68 @@
+-- luacheck: ignore 113
+local stub = require("wowstub")
+
+-- DB:GetNamespaceInfo für /gli probe db sources
+
+test("Info: Bereich, Schreiber und Summen je Herkunft", function()
+    local DB = stub.load()
+    local ns = DB:Register("gathering", { area = "Gathering", addon = "Glimpse_GatheringDB" })
+    ns:Count("herb", 1617)
+    ns:Count("herb", 1617)
+    ns:Count("ore", 1731)
+    ns:SetBaseline("herb", 0, 50)
+    ns:AddLocation(1617, 1429, 0.4, 0.5)
+    DB:RegisterAdapter("gathering", "GatherMate2", { IsAvailable = function() return false end })
+
+    local info = DB:GetNamespaceInfo("gathering")
+    eq(info.area, "Gathering", "Bereich")
+    eq(info.loaded, true, "geladen")
+    eq(info.writer, "Glimpse_GatheringDB", "Schreiber")
+    eq(info.sources.own.total, 3, "own")
+    eq(info.sources.own.chars, 1, "ein Charakter")
+    eq(info.sources.baseline.total, 50, "baseline")
+    eq(info.sources.imported, nil, "nichts importiert")
+    eq(info.places.own, 1, "Orte")
+    eq(info.adapters.GatherMate2, false, "Adapter fehlt")
+    eq(info.kinds, nil, "ohne Details keine Arten")
+end)
+
+test("Info: Arten je Herkunft mit detail", function()
+    local DB = stub.load()
+    local ns = DB:Register("combat", { area = "Core" })
+    ns:Count("kill", 299)
+    ns:SetBaseline("kill", 0, 7)
+    ns:Count("death", 299)
+    local kinds = DB:GetNamespaceInfo("combat", true).kinds
+    eq(kinds.kill.own, 1, "kill own")
+    eq(kinds.kill.baseline, 7, "kill baseline")
+    eq(kinds.death.own, 1, "death")
+end)
+
+test("Info: importierte Daten zählen unter imported", function()
+    local DB = stub.load()
+    local ns = DB:Register("gathering", { area = "Gathering", world = { node = true } })
+    ns:Count("node", 1617, nil, 4)
+    local text
+    DB:Export(nil, function(result) text = result end)
+    stub.flush()
+
+    stub.reset()
+    DB = stub.load()
+    DB:Import(text, function() end)
+    stub.flush()
+    local info = DB:GetNamespaceInfo("gathering")
+    eq(info.sources.imported.total, 4, "imported")
+    eq(info.writer, nil, "hier kein Schreiber")
+end)
+
+test("Info: unbekannt und nicht ladbar", function()
+    local DB = stub.load()
+    eq(DB:GetNamespaceInfo("nope"), nil, "unbekannt")
+    DB:Register("misc")
+    stub.restart(stub.saved())
+    stub.loaded["Glimpse_Database_Misc"], stub.disabled["Glimpse_Database_Misc"] = nil, true
+    local info = GlimpseDB:GetNamespaceInfo("misc")
+    eq(info.loaded, false, "nicht geladen")
+    eq(info.reason, "DISABLED", "Grund")
+    eq(info.writer, nil, "kein Schreiber in dieser Sitzung")
+end)

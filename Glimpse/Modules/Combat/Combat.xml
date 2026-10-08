@@ -1,0 +1,10 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <!-- Combat.lua legt das Modul an, die anderen Dateien erweitern es. -->
+    <Script file="Combat.lua"/>
+    <Script file="CombatKills.lua"/>
+    <Script file="CombatDeaths.lua"/>
+    <Script file="CombatLoot.lua"/>
+    <Script file="CombatTime.lua"/>
+    <Script file="CombatTooltip.lua"/>
+    <Script file="CombatOptions.lua"/>
+</Ui>

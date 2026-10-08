@@ -1,8 +1,14 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
     <!-- Init.lua legt das Addon-Objekt an, die anderen Dateien erweitern es nur. -->
     <Script file="Init.lua"/>
-    <Script file="Debug.lua"/>
+    <Script file="Debug\Debug.lua"/>
+    <Script file="Debug\Debugger.lua"/>
+    <Script file="Debug\Probes.lua"/>
+    <Script file="Debug\Sources.lua"/>
+    <Script file="Debug\LogWindow.lua"/>
+    <Script file="IDs.lua"/>
     <Script file="Options.lua"/>
+    <Script file="Data.lua"/>
     <Script file="Modifiers.lua"/>
     <Script file="Commands.lua"/>
     <Script file="Tooltip.lua"/>

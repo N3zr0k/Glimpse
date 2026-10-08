@@ -1,0 +1,67 @@
+local _, P = ...
+
+-- Importierte Werte werden per Maximum zusammengeführt: derselbe Export zweimal importiert zählt nicht doppelt.
+-- Nur Zahlen-Blätter mit Text- oder Zahlenschlüssel werden übernommen, alles andere still verworfen; das ist
+-- zugleich die Prüfung der fremden Daten.
+
+local MAX_DEPTH = 6
+local MAX_NUMBER = 1e15
+
+local function IsKey(key)
+    return type(key) == "string" or type(key) == "number"
+end
+
+local function IsNumber(value)
+    return type(value) == "number" and value == value and value < MAX_NUMBER and value > -MAX_NUMBER
+end
+
+--- Zahlen aus source in target übernehmen, je Blatt das Maximum
+function P.MergeMax(target, source, depth)
+    depth = depth or 0
+    if type(source) ~= "table" or depth > MAX_DEPTH then return end
+    for key, value in pairs(source) do
+        if IsKey(key) then
+            if IsNumber(value) then
+                local old = target[key]
+                if type(old) ~= "number" or value > old then target[key] = value end
+            elseif type(value) == "table" then
+                if type(target[key]) ~= "table" then target[key] = {} end
+                P.MergeMax(target[key], value, depth + 1)
+            end
+        end
+    end
+end
+
+-- seen[kind][id] = { erster, letzter }: frühester erster, spätester letzter
+function P.MergeSeen(target, source)
+    if type(source) ~= "table" then return end
+    for kind, ids in pairs(source) do
+        if IsKey(kind) and type(ids) == "table" then
+            local into = P.Path(target, kind)
+            for id, pair in pairs(ids) do
+                if IsKey(id) and type(pair) == "table" and IsNumber(pair[1]) and IsNumber(pair[2]) then
+                    local old = into[id]
+                    if old then
+                        old[1] = math.min(old[1], pair[1])
+                        old[2] = math.max(old[2], pair[2])
+                    else
+                        into[id] = { pair[1], pair[2] }
+                    end
+                end
+            end
+        end
+    end
+end
+
+-- Orte: places[mapID][xy] = id, Zahlen auf allen Ebenen
+function P.MergePlaces(target, source)
+    if type(source) ~= "table" then return end
+    for mapID, spots in pairs(source) do
+        if IsNumber(mapID) and type(spots) == "table" then
+            local into = P.Path(target, mapID)
+            for xy, id in pairs(spots) do
+                if IsNumber(xy) and xy >= 0 and xy <= 99999999 and IsKey(id) then into[xy] = id end
+            end
+        end
+    end
+end

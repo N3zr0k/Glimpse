@@ -223,6 +223,8 @@ function Glimpse:BuildOptions()
                     distanceUnit = self:BuildDistanceOptions(2),
                 },
             },
+            combat = self:BuildCombatOptions(2.5),
+            data = self:BuildDataOptions(3),
             credits = { type = "group", order = 110, name = L["Credits"], args = self:BuildCreditsArgs(self.name, nil, 1) },
             -- "profiles" (order 100) kommt in SetupOptions dazu
         },

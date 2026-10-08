@@ -1,0 +1,6 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <!-- Travel.lua legt das Modul an, die anderen Dateien erweitern es. -->
+    <Script file="Travel.lua"/>
+    <Script file="TravelDistance.lua"/>
+    <Script file="TravelZones.lua"/>
+</Ui>

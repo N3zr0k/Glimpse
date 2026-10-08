@@ -1,0 +1,16 @@
+## Interface: 16001
+## Title: Glimpse: Database (Misc)
+## Notes: Data area of Glimpse: Database. Everything else. Loaded only when an addon needs it.
+## Notes-deDE: Datenbereich von Glimpse: Database. Alles andere. Wird nur geladen, wenn ein Addon ihn braucht.
+
+## Version: 0.3.4-alpha.3
+## Author: N3zr0k
+## X-License: MIT
+## X-Website: https://github.com/N3zr0k/Glimpse
+
+## Category: Glimpse
+## Dependencies: Glimpse_Database
+## LoadOnDemand: 1
+## SavedVariables: GlimpseDB_Misc
+
+# Nur SavedVariables, kein Code: Glimpse_Database liest und schreibt die Tabelle.

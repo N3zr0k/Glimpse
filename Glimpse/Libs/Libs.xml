@@ -14,4 +14,7 @@
     <Include file="Ace3\AceGUI-3.0\AceGUI-3.0.xml"/>
     <Include file="Ace3\AceConfig-3.0\AceConfig-3.0.xml"/>
     <Include file="Ace3\AceDBOptions-3.0\AceDBOptions-3.0.xml"/>
+
+    <!-- Karten- und Weltkoordinaten (Modul Reisen) -->
+    <Script file="HereBeDragons\HereBeDragons-2.0.lua"/>
 </Ui>

@@ -10,7 +10,12 @@ ignore = {
 }
 
 -- Globale, die die Addons selbst setzen
-globals = { "Glimpse", "GlimpseDB", "GlimpseGatheringDB", "SLASH_GLIMPSE1", "StaticPopupDialogs" }
+globals = {
+    "Glimpse", "GlimpseSettings", "GlimpseGatheringDB", "GlimpseStatisticsDB", "SLASH_GLIMPSE1", "StaticPopupDialogs",
+    -- Glimpse_Database: API und SavedVariables
+    "GlimpseDB", "GlimpseDB_Meta", "GlimpseDB_Core", "GlimpseDB_Gathering", "GlimpseDB_Professions",
+    "GlimpseDB_Reputation", "GlimpseDB_Misc",
+}
 
 -- Blizzard-API und Mixins (nur lesen)
 read_globals = {
@@ -34,5 +39,10 @@ read_globals = {
     -- Orte, Wegpunkte und Fehlerfenster (Modul Locations, GatheringTooltip); TomTom ist optional
     "C_Map", "C_SuperTrack", "UiMapPoint", "CreateVector2D", "IsInInstance", "GetInstanceInfo", "TomTom",
     "StaticPopup_Show", "OKAY", "UISpecialFrames", "YES", "NO",
+    -- Module Kampf und Reisen, ID-Helfer; Glimpse_Database ist optional
+    "Item", "GetItemInfo", "GetSpellInfo", "UnitIsDead", "UnitHealth", "UnitExists", "UnitIsUnit",
+    "UnitCanAttack", "UnitIsTapDenied", "IsFishingLoot", "UnitOnTaxi", "UnitIsGhost", "IsSwimming", "IsMounted",
+    -- Glimpse_Database
+    "GetServerTime", "UnitClass", "GetRealmName", "debugprofilestop", "debugstack", "unpack",
 }
 

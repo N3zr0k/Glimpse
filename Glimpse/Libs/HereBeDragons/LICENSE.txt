@@ -1,0 +1,2 @@
+HereBeDragons by Nevcairiel (Hendrik Leppkes), https://github.com/Nevcairiel/HereBeDragons
+Version 2.18-release. The project states its license as BSD in its TOC (## X-License: BSD).

@@ -1,6 +1,9 @@
 local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local L = Glimpse.L
 
+-- Debug-Modus an/aus und die einfache Ausgabe für Module (ModuleProto:Debug). Kategorien, Stufen und das Log für
+-- Tester stehen in Debugger.lua.
+
 -- db ist bei sehr frühen Aufrufen noch nil
 function Glimpse:IsDebug()
     return self.db ~= nil and self.db.profile.debug
@@ -26,7 +29,9 @@ function Glimpse:DebugTagged(tag, ...)
         source = self.name
     end
 
-    self:Print(format("|cff9d9d9d[DEBUG]|r %s: %s", source, strjoin(" ", tostringall(...))))
+    local text = format("%s: %s", source, strjoin(" ", tostringall(...)))
+    self:AddLogLine(text)
+    self:Print("|cff9d9d9d[DEBUG]|r " .. text)
 end
 
 function Glimpse:Debug(...)

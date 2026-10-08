@@ -1,0 +1,7 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <!-- Unverändert eingebettet, je mit Lizenzdatei im eigenen Ordner -->
+    <Script file="LibStub\LibStub.lua"/>
+    <Include file="CallbackHandler-1.0\CallbackHandler-1.0.xml"/>
+    <Include file="LibSerialize\lib.xml"/>
+    <Include file="LibDeflate\lib.xml"/>
+</Ui>

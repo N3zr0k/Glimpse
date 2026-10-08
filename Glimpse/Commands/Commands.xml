@@ -4,4 +4,5 @@
     <Script file="Info.lua"/>
     <Script file="Config.lua"/>
     <Script file="Debug.lua"/>
+    <Script file="Probe.lua"/>
 </Ui>

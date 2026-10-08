@@ -6,6 +6,8 @@ local function setup()
     local Glimpse = stub.newGlimpse()
     Glimpse.GetMeta = function(_, key) return ({ Author = "N3zr0k", Title = "Glimpse: Test", Version = "1.0" })[key] end
     stub.load("Core/Options.lua", "Glimpse")
+    stub.load("Core/Debug/Probes.lua", "Glimpse")
+    stub.load("Core/Data.lua", "Glimpse")
     return Glimpse
 end
 
@@ -54,6 +56,7 @@ test("Credits: der Kern hat den Tab ebenfalls, der Autor steht nur dort", functi
     eq(overview.args.info.name():find("N3zr0k", 1, true), nil, "Autor nicht im Kopf der Übersicht")
     eq(overview.args.creditsHeader, nil, "nicht in der Übersicht")
     G.BuildDistanceOptions = function() return { type = "select" } end
+    G.BuildCombatOptions = function() return { type = "group" } end
     local options = G:BuildOptions()
     eq(options.args.credits.type, "group", "eigener Tab")
     eq(options.args.credits.order > 100, true, "nach Profile (Order 100)")

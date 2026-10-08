@@ -1,7 +1,8 @@
 # Glimpse: Entwickler-Dokumentation
 
 Glimpse ist ein Ace3-Grundgerüst für Tooltip-Addons. Dieses Dokument beschreibt den Aufbau, die
-Schnittstellen für Erweiterungen und die Arbeitsweise im Repo.
+Schnittstellen für Erweiterungen und die Arbeitsweise im Repo. Die verbindlichen Regeln für alle Glimpse-Addons stehen
+in [docs/REGELN.md](docs/REGELN.md).
 
 ## Aufbau
 
@@ -9,12 +10,15 @@ Schnittstellen für Erweiterungen und die Arbeitsweise im Repo.
 Glimpse/             Das Addon, nur was WoW lädt (die Junction im AddOns-Ordner zeigt hierher)
   Glimpse.toc        Einzige Quelle für Titel, Version, Notes, Icon (siehe unten)
   Glimpse.xml        Zentrale Ladeliste, nur Include-Zeilen
-  Core/              Init, Debug, Options, Modifiers, Commands, Tooltip
-  Commands/          ein Slash-Befehl = eine Datei (Help, Info, Config, Debug)
+  Core/              Init, IDs, Options, Data (Tab "Daten"), Modifiers, Commands, Tooltip
+    Debug/           Debug (Schalter), Debugger (Kategorien, Log), Probes, LogWindow
+  Commands/          ein Slash-Befehl = eine Datei (Help, Info, Config, Debug, Probe)
   Locales/           enUS (Default) und deDE, eingetragen in Locales.xml
-  Modules/           interne Module, je Modul ein Ordner (Locations, Example als Vorlage, TooltipDebug)
-  Libs/              Ace3 (mitgeliefert, damit ein Klon sofort läuft)
-tests/               Logik-Tests ohne WoW (lua tests/run.lua)
+  Modules/           interne Module, je Modul ein Ordner (Locations, Combat, Travel, Example als Vorlage, TooltipDebug)
+  Libs/              Ace3 und HereBeDragons (mitgeliefert, damit ein Klon sofort läuft)
+Glimpse_Database*/   Glimpse: Database und ihre vier Datenbereiche (Kapitel "Glimpse_Database")
+docs/REGELN.md       Regeln für alle Glimpse-Addons
+tests/               Logik-Tests ohne WoW (lua tests/run.lua, Database: lua tests/database/run.lua)
 tools/check.py       Strukturprüfung von TOC und XML
 .pkgmeta             Paket für den Packager: Addon-Ordner nach oben, Beziehungen für CurseForge
 ```
@@ -80,7 +84,7 @@ end
 ```
 
 Eigene Daten, die über Profile hinweg gelten sollen, gehören in eine eigene SavedVariable
-(`## SavedVariables:`), nicht in `GlimpseDB`. Beispiel: GatheringDB.
+(`## SavedVariables:`) oder nach Glimpse: Database, nicht in `GlimpseSettings`. Beispiel: GatheringDB.
 
 Interne Module (im Core-Repo unter `Modules/`) sehen genauso aus und werden in `Modules/Modules.xml`
 eingetragen.
@@ -230,11 +234,71 @@ Glimpse:RegisterCommand("name", "Beschreibung für /gli help", function(glimpse,
 Ein Befehl pro Datei. Im Core liegen sie in `Commands/` und stehen in `Commands/Commands.xml`; eine
 Erweiterung registriert ihren Befehl in einer eigenen Datei (siehe `Glimpse_KeybindsTooltip/Commands/`).
 
-### Debug (`Core/Debug.lua`)
+### Debug (`Core/Debug/`)
 
 `Glimpse:IsDebug()`, `Glimpse:SetDebug(enabled)`, `Glimpse:Debug(...)`, in Modulen `self:Debug(...)` (Ausgabe als `Glimpse(Modul): ...`,
 nur bei aktivem Debug-Modus). Der Schalter ist im Profil gespeichert. Auch Tooltip-Provider sollten
 Debug-Ausgaben vor dem Aufbau teurer Strings über `IsDebug()` absichern.
+
+Für Erweiterungen und Core-Module mit mehreren Themen gibt es Debugger mit Kategorien:
+
+```lua
+local debug = Glimpse:NewDebugger("Professions", { "fishing", "lure" })
+debug:Log("lure", "Köder %s", name)    -- nur im Debug-Modus und bei eingeschalteter Kategorie
+debug:Warn("lure", ...)                 -- wie Log, gelb
+debug:Error("lure", ...)                -- immer sichtbar
+if debug:IsOn("lure") then ... end      -- vor teurer Arbeit
+```
+
+* Ausgabe einheitlich als `[Glimpse:Professions/lure] ...`; gleiche Zeilen kurz hintereinander werden gezählt statt wiederholt.
+* Kategorien sind an, solange der Debug-Modus an ist; `/gli debug Professions lure off` schaltet eine ab, `/gli debug list` zeigt alle.
+* Die letzten 500 Zeilen bleiben im Speicher, `/gli debug log` öffnet sie in einem Fenster zum Kopieren.
+
+Probes sind kleine Prüfungen für Tester, die der Core auflistet und ausgibt:
+
+```lua
+Glimpse:RegisterProbe("prof", "lure", function(args) return { "Zeile 1", "Zeile 2" } end, "Zeigt den Köder")
+-- /gli probe            Liste
+-- /gli probe prof lure  ausführen
+```
+
+`/gli probe db sources` zeigt, woher die Daten aller Addons kommen: je Namespace Bereich, Schreiber (Addon), Summen je
+Herkunft (`own`, `imported`, `baseline`), Orte und externe Quellen, dazu ob die alten SavedVariables von Statistics und
+GatheringDB geladen sind. `/gli probe db sources <Namespace>` schlüsselt nach Art auf. Daten außerhalb von Database
+(eigene SavedVariables, Live-Quellen wie GatherMate2 oder die Spiel-Statistik) meldet jede Erweiterung selbst:
+
+```lua
+if Glimpse.RegisterDataSource then
+    Glimpse:RegisterDataSource("Glimpse_GatheringDB", function() return { "names: GlimpseGatheringNames" } end)
+end
+```
+
+### IDs (`Core/IDs.lua`)
+
+`Glimpse.IDs:ParseGUID(guid)`, `:NPCFromGUID(guid)`, `:DescribeItem(id, callback)` (wartet auf den Item-Cache),
+`:DescribeSpell(id)`, `:DescribeMap(mapID)` (Text `Name [ID]`), `:ZoneKey()` (uiMapID, in Instanzen `-instanceID`) und
+`:Where()` (mapID, x, y, Zonenname).
+
+### Daten (Glimpse: Database)
+
+Glimpse_Database liegt im selben Repo und Paket (Kapitel unten). Der Core führt es unter `## OptionalDeps`, damit es
+vorher lädt; fehlt es, laufen die Module still. Kampf und Reisen erfassen für jeden Charakter; Kampf zeigt Kills und
+Tode im Kreatur-Tooltip (`Modules/Combat/CombatTooltip.lua`, Tab "Kampf"). Erfasst wird in `CombatKills.lua`,
+`CombatDeaths.lua`, `CombatLoot.lua` und `CombatTime.lua`. Erweiterungen lesen über `GlimpseDB:Get(name)`:
+
+| Namespace | Art (kind) | ID | Wert |
+| --- | --- | --- | --- |
+| `combat` | `kill` | NPC-ID | Kills, pro Zone |
+| `combat` | `death` | NPC-ID des Verursachers, 0 = unbekannt | Tode, pro Zone |
+| `combat` | `time` | 0 | Sekunden im Kampf |
+| `combat` | `looted` | NPC-ID | geplünderte Leichen (Weltwissen) |
+| `combat` | `loot:<NPC-ID>` | Item-ID | Anzahl erbeutet (Weltwissen) |
+| `travel` | `distance` | 1 gelaufen, 2 beritten, 3 geschwommen, 4 Flugroute, 5 Geist | Yards |
+| `travel` | `zone` | uiMapID, in Instanzen `-instanceID` | Betreten |
+| `travel` | `zonetime` | wie `zone` | Sekunden |
+
+Zonen sind uiMapIDs, in Instanzen `-instanceID`. Reisen misst alle 0,5 s über HereBeDragons und verwirft Sprünge
+(Teleport, Ladebildschirm). Der Tab "Daten" in den Optionen zeigt die Bereiche, Export, Import und Zurücksetzen.
 
 ### Lokalisierung
 
@@ -247,12 +311,170 @@ ab. Neue Sprache: Datei kopieren und in `Locales.xml` eintragen.
 * Secret-Werte (`issecretvalue`) nie vergleichen, verketten oder als Schlüssel benutzen.
 * Blizzard-Funktionen, die zwischen Client-Ständen wandern, über einen Alias mit Fallback ansprechen
   (`C_Item.GetItemInfoInstant or GetItemInfoInstant`).
-* Eigene Daten nie in `GlimpseDB` außerhalb des eigenen Namespace ablegen.
+* Eigene Einstellungen nie in `GlimpseSettings` außerhalb des eigenen Namespace ablegen.
+
+## Glimpse_Database
+
+Unterste Schicht der Glimpse-Addons. Speichert, migriert, exportiert und meldet Änderungen; keine Oberfläche, kein
+Ace3. Alle anderen Addons schreiben nur in ihren eigenen Namespace und lesen überall.
+
+### Aufbau
+
+```
+Glimpse_Database/               Hauptaddon, immer geladen. SavedVariables: GlimpseDB_Meta, GlimpseDB_Core
+  Core/                         Init (Global, Callback, Helfer), Time (Stunden, Zeiträume), Characters (Index, Schlüssel),
+                                Areas (Bereiche laden, Größe, Zurücksetzen), Events (ADDON_LOADED, PLAYER_LOGIN)
+    Namespace/                  Namespace (Register, Get), Query (scope, Herkunft), Counters, Buckets, Locations, Adapters
+    Transfer/                   Async (Arbeit über Frames), Codec (Text), Export, Merge (Prüfen und Zusammenführen), Import
+    AlphaMigration.lua          Übernahme aus Statistics und GatheringDB, nur in Alpha-Versionen
+  Libs/                         LibStub, CallbackHandler-1.0, LibSerialize, LibDeflate
+Glimpse_Database_Gathering/     LoadOnDemand-Bereiche, nur TOC und SavedVariables GlimpseDB_<Bereich>
+Glimpse_Database_Professions/
+Glimpse_Database_Reputation/
+Glimpse_Database_Misc/
+tests/database/                 Logik-Tests ohne WoW (wowstub lädt die echten Libraries und alle Dateien nach XML)
+```
+
+Jede Datei bekommt vom Client `(addonName, P)`; `P` ist die private Tabelle des Addons. Alles, was nicht API ist,
+hängt dort.
+
+### Bereiche und Namespaces
+
+| Bereich | SavedVariables | Inhalt | Laden |
+| --- | --- | --- | --- |
+| (Meta) | GlimpseDB_Meta | Charakterliste, Namespaces mit Bereich und Version, Warteschlange für Importe | immer |
+| Core | GlimpseDB_Core | Core-Module: combat, travel | immer |
+| Gathering | GlimpseDB_Gathering | Fundorte, Knoten | bei Bedarf |
+| Professions | GlimpseDB_Professions | Angeln und weitere Berufe | bei Bedarf |
+| Reputation | GlimpseDB_Reputation | Ruf pro NPC und Fraktion | bei Bedarf |
+| Misc | GlimpseDB_Misc | alles andere (Standard) | bei Bedarf |
+
+Ein Bereich wird geladen, wenn ein Namespace darin angemeldet oder gelesen wird (`C_AddOns.LoadAddOn`). Eine
+Erweiterung, die einen Bereich immer braucht, kann ihn auch in der TOC unter `## Dependencies` führen.
+
+Namespace und Bereich sind getrennt: Meldet ein Addon seinen Namespace mit einem anderen Bereich an, ziehen die Daten
+beim nächsten Login mit um.
+
+### API
+
+```lua
+local DB = GlimpseDB            -- nil, wenn Database fehlt; DB.API_VERSION prüfen
+
+-- Schreiben (genau ein Schreiber pro Namespace)
+local ns = DB:Register("fishing", {
+    area = "Professions",             -- Standard "Misc"
+    version = 1,                      -- Schema-Version, Standard 1
+    migrate = function(data, from, to) end,
+    zones = true,                     -- Zähler auch pro Zone
+    world = { loot = true },          -- Arten, die als Weltwissen exportiert werden
+    addon = "Glimpse_Professions",    -- Schreiber für die Diagnose, sonst aus dem Aufrufstapel
+})                                    -- nil, Grund ("DISABLED", "NEWER_DATA" ...), wenn es nicht geht
+
+ns:Count(kind, id, mapID, amount)     -- id Standard 0, amount Standard 1; schreibt Zähler, Zone, Zeiten, Stunden
+ns:SetBaseline(kind, id, value)       -- Startwert vor Glimpse, nur einmal
+ns:AddLocation(id, mapID, x, y)       -- x, y von 0 bis 1
+ns:RemoveLocation(mapID, x, y)
+
+-- Lesen (jeder, auch der Schreiber)
+local reader = DB:Get("fishing")      -- lädt den Bereich bei Bedarf; nil, wenn unbekannt
+reader:GetCount(kind, id, scope)      -- id nil = alle IDs
+reader:GetCounts(kind, scope)         -- { [id] = n }
+reader:GetZones(kind, id, scope)      -- { [mapID] = n }
+reader:GetSeen(kind, id, scope)       -- erster, letzter Zeitpunkt
+reader:GetSeries(kind, id, scope)     -- { [Stunde] = n }, scope braucht range oder from/to
+reader:GetLocations(mapID, id, scope) -- Liste { mapID, x, y, id, source }
+
+-- scope: "char" (Standard), "account", "all" (mit fremden Charakteren aus Importen), Charakter-Index oder
+-- { chars = ..., sources = "own" | { "own", "imported", "baseline", "external", "external:GatherMate2" },
+--   range = "today" | "week" | "month"  oder  from = Unix-Zeit, to = Unix-Zeit }
+-- Ohne sources zählen own und imported. baseline nur auf Wunsch und nie in Zeiträumen.
+
+DB.RegisterCallback(self, DB.EVENT_CHANGED, function(event, nsName, kind, id) end)
+-- nsName nil: viele Änderungen auf einmal (Import, Bereich zurückgesetzt)
+
+DB:RegisterAdapter("gathering", "GatherMate2", adapter)   -- externe Daten live lesen, siehe Namespace/Adapters.lua
+DB:Export(names, function(text, err) end)                  -- names nil = alle Namespaces, asynchron
+DB:Import(text, function(result, err) end)                 -- asynchron, Fehler siehe Transfer/Import.lua
+DB:RegisterImportConverter(name, detect, convert)           -- fremde Exportformate
+
+DB:GetCharacters()                    -- eigene Charaktere (Index), aktueller zuerst
+DB:GetCharacterInfo(index)            -- name, realm, class, key, foreign
+DB:GetNamespaces()
+DB:GetNamespaceInfo(name, detail)     -- Bereich, Schreiber, Summen je Herkunft, Orte, Adapter (für /gli probe db sources)
+DB:LoadArea(area) / DB:GetAreaSize(area) / DB:ResetArea(area)
+DB:GetRange("week")                   -- from, to; lokale Mitternacht über date/time
+DB:HourOf(stamp) / DB:HourStart(hour) / DB:PackXY(x, y) / DB:UnpackXY(xy)
+```
+
+### Datenformat
+
+Pro Namespace eine Tabelle im Bereich:
+
+```
+version
+own / imported / baseline        Blöcke nach Herkunft
+  counts[char][kind][id] = n
+  zones[char][kind][id][mapID] = n
+  seen[char][kind][id] = { erster, letzter }
+  hours[char][kind][Stunde] = n
+  idHours[char][kind][id][Stunde] = n
+places[source][mapID][x * 10000 + y] = id
+```
+
+- `char` ist der Index in `GlimpseDB_Meta.characters`, bei `imported` der Charakter, von dem die Daten stammen.
+- Stunden zählen ab 2026-01-01 00:00 UTC (`DB.EPOCH`), geschrieben mit `GetServerTime()`.
+- Charakter-Schlüssel: kurzer Hash der Spieler-GUID. `foreign = true` heißt: nur aus einem Import bekannt.
+
+### Export und Import
+
+- Text: `!GlimpseDB:1!` + LibSerialize, LibDeflate, `EncodeForPrint`; beides asynchron über mehrere Frames.
+- **Weltwissen** (Orte, Arten aus `world`) ist die Summe aller eigenen Charaktere und landet beim Empfänger als
+  `imported` unter dem Charakter, der exportiert hat.
+- **Persönliche Daten** (alle anderen Arten) gehen nur an denselben Charakter. Ist er auf dem Rechner noch unbekannt,
+  wartet der Teil in `GlimpseDB_Meta.pending` bis zu seinem Login.
+- Exportiert wird nur `own`; zusammengeführt per Maximum, ein doppelter Import zählt nicht doppelt.
+- Exporte derselben Installation werden abgelehnt (`SAME_INSTALL`).
+- Unterschiedliche Schema-Version eines Namespace: der Namespace wird übersprungen (`skipped`).
+
+### Übernahme alter Daten
+
+`Glimpse_Database/Core/AlphaMigration.lua` übernimmt beim Login die SavedVariables von Glimpse: Statistics
+(`GlimpseStatisticsDB`) und Glimpse: GatheringDB (`GlimpseGatheringDB`) in den Block `own`. Die SavedVariables sind
+nur da, solange das alte Addon aktiv ist; sonst wartet die Übernahme auf den nächsten Login mit aktivem Addon.
+Erledigtes steht mit Zeitpunkt in `GlimpseDB_Meta.migrated` (`DB:GetMigrations()`, im Spiel `/gli probe db migration`).
+Die alten Addons behalten ihre Daten und laufen unverändert weiter.
+
+Charaktere werden nur über die GUID zugeordnet. Statistics speichert je "Name - Realm"; übernommen wird nur der
+eingeloggte Charakter, jeder Twink bei seinem eigenen Login (`migrated.statistics[Charakter-Schlüssel]`, auch wenn er
+in Statistics keine Daten hat). GatheringDB ist Weltwissen und wird beim ersten Login übernommen, ohne Charakter: es steht unter dem Eintrag
+`world` (Schlüssel "world"), der zum Account zählt, aber in `DB:GetCharacters()` fehlt. Abfragen brauchen dafür den
+scope "account" oder "all".
+
+| Namespace | Art | ID | Herkunft |
+| --- | --- | --- | --- |
+| combat | kill, death | NPC (0 = ohne Zuordnung) | Statistics, Startwerte im Block baseline |
+| fishing | cast, catch | 0, je Zone | Statistics, Startwert für catch |
+| fishing | fish | Item, je Zone | Statistics |
+| fishing | looted, loot:\<Zone>, drop:\<Zone> | Zone, Item | GatheringDB (Weltwissen), dazu Orte |
+| gathering | herb, ore, other, skin | Objekt bzw. NPC | Statistics |
+| gathering | node, nodeloot:\<Objekt>, nodedrop:\<Objekt> | Objekt, Item | GatheringDB (Weltwissen), dazu Zonen und Orte |
+| gathering | npc, npcloot:\<NPC>, npcdrop:\<NPC> | NPC, Item | GatheringDB (Weltwissen), Versuche = Kills |
+| gathering | skinned, skinloot:\<NPC>, skindrop:\<NPC> | NPC, Item | GatheringDB (Weltwissen) |
+
+`*loot` zählt die Menge, `*drop` die Beutefenster mit dem Item (Grundlage der Drop-Chance). Wer einen dieser
+Namespaces später als Schreiber anmeldet, übernimmt die Arten und die `world`-Liste aus `AlphaMigration.lua`.
+
+### Alpha-Migration
+
+Die Übernahme läuft nur in `-alpha`-Versionen (Versions-Check am Anfang der Datei), ohne eigene Optionen. Alte Exporte
+(`GSTAT1:`, `GGDB1:`) werden nicht umgewandelt, weil sie keine GUID enthalten. `tools/check.py` bricht ab, wenn es die
+Datei in einer anderen Version noch gibt: vor der ersten Beta Datei und XML-Zeile löschen.
 
 ## Prüfen
 
 ```
-lua tests/run.lua          # Logik-Tests (Locations, Einheiten, Zusatztasten, Credits) mit nachgebauter WoW-Umgebung
+lua tests/run.lua          # Logik-Tests (Locations, Einheiten, Zusatztasten, Credits, Kampf, Reisen) mit nachgebauter WoW-Umgebung
+lua tests/database/run.lua # Logik-Tests von Glimpse_Database mit den echten Libraries
 luacheck .                 # Konfiguration in .luacheckrc
 python3 tools/check.py     # TOC, XML und Dateiverweise
 ```
@@ -263,35 +485,40 @@ unbekannte Variable, ist es ein Tippfehler oder eine echte API-Funktion, die in 
 
 ## Veröffentlichen
 
-Versionsschema (alle Glimpse-Addons), z. B. `0.2.35`:
-* erste Zahl: Major-Release, zweite Zahl: Feature-Release (beides gibt Sven vor)
-* dritte Zahl: jede Änderung im Addon-Ordner des Repos (Code, TOC, Kommentare, Medien)
-* `-beta.N` / `-alpha.N`: N zählt bei Änderungen außerhalb des Addon-Ordners hoch (Checks, Tests, Workflows, README, alles andere im Repo). Bei einer neuen dritten Zahl beginnt N wieder bei 1.
-* Ändert sich nur N, wird kein Release gebaut (kein Tag durch `ci.yml`, ein Tag von Hand bricht `release.yml` ohne Release ab).
+Versionsschema (alle Glimpse-Addons): `X.Y.Z-PHASE.N`, Tag `vX.Y.Z-PHASE.N`, z. B. `0.3.4-alpha.2`.
+* `X` Major-Release, `Y` Minor-Release, `PHASE` (`alpha`, `beta`, `latest`): gibt nur Sven vor und frei.
+* `Z` Bugfix/Features: steigt bei jeder Änderung in einem Addon-Ordner des Repos (Code, TOC, Kommentare, Medien).
+* `N` Repository-Version: steigt bei Änderungen außerhalb der Addon-Ordner (Checks, Tests, Workflows, Doku, README).
+  Ein neues `Z` setzt `N` auf 1 zurück.
+* Ändert sich nur `N`, wird kein Release gebaut (kein Tag durch `ci.yml`, ein Tag von Hand bricht `release.yml` ohne
+  Release ab).
+* Bevor ein Repo gebaut wird, werden die Änderungen aufgelistet und von Sven freigegeben.
 
-Die Stufe eines Releases steht in der Version der TOC (`## Version:`), das Tag heißt immer `v` + diese Version:
+Die Phase steht in der Version der TOC (`## Version:`), das Tag heißt immer `v` + diese Version:
 
-| `## Version:` in der TOC | Tag | Auf GitHub |
-| --- | --- | --- |
-| `X.Y.Z-alpha.N` | `vX.Y.Z-alpha.N` | Prerelease (Alpha) |
-| `X.Y.Z-beta.N` | `vX.Y.Z-beta.N` | richtiges Release (kein Prerelease, nicht „Latest“), im Titel als Beta gekennzeichnet |
-| `X.Y.Z` | `vX.Y.Z` | Release |
+| `## Version:` in der TOC | Tag | GitHub | CurseForge |
+| --- | --- | --- | --- |
+| `X.Y.Z-alpha.N` | `vX.Y.Z-alpha.N` | Prerelease | nichts |
+| `X.Y.Z-beta.N` | `vX.Y.Z-beta.N` | Release mit „(Beta)“ im Titel, nicht „Latest“ | Beta |
+| `X.Y.Z-latest.N` | `vX.Y.Z-latest.N` | Release, als „Latest“ markiert | Release |
 
-Alle TOCs eines Repos müssen dieselbe Version haben. Im `CHANGELOG.md` braucht jede Stufe den Abschnitt
-`## [X.Y.Z]`, nur bei Alpha reicht `## [Unreleased]`. Die Stufe steht nicht im CHANGELOG.
+Wago und WoWInterface sind abgeschaltet, bis Sven sie freigibt. Eine Version ohne Phase lehnt `tools/check.py` ab;
+alte Tags ohne Phase (`v0.2.3`) zählen wie latest.
 
-1. Version in der TOC setzen (SemVer, bei Vorabversionen mit Stufe und Nummer, z. B. `0.2.3-beta.1`) und den
-   CHANGELOG-Abschnitt schreiben.
+Alle TOCs eines Repos müssen dieselbe Version haben. Im `CHANGELOG.md` brauchen beta und latest den Abschnitt
+`## [X.Y.Z]`, bei alpha reicht `## [Unreleased]`. Die Phase steht nicht im CHANGELOG.
+
+1. Version in der TOC setzen und den CHANGELOG-Abschnitt schreiben.
 2. Auf `main` pushen. Ist die Pipeline (Struktur, luacheck, Tests) grün und gibt es für die Basisversion noch kein Tag
-   derselben oder einer höheren Stufe (Alpha < Beta < final, die Suffix-Zahl zählt nicht), setzt `ci.yml` das
-   Tag selbst und startet `release.yml` per `workflow_dispatch` auf dem Tag (ein mit dem `GITHUB_TOKEN` gepushtes Tag
-   löst keinen Push-Workflow aus).
-3. `release.yml` prüft Tag, TOC-Version und CHANGELOG, baut das ZIP mit dem BigWigs-Packager und legt ein
-   GitHub-Release an. Alpha-Tags werden als Prerelease veröffentlicht, Beta-Tags als richtiges Release mit „(Beta)“ im Titel.
+   derselben oder einer höheren Phase (alpha < beta < latest, `N` zählt nicht), setzt `ci.yml` das Tag selbst und
+   startet `release.yml` per `workflow_dispatch` auf dem Tag (ein mit dem `GITHUB_TOKEN` gepushtes Tag löst keinen
+   Push-Workflow aus).
+3. `release.yml` prüft Tag, TOC-Version und CHANGELOG, baut das ZIP mit dem BigWigs-Packager, legt das GitHub-Release
+   an und kennzeichnet es nach der Tabelle oben.
 
-Eine Version erscheint so nacheinander als Alpha, Beta und final: nur die TOC-Version ändern
-(`0.2.3-alpha.1` → `0.2.3-beta.1` → `0.2.3`) und pushen. `0.2.3-beta.2` baut kein Release, weil sich nur das Repo
-geändert hat. Von Hand geht es auch (`git tag v0.2.4-beta.1 && git push --tags`), das löst `release.yml` direkt aus.
+Eine Version erscheint so nacheinander als alpha, beta und latest: nur die Phase in der TOC ändern
+(`0.2.3-alpha.1` → `0.2.3-beta.1` → `0.2.3-latest.1`) und pushen. `0.2.3-beta.2` baut kein Release, weil sich nur das
+Repo geändert hat. Von Hand geht es auch (`git tag v0.2.4-beta.1 && git push --tags`), das löst `release.yml` direkt aus.
 
 Was jetzt anstünde, zeigt `python3 tools/check.py --next-tag` (leer: nichts). Fehlt der CHANGELOG-Abschnitt für die Version
 oder weichen TOC-Versionen ab, wird kein Tag gesetzt und der Lauf schlägt fehl. Bleibt die Version gleich, passiert
@@ -300,6 +527,6 @@ nichts. Gibt es ein Tag, aber noch kein Release (ein früherer Lauf ist gescheit
 **CurseForge:** Die Projekt-ID steht als `## X-Curse-Project-ID` in der TOC (Glimpse 1730173, KeybindsTooltip 1730180,
 Gathering 1730186, dort zusätzlich als `-p` im Packager-Schritt von `release.yml`, weil das Paket keine TOC im
 Hauptordner hat). Hochgeladen wird nur, wenn das Repo-Secret `CF_API_KEY` gesetzt ist (GitHub: Settings > Secrets and
-variables > Actions). Der Token gehört nie ins Repo. Alpha, Beta und final erscheinen dort als Alpha, Beta und Release.
+variables > Actions). Der Token gehört nie ins Repo. Hochgeladen werden nur beta (als Beta) und latest (als Release).
 
 Erweiterungen, die neue Core-Funktionen brauchen, tragen `## X-Glimpse-MinVersion` in ihre TOC ein.

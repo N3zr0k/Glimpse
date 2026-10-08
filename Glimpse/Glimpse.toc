@@ -1,9 +1,9 @@
 ## Interface: 16001
-## Title: Glimpse |cff00ff00v0.2.5|r
+## Title: Glimpse |cff00ff00v0.3.4|r
 ## Notes: Minimalistic and powerful tooltip enhancement.
 ## Notes-deDE: Minimalistische und leistungsstarke Tooltip-Erweiterung.
 
-## Version: 0.2.5-beta.6
+## Version: 0.3.4-alpha.3
 ## Author: N3zr0k
 ## X-Website: https://github.com/N3zr0k/Glimpse
 ## X-Repo: https://github.com/N3zr0k/Glimpse
@@ -12,7 +12,8 @@
 
 ## Category: Tooltip
 ## IconTexture: Interface\AddOns\Glimpse\Media\Icon
-## SavedVariables: GlimpseDB
+## OptionalDeps: Glimpse_Database
+## SavedVariables: GlimpseSettings
 
 # Main XML Loader
 Glimpse.xml

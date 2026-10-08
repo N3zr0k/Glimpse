@@ -1,9 +1,15 @@
-# Ein Addon-Ordner im Repo (Glimpse/), alles andere liegt daneben. Der Packager baut im Ordner Glimpse, schiebt den
-# Inhalt des Addon-Ordners eine Ebene hoch; was außen liegt, bleibt über "ignore" draußen.
+# Ein Repo, mehrere Addons: Glimpse, Glimpse_Database und die LoadOnDemand-Bereiche der Database. Der Packager baut
+# alles in einen Ordner Glimpse und schiebt die Addon-Ordner danach auf die oberste Ebene des ZIPs. Was außen liegt,
+# bleibt über "ignore" draußen.
 package-as: Glimpse
 
 move-folders:
   Glimpse/Glimpse: Glimpse
+  Glimpse/Glimpse_Database: Glimpse_Database
+  Glimpse/Glimpse_Database_Gathering: Glimpse_Database_Gathering
+  Glimpse/Glimpse_Database_Professions: Glimpse_Database_Professions
+  Glimpse/Glimpse_Database_Reputation: Glimpse_Database_Reputation
+  Glimpse/Glimpse_Database_Misc: Glimpse_Database_Misc
 
 manual-changelog:
   filename: CHANGELOG.md
@@ -12,6 +18,9 @@ manual-changelog:
 # Beziehungen auf CurseForge (Kurznamen der Projekte); externe Addons werden nicht gemeldet
 embedded-libraries:
   - ace3
+  - herebedragons
+  - libserialize
+  - libdeflate
 
 ignore:
   - tests

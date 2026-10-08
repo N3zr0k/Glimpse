@@ -263,6 +263,12 @@ unbekannte Variable, ist es ein Tippfehler oder eine echte API-Funktion, die in 
 
 ## Veröffentlichen
 
+Versionsschema (alle Glimpse-Addons), z. B. `0.2.35`:
+* erste Zahl: Major-Release, zweite Zahl: Feature-Release (beides gibt Sven vor)
+* dritte Zahl: jede Änderung im Addon-Ordner des Repos (Code, TOC, Kommentare, Medien)
+* `-beta.N` / `-alpha.N`: N zählt bei Änderungen außerhalb des Addon-Ordners hoch (Checks, Tests, Workflows, README, alles andere im Repo). Bei einer neuen dritten Zahl beginnt N wieder bei 1.
+* Ändert sich nur N, wird kein Release gebaut (kein Tag durch `ci.yml`, ein Tag von Hand bricht `release.yml` ohne Release ab).
+
 Die Stufe eines Releases steht in der Version der TOC (`## Version:`), das Tag heißt immer `v` + diese Version:
 
 | `## Version:` in der TOC | Tag | Auf GitHub |
@@ -277,15 +283,15 @@ Alle TOCs eines Repos müssen dieselbe Version haben. Im `CHANGELOG.md` braucht 
 1. Version in der TOC setzen (SemVer, bei Vorabversionen mit Stufe und Nummer, z. B. `0.2.3-beta.1`) und den
    CHANGELOG-Abschnitt schreiben.
 2. Auf `main` pushen. Ist die Pipeline (Struktur, luacheck, Tests) grün und gibt es für die Basisversion noch kein Tag
-   derselben oder einer höheren Stufe (Alpha < Beta < final, bei gleicher Stufe zählt die Nummer), setzt `ci.yml` das
+   derselben oder einer höheren Stufe (Alpha < Beta < final, die Suffix-Zahl zählt nicht), setzt `ci.yml` das
    Tag selbst und startet `release.yml` per `workflow_dispatch` auf dem Tag (ein mit dem `GITHUB_TOKEN` gepushtes Tag
    löst keinen Push-Workflow aus).
 3. `release.yml` prüft Tag, TOC-Version und CHANGELOG, baut das ZIP mit dem BigWigs-Packager und legt ein
    GitHub-Release an. Alpha-Tags werden als Prerelease veröffentlicht, Beta-Tags als richtiges Release mit „(Beta)“ im Titel.
 
-Eine Version erscheint so nacheinander als Alpha, Beta (auch mehrere) und final: nur die TOC-Version ändern
-(`0.2.3-alpha.1` → `0.2.3-beta.1` → `0.2.3-beta.2` → `0.2.3`) und pushen. Von Hand geht es auch
-(`git tag v0.2.3-beta.2 && git push --tags`), das löst `release.yml` direkt aus.
+Eine Version erscheint so nacheinander als Alpha, Beta und final: nur die TOC-Version ändern
+(`0.2.3-alpha.1` → `0.2.3-beta.1` → `0.2.3`) und pushen. `0.2.3-beta.2` baut kein Release, weil sich nur das Repo
+geändert hat. Von Hand geht es auch (`git tag v0.2.4-beta.1 && git push --tags`), das löst `release.yml` direkt aus.
 
 Was jetzt anstünde, zeigt `python3 tools/check.py --next-tag` (leer: nichts). Fehlt der CHANGELOG-Abschnitt für die Version
 oder weichen TOC-Versionen ab, wird kein Tag gesetzt und der Lauf schlägt fehl. Bleibt die Version gleich, passiert

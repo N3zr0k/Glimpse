@@ -1,13 +1,11 @@
 local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 
--- Orte für alle Erweiterungen: Karten, Position des Spielers, Entfernungen, Koordinaten, Wegpunkte und die
--- Einheit der Entfernungen. Erweiterungen holen sich das Modul mit
+-- Karten, Spielerposition, Entfernungen, Koordinaten, Wegpunkte für Erweiterungen (DEVELOPER.md):
 --   local Locations = Glimpse:GetModule("Locations")
--- und rufen dessen Funktionen auf (siehe DEVELOPER.md). Alles hier benutzt nur Spielfunktionen. Weitere
--- Addons (TomTom) sind optional.
+-- TomTom ist optional.
 local Locations = Glimpse:NewModule("Locations")
 
--- Version der Schnittstelle, wird erhöht, wenn sich Funktionen ändern oder wegfallen
+-- Erhöhen, wenn Funktionen sich ändern oder wegfallen
 Locations.API_VERSION = 1
 
 local function Clean(value)
@@ -16,8 +14,7 @@ local function Clean(value)
 end
 Locations.Clean = Clean
 
--- Alle Blizzard-Funktionen an einer Stelle. Fehlt eine, bleibt der Eintrag nil und die Funktionen
--- liefern nil. Tests können die Einträge ersetzen.
+-- Blizzard-API gebündelt, damit Tests sie ersetzen können. Fehlende Einträge = nil-Ergebnisse.
 Locations.api = {
     GetBestMapForUnit = C_Map and C_Map.GetBestMapForUnit,
     GetPlayerMapPosition = C_Map and C_Map.GetPlayerMapPosition,

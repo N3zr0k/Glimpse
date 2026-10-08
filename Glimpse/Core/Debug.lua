@@ -1,8 +1,7 @@
 local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local L = Glimpse.L
 
--- Der Debug-Schalter liegt im Profil, damit er pro Profil getrennt eingestellt werden kann.
--- db kann beim sehr frühen Aufruf noch nil sein, deshalb die Prüfung.
+-- db ist bei sehr frühen Aufrufen noch nil
 function Glimpse:IsDebug()
     return self.db ~= nil and self.db.profile.debug
 end
@@ -10,16 +9,13 @@ end
 function Glimpse:SetDebug(enabled)
     self.db.profile.debug = enabled and true or false
 
-    -- Ohne das bleibt die Checkbox im Settings-Panel auf dem alten Wert,
-    -- wenn man den Modus per Slash-Befehl umschaltet.
+    -- Checkbox im Panel nachziehen, wenn per Slash-Befehl umgeschaltet
     LibStub("AceConfigRegistry-3.0"):NotifyChange(self.name)
 
     self:Print(self.db.profile.debug and L["Debug mode enabled"] or L["Debug mode disabled"])
 end
 
---- Debug-Ausgabe mit Quelle.
--- Module werden als Glimpse(Modulname) ausgegeben.
--- Der Debug-Status wird zentral geprüft.
+--- Debug-Ausgabe mit Quelle, Module erscheinen als Glimpse(Modulname)
 function Glimpse:DebugTagged(tag, ...)
     if not self:IsDebug() then return end
 

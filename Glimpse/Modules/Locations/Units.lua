@@ -2,18 +2,13 @@ local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local L = Glimpse.L
 local Locations = Glimpse:GetModule("Locations")
 
--- Entfernungen für alle Erweiterungen: Der Spielwert ist in Yards. Der Spieler wählt in den Glimpse-Optionen
--- (Allgemein), ob Yards oder Meter angezeigt werden, oder lässt es nach der Sprache seines Clients entscheiden.
--- Alle Erweiterungen zeigen Entfernungen dadurch einheitlich an.
---
--- Benutzung in einer Erweiterung:
+-- Einheitliche Entfernungsanzeige. Spielwerte sind Yards, Einheit kommt aus den Glimpse-Optionen.
+-- Benutzung:
 --   Locations:FormatDistance(yards)   -> "120 yd", "1.3 mi", "91 m" oder "3,4 km"
 --   Locations:GetDistanceUnit()       -> "yards" oder "meters" (für eigene Rechnungen)
--- Dieselben Funktionen gibt es auch direkt am Addon (Glimpse:FormatDistance), das ältere Erweiterungen benutzen.
+-- Auch als Glimpse:FormatDistance usw. verfügbar (Aliase unten).
 
--- Welches Maßsystem zu welcher Sprache des Spielclients passt (für distanceUnit = "auto"). Der Client kennt nur die
--- Sprache, nicht das Land: Yards und Meilen nutzen vor allem die USA und das Vereinigte Königreich, alle anderen
--- Sprachen des Spiels gehören zu Ländern mit metrischem System. Unbekannte Sprachen bekommen Yards, die Einheit des Spiels.
+-- Für distanceUnit = "auto". Der Client kennt nur die Sprache, nicht das Land. Unbekannt = Yards.
 Locations.LOCALE_UNITS = {
     enUS = "yards", -- USA
     enGB = "yards", -- Vereinigtes Königreich
@@ -32,15 +27,14 @@ Locations.LOCALE_UNITS = {
 local YARDS_PER_MILE = 1760
 local METERS_PER_YARD = 0.9144
 
---- Die Einheit der Entfernungen: "yards" oder "meters". Bei "auto" (Standard) nach der Sprache des Clients.
+--- "yards" oder "meters", bei "auto" nach Client-Sprache.
 function Locations:GetDistanceUnit()
     local unit = Glimpse.db and Glimpse.db.profile.distanceUnit
     if unit == "yards" or unit == "meters" then return unit end
     return self.LOCALE_UNITS[GetLocale and GetLocale() or ""] or "yards"
 end
 
---- Entfernung (in Yards, wie das Spiel sie liefert) als Text in der gewählten Einheit. Ab einer Meile (1760 yd)
--- bzw. einem Kilometer (1000 m) geht es in die nächste Einheit. Im Deutschen mit Dezimalkomma.
+--- Yards als Text in der gewählten Einheit, ab 1 mi bzw. 1 km die größere Einheit. deDE mit Dezimalkomma.
 function Locations:FormatDistance(yards)
     local text
     if self:GetDistanceUnit() == "meters" then
@@ -60,7 +54,6 @@ function Locations:FormatDistance(yards)
     return text
 end
 
---- Optionen für die Einheit (für die Glimpse-Optionen)
 function Locations:BuildDistanceOptions(order)
     return {
         type = "select", order = order or 10, width = "double",
@@ -73,7 +66,7 @@ function Locations:BuildDistanceOptions(order)
     }
 end
 
--- Kurzwege am Addon: der Kern und ältere Erweiterungen rufen sie darüber auf
+-- Aliase am Addon, genutzt vom Core und von Erweiterungen
 Glimpse.LOCALE_UNITS = Locations.LOCALE_UNITS
 function Glimpse:GetDistanceUnit() return Locations:GetDistanceUnit() end
 function Glimpse:FormatDistance(yards) return Locations:FormatDistance(yards) end

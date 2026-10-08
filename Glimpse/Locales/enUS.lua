@@ -1,8 +1,6 @@
 local ADDON_NAME = ...
 
--- Default-Locale. Die Schlüssel sind der englische Text selbst, deshalb "= true".
--- Das letzte true (silent) sorgt dafür, dass fehlende Keys in anderen Sprachen
--- einfach den Key zurückgeben statt einen Fehler zu werfen.
+-- Default-Locale, Key = englischer Text. silent: fehlende Keys liefern den Key statt Fehler.
 local L = LibStub("AceLocale-3.0"):NewLocale(ADDON_NAME, "enUS", true, true)
 
 -- allgemein

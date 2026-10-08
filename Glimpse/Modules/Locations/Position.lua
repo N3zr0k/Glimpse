@@ -2,9 +2,7 @@ local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local Locations = Glimpse:GetModule("Locations")
 local Clean = Locations.Clean
 
---- Die Instanz, in der der Spieler ist: { instance (instanceID), name } oder nil in der offenen Welt (oder
--- wenn sie sich nicht bestimmen lässt). Dort gibt es keine brauchbaren Koordinaten, die Instanz selbst
--- ist der Ort.
+--- { instance (instanceID), name } in einer Instanz, sonst nil. Dort gibt es keine brauchbaren Koordinaten.
 function Locations:GetPlayerInstance()
     local isInside, getInfo = self.api.IsInInstance, self.api.GetInstanceInfo
     if not isInside or not getInfo then return nil end
@@ -13,7 +11,7 @@ function Locations:GetPlayerInstance()
     inside, kind = Clean(inside), Clean(kind)
     if not inside or kind == "none" then return nil end
 
-    -- GetInstanceInfo: Name, Art, Schwierigkeit, Schwierigkeitsname, Größe, dynamisch, ?, Instanz-ID ...
+    -- 8. Rückgabe = instanceID
     local name, _, _, _, _, _, _, instanceID = getInfo()
     name, instanceID = Clean(name), Clean(instanceID)
     if type(instanceID) ~= "number" or instanceID < 1 then return nil end
@@ -21,8 +19,7 @@ function Locations:GetPlayerInstance()
     return { instance = instanceID, name = type(name) == "string" and name or nil }
 end
 
---- Position des Spielers in der offenen Welt: { map (uiMapID), x, y (0 bis 1) } oder nil, wenn sie sich
--- nicht bestimmen lässt (Instanzen, keine Kartenfunktionen, geschützte Werte).
+--- { map (uiMapID), x, y (0 bis 1) } in der offenen Welt, sonst nil (Instanz, keine API, Secret-Werte).
 function Locations:GetPlayerPosition()
     local get, best = self.api.GetPlayerMapPosition, self.api.GetBestMapForUnit
     if not get or not best then return nil end
@@ -36,20 +33,18 @@ function Locations:GetPlayerPosition()
 
     local x, y = position:GetXY()
     x, y = Clean(x), Clean(y)
-    -- (0, 0) heißt: keine Position bekannt
+    -- (0, 0) = Position unbekannt
     if type(x) ~= "number" or type(y) ~= "number" or x <= 0 or y <= 0 or x > 1 or y > 1 then return nil end
 
     return { map = map, x = x, y = y }
 end
 
---- Wo der Spieler gerade ist: { instance, name } in einer Instanz, sonst { map, x, y }, oder nil, wenn sich
--- beides nicht bestimmen lässt.
+--- GetPlayerInstance() oder GetPlayerPosition()
 function Locations:GetPlayerArea()
     return self:GetPlayerInstance() or self:GetPlayerPosition()
 end
 
---- Der Ort als kurzer Text für die Debug-Ausgabe: "Instanz Die Todesminen (36)" oder
--- "Karte Elwynn (37) 41.2 / 56.8" (Koordinaten in Prozent), oder nil ohne Ort.
+--- Debug-Text: "Instanz Die Todesminen (36)" oder "Karte Elwynn (37) 41.2 / 56.8".
 function Locations:DescribeArea(area)
     if type(area) ~= "table" then return nil end
 

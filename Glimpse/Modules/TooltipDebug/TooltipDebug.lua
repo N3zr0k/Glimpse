@@ -1,25 +1,18 @@
 local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local L = Glimpse.L
 
--- Debug-Modul für Tooltips. Zeigt nur etwas an, wenn der Debug-Modus an ist
--- (/gli debug on), und zwar hinter der Trennlinie am Ende des Tooltips:
+-- Tooltip-Infos für Entwickler, nur im Debug-Modus (/gli debug on):
 --
 --   [DEBUG] Glimpse(TooltipDebug)
 --   Ziel: NPC (ID 1234)
 --   Datentyp: Unit (2)
 --   Tooltip-Frame: GameTooltip
---   Geschützte Felder: guid        <- nur wenn der Client Felder geschützt hat
+--   Geschützte Felder: guid        <- nur bei Secret-Feldern
 --
--- Das sind die Infos, die man beim Schreiben eigener Zeilen braucht: welcher Typ ankommt
--- (für RegisterTooltipLine), in welchem Frame der Tooltip steckt (z. B. GameTooltip oder
--- ItemRefTooltip) und welche Felder man wegen Secret-Werten nicht lesen kann.
---
--- Wie man selbst Zeilen für einen Typ anhängt, steht als Beispiel ganz unten.
--- Das Modul kann gelöscht werden (dann auch aus Modules.xml nehmen).
+-- Kann gelöscht werden (dann auch aus Modules.xml). Beispiel für eigene Zeilen ganz unten.
 local TooltipDebug = Glimpse:NewModule("TooltipDebug")
 
--- Enum.TooltipDataType geht von Name -> Wert, wir brauchen die Gegenrichtung.
--- Wird beim ersten Tooltip einmal aufgebaut.
+-- Wert -> Name aus Enum.TooltipDataType, lazy aufgebaut
 local typeNames
 
 local function TypeName(value)
@@ -32,7 +25,7 @@ local function TypeName(value)
     return typeNames[value] or tostring(value)
 end
 
--- Erstes Stück der GUID sagt, was für ein Ziel eine Unit ist
+-- Erstes GUID-Segment -> Zielart
 local GUID_KINDS = {
     Creature = "NPC",
     Vehicle = "NPC",
@@ -41,25 +34,22 @@ local GUID_KINDS = {
     GameObject = "Object",
 }
 
--- Eigene Auswertung für Units: das Ziel steckt in der GUID, nicht in data.id.
--- Gibt target und id zurück, beides darf fehlen.
+-- Units: Ziel steckt in der GUID, nicht in data.id. Rückgabe target, id (id optional).
 local function ResolveUnit(data)
     local guid = data.guid
     if not guid then return "Unit", nil end
 
     -- Creature-0-<Server>-<Instanz>-<Zone>-<NPC-ID>-<Spawn>
     local kind, _, _, _, _, npcID = strsplit("-", guid)
-    -- Spieler-GUIDs haben an dieser Stelle keine ID
+    -- Spieler-GUIDs haben dort keine NPC-ID
     if kind == "Player" then npcID = nil end
 
     return GUID_KINDS[kind] or "Unit", npcID
 end
 
--- Baut die Debug-Zeilen. target ist der Text für "Ziel", die ID kommt aus data.id, außer ein
--- Typ bringt einen eigenen resolve(data) mit. Fehlt ein Wert, war er nicht vorhanden oder
--- geschützt (steht dann unter hidden).
+-- ID aus data.id, außer der Typ bringt resolve(data) mit
 local function BuildLines(module, data, tooltip, hidden, target, resolve)
-    -- Der Schalter wird bei jedem Tooltip geprüft, damit man Debug live umschalten kann
+    -- pro Tooltip prüfen, damit Debug live umschaltbar ist
     if not Glimpse:IsDebug() then return nil end
 
     local id = data.id
@@ -73,7 +63,7 @@ local function BuildLines(module, data, tooltip, hidden, target, resolve)
         typeText = format("%s (%s)", TypeName(data.type), tostring(data.type))
     end
 
-    -- Tooltips ohne Namen (anonyme Frames) gibt es auch
+    -- anonyme Tooltip-Frames
     local frame = tooltip and tooltip:GetName()
     if not frame or Glimpse:IsSecret(frame) then frame = "?" end
 
@@ -91,9 +81,7 @@ local function BuildLines(module, data, tooltip, hidden, target, resolve)
     return lines
 end
 
--- Typen, die das Modul abdeckt: { Name in Enum.TooltipDataType, optionaler Resolver }
--- Fehlt ein Typ im Client, wird er beim Registrieren übersprungen.
--- Weitere Typen: einfach eine Zeile ergänzen.
+-- { Name in Enum.TooltipDataType, optionaler Resolver }, fehlende Typen werden übersprungen
 local TYPES = {
     { "Item" },
     { "Spell" },
@@ -113,7 +101,6 @@ function TooltipDebug:OnEnable()
         local dataType = Enum.TooltipDataType and Enum.TooltipDataType[name]
 
         if dataType then
-            -- Der Provider bekommt (module, data, tooltip, hidden) und gibt die Zeilen zurück
             self:RegisterTooltipLine(dataType, function(module, data, tooltip, hidden)
                 return BuildLines(module, data, tooltip, hidden, name, resolve)
             end)
@@ -123,11 +110,8 @@ function TooltipDebug:OnEnable()
     end
 end
 
--- Beispiel: eigene Zeile für einen Tooltip-Typ anhängen (in einem eigenen Modul oder einer
--- Erweiterung). Der Typ kann als Name ("Item"), als Enum-Wert oder als "ALL" angegeben werden.
--- Der Provider gibt zurück, was angehängt werden soll, oder nil für nichts. Die Zeilen
--- erscheinen hinter der Trennlinie. data enthält nur Felder, die nicht secret sind, ein
--- fehlendes Feld muss also immer mit nil rechnen.
+-- Beispiel für eigene Zeilen (Modul oder Erweiterung). Typ als Name, Enum-Wert oder "ALL".
+-- data enthält keine Secret-Felder, jedes Feld kann also nil sein.
 --
 --   local Herbs = Glimpse:NewModule("Herbs")
 --

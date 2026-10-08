@@ -1,11 +1,9 @@
 local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local L = Glimpse.L
 
--- Zusatztasten für Tooltip-Erweiterungen: Eine Erweiterung kann ihre Ergänzungen nur anzeigen,
--- solange Shift, Strg und/oder Alt gehalten werden. Die Auswahl liegt in einer Einstellungstabelle
--- (z. B. dem Profil der Erweiterung) mit den Feldern modShift, modCtrl und modAlt.
---
--- Benutzung in einer Erweiterung:
+-- Tooltip-Ergänzungen nur bei gehaltener Shift/Strg/Alt-Taste.
+-- Einstellungen (z. B. Profil der Erweiterung) mit modShift, modCtrl, modAlt.
+-- Benutzung:
 --   defaults:   modShift = false, modCtrl = false, modAlt = false
 --   Optionen:   args.modifiers = Glimpse:BuildModifierOptions(self.db.profile, onChange, order)
 --   Tooltip:    if not Glimpse:ModifiersHeld(self.db.profile) then return nil end
@@ -18,7 +16,6 @@ local KEYS = {
     { "modAlt", "Alt", function() return IsAltKeyDown() end },
 }
 
---- true, wenn mindestens eine Taste verlangt wird.
 function Glimpse:ModifiersRequired(settings)
     for _, key in ipairs(KEYS) do
         if settings[key[1]] then return true end
@@ -26,7 +23,7 @@ function Glimpse:ModifiersRequired(settings)
     return false
 end
 
---- true, wenn alle gewählten Tasten gehalten werden. Ist keine gewählt, gilt es immer.
+--- Ohne gewählte Taste immer true
 function Glimpse:ModifiersHeld(settings)
     for _, key in ipairs(KEYS) do
         if settings[key[1]] and not key[3]() then return false end
@@ -34,9 +31,7 @@ function Glimpse:ModifiersHeld(settings)
     return true
 end
 
---- Optionsgruppe "Nur bei gedrückter Taste" für die Optionsseite einer Erweiterung.
--- settings = Tabelle mit den Feldern, onChange wird nach jeder Änderung aufgerufen (z. B. um den
--- sichtbaren Tooltip neu aufzubauen).
+--- AceConfig-Gruppe für die Optionsseite einer Erweiterung. onChange nach jeder Änderung.
 function Glimpse:BuildModifierOptions(settings, onChange, order)
     local args = {
         help = {

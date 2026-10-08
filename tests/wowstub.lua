@@ -89,7 +89,7 @@ end
 
 -- Lädt eine Addon-Datei, ADDON_NAME wird wie vom Client als erstes Argument übergeben
 function stub.load(path, addonName)
-    local chunk, err = loadfile(ROOT .. "/" .. path)
+    local chunk, err = loadfile(ROOT .. "/Glimpse/" .. path) -- Pfade relativ zum Addon-Ordner
     assert(chunk, err)
     return chunk(addonName or "Test")
 end

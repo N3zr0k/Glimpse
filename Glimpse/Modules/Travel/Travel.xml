@@ -2,5 +2,10 @@
     <!-- Travel.lua legt das Modul an, die anderen Dateien erweitern es. -->
     <Script file="Travel.lua"/>
     <Script file="TravelDistance.lua"/>
+    <Script file="TravelTeleports.lua"/>
+    <Script file="TravelJumps.lua"/>
+    <Script file="TravelTram.lua"/>
     <Script file="TravelZones.lua"/>
+    <Script file="TravelFlightPoints.lua"/>
+    <Script file="TravelFlights.lua"/>
 </Ui>

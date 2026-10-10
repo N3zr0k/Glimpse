@@ -12,6 +12,7 @@ local function setup(namespaces)
     function Glimpse:AddLogLine() end
     _G.strtrim = function(s) return (s:gsub("^%s+", ""):gsub("%s+$", "")) end
     _G.strlower = string.lower
+    stub.load("Core/Debug/DebugTag.lua", "Glimpse")
     stub.load("Core/Debug/Probes.lua", "Glimpse")
     stub.load("Core/Debug/Sources.lua", "Glimpse")
 
@@ -99,4 +100,35 @@ test("Sources: ohne Database ein Hinweis", function()
     local G = setup(nil)
     G:RunProbe("db", "sources")
     eq(Has(Output(G), "Glimpse: Database is not installed"), true, "Hinweis")
+end)
+
+test("Sources: Besitzer eines Namespace", function()
+    local G = setup({ reputation = { area = "Reputation", loaded = true, owner = "Glimpse_Reputation", sources = {},
+        places = {}, adapters = {} } })
+    G:RunProbe("db", "sources")
+    eq(Has(Output(G), "reputation|r: Reputation, no writer, owner Glimpse_Reputation"), true, "Besitzer")
+end)
+
+test("Befehl db owner: anzeigen, freigeben, Fehler", function()
+    local G = setup({})
+    local reset
+    _G.GlimpseDB.GetOwner = function(_, name) return name == "fishing" and "Glimpse_Professions" or nil end
+    _G.GlimpseDB.ResetOwner = function(_, name)
+        reset = name
+        return name == "fishing", "UNKNOWN"
+    end
+    G.commands = {}
+    function G:RegisterCommand(name, _, func) self.commands[name] = func end
+    stub.load("Commands/Database.lua", "Glimpse")
+    local command = G.commands.db
+
+    command(G, "owner Fishing")
+    eq(Output(G), "fishing: owner Glimpse_Professions", "anzeigen")
+    command(G, "owner fishing reset")
+    eq(reset, "fishing", "freigegeben")
+    eq(Has(Output(G), "owner released"), true, "Meldung")
+    command(G, "owner other reset")
+    eq(Output(G), "other: owner not released (UNKNOWN).", "Fehler")
+    command(G, "owner")
+    eq(Has(Output(G), "Usage"), true, "ohne Namespace")
 end)

@@ -63,6 +63,11 @@ function stub.reset()
     local toc = io.open(ROOT .. "/Glimpse_Database/Glimpse_Database.toc"):read("*a")
     stub.version = toc:match("## Version: (%S+)")
 
+    -- Aufrufstapel: ohne stub.useStack kein debugstack (wie außerhalb des Clients, kein Besitzer-Schutz).
+    -- stub.caller = Addon-Ordner des Aufrufers, nil = Code ohne Ordner (loadstring)
+    _G.debugstack = nil
+    stub.caller = "Glimpse"
+
     stub.frames = {}
     _G.CreateFrame = function()
         local frame = { events = {} }
@@ -76,6 +81,16 @@ function stub.reset()
     for _, name in ipairs({ "GlimpseDB", "GlimpseDB_Meta", "GlimpseDB_Core", "GlimpseDB_Gathering",
         "GlimpseDB_Professions", "GlimpseDB_Reputation", "GlimpseDB_Misc", "GlimpseStatisticsDB", "GlimpseGatheringDB" }) do
         _G[name] = nil
+    end
+end
+
+--- Aufrufstapel einschalten, caller wie stub.caller
+function stub.useStack(caller)
+    stub.caller = caller
+    _G.debugstack = function()
+        local file = stub.caller and ("Interface/AddOns/" .. stub.caller .. "/Core/File.lua") or '[string "code"]'
+        return "Interface/AddOns/Glimpse_Database/Core/Namespace/Namespace.lua:1: in function <...>\n"
+            .. file .. ":1: in main chunk\n"
     end
 end
 

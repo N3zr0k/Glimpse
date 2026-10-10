@@ -1,5 +1,100 @@
 # Changelog
 
+## [0.3.25] - 2026-10-10
+
+### Changed
+- All Glimpse addons are listed under the category Tooltip in the game
+
+## [0.3.24] - 2026-10-10
+
+### Fixed
+- Tooltip separator line has a fixed width
+
+## [0.3.23] - 2026-10-10
+
+### Fixed
+- Tooltips with Glimpse lines no longer grow very wide after looting and shrink on every hover
+
+## [0.3.22] - 2026-10-10
+
+### Fixed
+- No more Lua error in Travel and double click when the game protects values during combat
+
+## [0.3.21] - 2026-10-09
+
+### Changed
+- The Deeprun Tram ride time is a fixed 58 seconds per ride (also in travel time) instead of a measurement
+
+## [0.3.20] - 2026-10-09
+
+### Fixed
+- Walking inside the Deeprun Tram no longer splits a ride in two
+
+## [0.3.19] - 2026-10-09
+
+### Fixed
+- Deeprun Tram start city is remembered again when you walk into Stormwind or Ironforge
+
+## [0.3.18] - 2026-10-09
+
+### Fixed
+- Deeprun Tram start city is also found when you log in inside Stormwind or Ironforge
+
+## [0.3.17] - 2026-10-09
+
+### Fixed
+- Deeprun Tram rides are detected only inside the tram instance, start and destination come from the city you entered from; `/gli probe travel tram` shows the state and can log a speed profile
+
+## [0.3.16] - 2026-10-09
+
+### Fixed
+- Travel no longer counts a short walk as a ship or tram ride
+
+## [0.3.15] - 2026-10-09
+
+### Added
+- Travel counts Deeprun Tram rides with destination and duration; ride start and end messages for tram and flights
+
+## [0.3.14] - 2026-10-09
+
+### Added
+- Debug messages in chat and tooltips show which addon they come from
+
+## [0.3.13] - 2026-10-09
+
+### Added
+- Travel counts jumps and the Deeprun Tram separately; teleports have their own counter
+
+## [0.3.12] - 2026-10-09
+
+### Added
+- Travel records the distance of each flight route
+
+## [0.3.11] - 2026-10-09
+
+### Added
+- Travel counts distance and time on ships and zeppelins and under water separately
+- Travel counts teleports, hearthstones and portals per character
+
+## [0.3.9] - 2026-10-09
+
+### Added
+- Travel records flight points, flight times per route and time spent moving
+- Database keeps daily values; travel distance and time per day and for the last 7 days
+
+### Changed
+- Credits of all addons shown once in the Glimpse overview instead of a tab on every page
+
+## [0.3.6] - 2026-10-09
+
+### Added
+- Double click dispatcher: addons react to a double click in the world, key and priority set under General > Double click
+
+## [0.3.5] - 2026-10-08
+
+### Added
+- Namespaces belong to the addon that creates them; other addons cannot write to them
+
 ## [0.3.3] - 2026-10-08
 
 ### Added

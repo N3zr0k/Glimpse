@@ -8,6 +8,7 @@ local function setup()
     Glimpse.db = { profile = { debug = false, debugOff = {} } }
     function Glimpse.db:RegisterNamespace() return { profile = {} } end
     _G.tContains = function(t, v) for _, x in ipairs(t) do if x == v then return true end end return false end
+    stub.load("Core/Debug/DebugTag.lua", "Glimpse")
     stub.load("Core/Debug/Probes.lua", "Glimpse")
     stub.load("Core/Data.lua", "Glimpse")
     stub.load("Core/Debug/Debug.lua", "Glimpse")
@@ -172,6 +173,7 @@ test("Kampf: ohne Database still", function()
     Glimpse.db = { profile = { debugOff = {} } }
     function Glimpse.db:RegisterNamespace() return { profile = {} } end
     _G.tContains = function() return false end
+    stub.load("Core/Debug/DebugTag.lua", "Glimpse")
     stub.load("Core/Debug/Probes.lua", "Glimpse")
     stub.load("Core/Data.lua", "Glimpse")
     stub.load("Core/Debug/Debug.lua", "Glimpse")
@@ -252,4 +254,17 @@ test("Kampf-Tooltip: links an die Stufe gehängt", function()
     Combat:OnUnitTooltip(tooltip, { guid = NPC })
     local _, n = _G.FakeTipTextLeft2:GetText():gsub("Attack", "")
     eq(n, 1, "nicht doppelt")
+end)
+
+test("Kampf-Optionen: Beispiel folgt den Schaltern Kill und Death", function()
+    local Combat = setup()
+    local profile = Combat.settings.profile
+    local both = Combat:ExampleTooltipText()
+    eq(both:find(Combat.KILL_ICON, 1, true) ~= nil and both:find(Combat.DEATH_ICON, 1, true) ~= nil, true, "beide")
+    profile.kills = false
+    local onlyDeaths = Combat:ExampleTooltipText()
+    eq(onlyDeaths:find(Combat.KILL_ICON, 1, true), nil, "ohne Kills")
+    eq(onlyDeaths:find(Combat.DEATH_ICON, 1, true) ~= nil, true, "Tode bleiben")
+    profile.deaths = false
+    eq(Combat:ExampleTooltipText(), "", "beides aus")
 end)

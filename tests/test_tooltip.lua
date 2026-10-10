@@ -21,7 +21,7 @@ local function setup()
         end
     end
     function tooltip:GetName() return "TestTip" end
-    function tooltip:GetWidth() return 220 end
+    function tooltip:GetWidth() return 5000 end -- alter Inhalt des wiederverwendeten Tooltips
     function tooltip:NumLines() return #self.lines end
     function tooltip:AddLine(text) self.lines[#self.lines + 1] = text sync() end
     function tooltip:AddDoubleLine(left) self.lines[#self.lines + 1] = left sync() end
@@ -44,6 +44,14 @@ test("Tooltip: eine Trennlinie vor der ersten Zeile, AddTooltipSeparator trennt 
     eq(tooltip.lines[3], "Erste", "erste Gruppe")
     eq(isSeparator(tooltip.lines[4]), true, "Trennlinie zwischen den Gruppen")
     eq(tooltip.lines[5], "Zweite", "zweite Gruppe")
+end)
+
+test("Tooltip: Trennlinie hat feste Breite, unabhängig von der alten Tooltip-Breite", function()
+    local Glimpse, tooltip, run = setup()
+    Glimpse:RegisterTooltipLine("Test:Spell", Enum.TooltipDataType.Spell, function() return { "Zeile" } end)
+    tooltip:AddLine(string.rep("x", 60))
+    run({ type = Enum.TooltipDataType.Spell })
+    eq(tooltip.lines[2]:match(":8:(%d+)|t"), "200", "feste Breite")
 end)
 
 test("Tooltip: eine Trennlinie am Ende fällt weg, erneutes Verarbeiten hängt nichts doppelt an", function()

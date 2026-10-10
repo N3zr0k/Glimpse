@@ -2,35 +2,71 @@ local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 
 -- Reisen: Strecke pro Fortbewegungsart und Zonen mit Aufenthaltsdauer, für jeden Charakter. Schreibt in den
 -- Namespace "travel" von Glimpse: Database; ohne Database bleibt das Modul still. Keine Wegverläufe.
+-- Dazu Flugpunkte und gemessene Flugzeiten. Lesen (z. B. Glimpse: Travel) über GlimpseDB:Get("travel").
 --
 -- Arten (kind) und IDs:
 --   distance    Fortbewegungsart (Travel.MODES)   Yards
 --   zone        uiMapID, in Instanzen -instanceID  Betreten
 --   zonetime    wie zone                           Sekunden
+--   traveltime  Fortbewegungsart                   Sekunden in Bewegung
+--   teleport    0                                  Teleport, Ruhestein, Portal; ohne Strecke
+--   jump        0                                  Sprünge mit der Leertaste
+--   tram        Ziel (1 Sturmwind, 2 Eisenschmiede, 0 unbekannt)  Fahrten mit der Tiefenbahn; Summe über alle IDs = alle Fahrten
+-- Nachrichten (AceEvent, z. B. für eine Ankunftsanzeige):
+--   GLIMPSE_TRAVEL_RIDE_START, kind, id, startTime, seconds   kind "tram" (id = Ziel, 0 = unbekannt; seconds = feste
+--                                                    Fahrzeit Travel.TRAM_SECONDS) oder "flight" (Route, seconds nil)
+--   GLIMPSE_TRAVEL_RIDE_END, kind, id                Ankunft, Landung oder Abbruch
+--   flightpoint Flugpunkt (nodeID)                 1 = dem Charakter bekannt
+--   flight      Strecke (von * 10000 + nach)       Flüge
+--   flighttime  wie flight                         Sekunden; Schnitt = flighttime / flight
+--   flightdistance wie flight                      Yards; Tempo = flightdistance / flighttime
+-- Orte (AddLocation): Flugpunkte mit nodeID auf ihrer Zonenkarte.
 local Travel = Glimpse:NewModule("Travel")
 
 Travel.NAMESPACE = "travel"
-Travel.MODES = { walk = 1, mount = 2, swim = 3, taxi = 4, ghost = 5 }
+-- swim: an der Oberfläche, underwater: getaucht; transport: Schiff oder Zeppelin, der Charakter steht und wird bewegt;
+-- tram: nur in der Instanz der Tiefenbahn, nach 2 s schneller als Laufen (TravelTram.lua)
+Travel.MODES = { walk = 1, mount = 2, swim = 3, taxi = 4, ghost = 5, transport = 6, underwater = 7, tram = 8 }
+Travel.TRAM_INSTANCE = 369 -- Instanz-ID der Tiefenbahn (Karte zwischen Eisenschmiede und Sturmwind)
 
 -- Blizzard-API gebündelt, damit Tests sie ersetzen können
 Travel.api = {
     GetTime = GetTime,
     UnitOnTaxi = UnitOnTaxi,
+    C_TaxiMap = C_TaxiMap,
+    GetTaxiMapID = GetTaxiMapID,
+    hooksecurefunc = hooksecurefunc,
     UnitIsGhost = UnitIsGhost,
     IsSwimming = IsSwimming,
+    IsSubmerged = IsSubmerged,
+    GetMirrorTimerInfo = GetMirrorTimerInfo,
     IsMounted = IsMounted,
+    GetUnitSpeed = GetUnitSpeed,
+    IsFalling = IsFalling,
+    IsInInstance = IsInInstance,
     HBD = LibStub("HereBeDragons-2.0", true),
 }
 
+-- Antwort einer Abfrage als echtes true/false. Geschützte Werte (Secret, z. B. beim Zaubern) dürfen nicht verglichen
+-- werden und zählen als nicht erfüllt; fehlt die Abfrage im Client, gilt dasselbe.
+function Travel.Ask(func, ...)
+    if not func then return false end
+    local ok, value = pcall(func, ...)
+    if not ok or Glimpse:IsSecret(value) then return false end
+    return value == true or value == 1
+end
+
 function Travel:OnInitialize()
-    self.debug = Glimpse:NewDebugger("Travel", { "distance", "zone" })
+    self.debug = Glimpse:NewDebugger("Travel", { "distance", "zone", "flight" })
+    Glimpse:RegisterProbe("travel", "tram", function(args) return self:TramProbe(args) end,
+        "Stadt, Start und Fahrt der Tiefenbahn; \"profile\" schaltet das Geschwindigkeitsprofil um")
 end
 
 function Travel:OnEnable()
     local DB = GlimpseDB
     if not DB then return end
 
-    local ns, reason = DB:Register(self.NAMESPACE, { area = "Core" })
+    local ns, reason = DB:Register(self.NAMESPACE, { area = "Core", days = true })
     if not ns then
         self.debug:Error("distance", "Database: %s", tostring(reason))
         return
@@ -39,9 +75,12 @@ function Travel:OnEnable()
 
     self:StartDistance()
     self:StartZones()
+    self:StartFlights()
+    self:StartJumps()
     self:RegisterEvent("PLAYER_LOGOUT", function()
         self:FlushDistance()
         self:LeaveZone()
+        self:CancelFlight()
     end)
 end
 

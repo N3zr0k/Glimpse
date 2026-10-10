@@ -3,7 +3,7 @@ local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 -- Trennlinie vor den Glimpse-Zeilen. Grünes/schwarzes Quadrat im Spiel = Pfad falsch.
 local SEPARATOR_TEXTURE = "Interface\\Common\\UI-TooltipDivider-Transparent"
 local SEPARATOR_HEIGHT = 8
-local SEPARATOR_MIN_WIDTH = 100
+local SEPARATOR_WIDTH = 200
 
 -- Einträge { key, type, func } in Registrierungsreihenfolge, type = Enum.TooltipDataType oder "ALL".
 --   entries     = rohe Handler, func(tooltip, data), prüfen Secrets selbst
@@ -34,14 +34,10 @@ end
 -- Trennlinie und Zeilen
 -- ---------------------------------------------------------------------------
 
+-- Feste Breite: Aus dem Tooltip lässt sich die Breite im PostCall nicht verlässlich bestimmen (der Tooltip wird
+-- wiederverwendet, GetWidth() ist noch die Breite des vorherigen Inhalts).
 local function AddSeparator(tooltip)
-    -- Linie soll nicht über den Tooltip hinausragen
-    local width = 200
-    local tooltipWidth = tooltip:GetWidth()
-    if type(tooltipWidth) == "number" and not IsSecret(tooltipWidth) then
-        width = math.max(math.floor(tooltipWidth) - 20, SEPARATOR_MIN_WIDTH)
-    end
-    tooltip:AddLine(format("|T%s:%d:%d|t", SEPARATOR_TEXTURE, SEPARATOR_HEIGHT, width))
+    tooltip:AddLine(format("|T%s:%d:%d|t", SEPARATOR_TEXTURE, SEPARATOR_HEIGHT, SEPARATOR_WIDTH))
 end
 
 --- Trennlinie zwischen Zeilengruppen. Ist die automatische erste Linie noch nicht gesetzt,

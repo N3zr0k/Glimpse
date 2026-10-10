@@ -1,64 +1,60 @@
 -- luacheck: ignore 111 113 122 143 432
 local stub = require("wowstub")
 
--- Credits-Bereich der Optionsseiten (Core/Options.lua)
+-- Credits der Suite, einmal in der Core-Übersicht (Core/Credits.lua)
 local function setup()
     local Glimpse = stub.newGlimpse()
-    Glimpse.GetMeta = function(_, key) return ({ Author = "N3zr0k", Title = "Glimpse: Test", Version = "1.0" })[key] end
+    local titles = { Glimpse_GatheringTooltip = "Glimpse: Gathering", Glimpse_Statistics = "Glimpse: Statistics",
+        Glimpse_Test = "Glimpse: Test" }
+    Glimpse.GetMeta = function(_, key, addonName)
+        if key == "Title" and addonName then return titles[addonName] end
+        return ({ Author = "N3zr0k", Title = "Glimpse", Version = "1.0" })[key]
+    end
     stub.load("Core/Options.lua", "Glimpse")
+    stub.load("Core/Credits.lua", "Glimpse")
+    stub.load("Core/Debug/DebugTag.lua", "Glimpse")
     stub.load("Core/Debug/Probes.lua", "Glimpse")
     stub.load("Core/Data.lua", "Glimpse")
+    _G.GetBuildInfo = function() return "1.0", "1", "date", 16001 end
     return Glimpse
 end
 
-test("Credits: Autor aus der TOC, Listen mit goldener Bezeichnung", function()
+test("Credits: Autor, Bildnachweise der Erweiterungen und Dank", function()
     local G = setup()
-    local args = G:BuildCreditsArgs("Test", { contributors = { "Anna (Grafik)" }, images = { "Pin - Karacis (Flaticon)" }, thanks = { "Alle Tester" } }, 20)
+    local args = G:BuildCreditsArgs(20)
     eq(args.creditsHeader.type, "header", "Trennlinie")
     eq(args.creditsHeader.order, 20, "Position")
     local text = args.credits.name()
     eq(text:find("|cffffd100Author:|r N3zr0k", 1, true) ~= nil, true, "Autor")
-    eq(text:find("|cffffd100Contributors:|r\n- Anna (Grafik)", 1, true) ~= nil, true, "Mitwirkende")
-    eq(text:find("|cffffd100Image credits:|r\n- Pin - Karacis (Flaticon)", 1, true) ~= nil, true, "Bildnachweis")
-    eq(text:find("|cffffd100Special thanks:|r\n- Alle Tester", 1, true) ~= nil, true, "Dank")
+    eq(text:find("- Glimpse: Gathering: Pin - Karacis (Flaticon) |cff66ccff(https://www.flaticon.com/de/kostenloses-icon/ort_5338544)|r", 1, true) ~= nil, true, "Gathering")
+    eq(text:find("- Glimpse: Statistics: Analytics - Pixel perfect (Flaticon)", 1, true) ~= nil, true, "Statistics")
+    eq(text:find("|cffffd100Special thanks:|r\n- Flovy (Tester)\n- sMash (Tester)", 1, true) ~= nil, true, "Dank")
 end)
 
-test("Credits: ohne Angaben Autor und der allgemeine Dank an die Tester", function()
+test("Credits: Angaben einer Erweiterung erscheinen in der Übersicht, bekannte Links nicht doppelt", function()
     local G = setup()
-    local text = G:BuildCreditsArgs("Test").credits.name()
-    eq(text, "|cffffd100Author:|r N3zr0k\n\n|cffffd100Special thanks:|r\n- Flovy (Tester)\n- sMash (Tester)", "Autor, Tester")
+    G:AddCredits("Glimpse_Test", { contributors = { "Anna (Grafik)" } })
+    G:AddCredits("Glimpse_GatheringTooltip", { images = { "Stecknadel - Karacis |cff66ccff(https://www.flaticon.com/de/kostenloses-icon/ort_5338544)|r" } })
+    local text = G:BuildCreditsArgs().credits.name()
+    eq(text:find("|cffffd100Contributors:|r\n- Glimpse: Test: Anna (Grafik)", 1, true) ~= nil, true, "Mitwirkende")
+    eq(text:find("Stecknadel", 1, true), nil, "Link schon bekannt")
 end)
 
-test("Credits: jede Seite hat Tabs, Credits ist immer der letzte", function()
+test("Credits: nur in der Core-Übersicht, nicht auf den Seiten der Erweiterungen", function()
     local G = setup()
-    -- ohne tabs: die Optionen kommen in den Tab "Optionen"
-    local plain = G:BuildAddonPage("Test", { a = { type = "toggle" } }, false, { images = { "x" } })
-    eq(plain.childGroups, "tab", "Tabs")
-    eq(plain.args.options.type, "group", "Tab Optionen")
-    eq(plain.args.options.args.a.type, "toggle", "Optionen darin")
-    eq(plain.args.creditsHeader, nil, "nichts über den Tabs")
-    eq(plain.args.creditsTab.order > plain.args.options.order, true, "Credits zuletzt")
-    eq(plain.args.creditsTab.args.creditsHeader.type, "header", "Trennlinie im Tab")
-    eq(plain.args.creditsTab.args.credits.name():find("- x", 1, true) ~= nil, true, "Text im Tab")
-    eq(plain.args.version, nil, "keine Versionszeile in der Seite (steht unter dem Rahmen)")
+    local plain = G:BuildAddonPage("Glimpse_Test", { a = { type = "toggle" } }, false, { images = { "x" } })
+    eq(plain.args.options.args.a.type, "toggle", "Optionen im Tab")
+    eq(plain.args.creditsTab, nil, "kein Credits-Tab")
+    eq(G:BuildCreditsArgs().credits.name():find("- Glimpse: Test: x", 1, true) ~= nil, true, "Angabe in der Übersicht")
 
-    -- mit tabs: die Gruppen bleiben, Credits kommt dazu
-    local tabbed = G:BuildAddonPage("Test", { general = { type = "group", order = 1, args = {} }, other = { type = "group", order = 2, args = {} } }, true)
-    eq(tabbed.args.general.args.credits, nil, "nicht mehr in Allgemein")
-    eq(tabbed.args.creditsTab.order > tabbed.args.other.order, true, "letzter Tab")
-    eq(tabbed.args.creditsTab.args.credits.name(), "|cffffd100Author:|r N3zr0k\n\n|cffffd100Special thanks:|r\n- Flovy (Tester)\n- sMash (Tester)", "Autor und Dank ohne weitere Angaben")
-end)
+    local tabbed = G:BuildAddonPage("Glimpse_Test", { general = { type = "group", order = 1, args = {} } }, true)
+    eq(tabbed.args.creditsTab, nil, "auch mit Tabs keiner")
 
-test("Credits: der Kern hat den Tab ebenfalls, der Autor steht nur dort", function()
-    local G = setup()
-    _G.GetBuildInfo = function() return "1.0", "1", "date", 16001 end
     local overview = G:BuildOverview()
-    eq(overview.args.info.name():find("N3zr0k", 1, true), nil, "Autor nicht im Kopf der Übersicht")
-    eq(overview.args.creditsHeader, nil, "nicht in der Übersicht")
+    eq(overview.args.creditsHeader.type, "header", "Trennlinie in der Übersicht")
+    eq(overview.args.creditsHeader.order > overview.args.extensions.order, true, "unter den Erweiterungen")
     G.BuildDistanceOptions = function() return { type = "select" } end
     G.BuildCombatOptions = function() return { type = "group" } end
-    local options = G:BuildOptions()
-    eq(options.args.credits.type, "group", "eigener Tab")
-    eq(options.args.credits.order > 100, true, "nach Profile (Order 100)")
-    eq(options.args.credits.args.credits.name():find("N3zr0k", 1, true) ~= nil, true, "Autor in den Credits")
+    G.BuildDoubleClickOptions = function() return { type = "group" } end
+    eq(G:BuildOptions().args.credits, nil, "kein eigener Credits-Tab im Core")
 end)

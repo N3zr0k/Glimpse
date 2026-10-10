@@ -1,0 +1,73 @@
+-- luacheck: ignore 113
+local stub = require("wowstub")
+
+-- Besitzer eines Namespace (Namespace.lua): nur der Addon-Ordner, der ihn angelegt hat, darf schreiben
+
+test("Besitzer: erster Ordner besitzt den Namespace, andere werden abgelehnt", function()
+    local DB = stub.load()
+    stub.useStack("Glimpse_Reputation")
+    local ns = DB:Register("reputation", { area = "Reputation" })
+    eq(ns ~= nil, true, "angelegt")
+    eq(DB:GetOwner("reputation"), "Glimpse_Reputation", "Besitzer gespeichert")
+
+    stub.useStack("Fremdes_Addon")
+    local other, reason = DB:Register("reputation", { area = "Misc" })
+    eq(other, nil, "abgelehnt")
+    eq(reason, "NOT_OWNER", "Grund")
+    eq(DB:GetNamespaceInfo("reputation").area, "Reputation", "Bereich unverändert")
+end)
+
+test("Besitzer: gilt auch in der nächsten Sitzung, wenn das fremde Addon zuerst lädt", function()
+    local DB = stub.load()
+    stub.useStack("Glimpse_Reputation")
+    DB:Register("reputation", { area = "Reputation" })
+
+    DB = stub.restart(stub.saved())
+    stub.useStack("Fremdes_Addon")
+    eq(select(2, DB:Register("reputation")), "NOT_OWNER", "fremdes Addon zuerst")
+    stub.useStack("Glimpse_Reputation")
+    eq(DB:Register("reputation", { area = "Reputation" }) ~= nil, true, "Besitzer danach")
+end)
+
+test("Besitzer: Code ohne Addon-Ordner darf nichts anmelden", function()
+    local DB = stub.load()
+    stub.useStack(nil)
+    local ns, reason = DB:Register("reputation")
+    eq(ns, nil, "abgelehnt")
+    eq(reason, "NO_ADDON", "Grund")
+end)
+
+test("Besitzer: vorhandene Namespaces gehören ihren bisherigen Addons", function()
+    local DB = stub.load()
+    stub.useStack("Fremdes_Addon")
+    eq(select(2, DB:Register("fishing")), "NOT_OWNER", "fishing")
+    eq(select(2, DB:Register("combat")), "NOT_OWNER", "combat")
+    stub.useStack("Glimpse_Professions")
+    eq(DB:Register("fishing", { area = "Professions" }) ~= nil, true, "Professions darf")
+    eq(DB:GetOwner("gathering"), "Glimpse_GatheringDB", "gathering")
+    eq(DB:GetOwner("travel"), "Glimpse", "travel")
+end)
+
+test("Besitzer: Freigabe nur aus Glimpse, danach meldet der neue Ordner an", function()
+    local DB = stub.load()
+    stub.useStack("Glimpse_Professions")
+    DB:Register("fishing", { area = "Professions" })
+
+    stub.useStack("Fremdes_Addon")
+    eq(select(2, DB:ResetOwner("fishing")), "NOT_ALLOWED", "fremdes Addon darf nicht freigeben")
+    stub.useStack("Glimpse")
+    eq(select(2, DB:ResetOwner("unbekannt")), "UNKNOWN", "unbekannter Namespace")
+    eq(DB:ResetOwner("fishing"), true, "Glimpse gibt frei")
+    eq(DB:GetOwner("fishing"), nil, "frei")
+
+    DB = stub.restart(stub.saved())
+    stub.useStack("Glimpse_Berufe")
+    eq(DB:Register("fishing", { area = "Professions" }) ~= nil, true, "neuer Ordner")
+    eq(DB:GetOwner("fishing"), "Glimpse_Berufe", "neuer Besitzer")
+end)
+
+test("Besitzer: ohne debugstack (Tests der Erweiterungen) kein Schutz", function()
+    local DB = stub.load()
+    eq(DB:Register("gathering", { area = "Gathering" }) ~= nil, true, "angelegt")
+    eq(DB:GetOwner("gathering"), "Glimpse_GatheringDB", "Besitzer bleibt vorgegeben")
+end)

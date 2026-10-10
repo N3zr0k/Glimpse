@@ -5,4 +5,5 @@
     <Script file="Config.lua"/>
     <Script file="Debug.lua"/>
     <Script file="Probe.lua"/>
+    <Script file="Database.lua"/>
 </Ui>

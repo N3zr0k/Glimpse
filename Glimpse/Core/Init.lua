@@ -24,8 +24,10 @@ end
 -- Prototyp für alle Module inkl. Erweiterungen, muss vor dem ersten NewModule() stehen
 local ModuleProto = {}
 Glimpse.ModuleProto = ModuleProto -- Tooltip-Funktionen kommen aus Core/Tooltip.lua
+-- Addon aus dem Aufrufstapel, damit Module von Erweiterungen mit deren Namen erscheinen
 function ModuleProto:Debug(...)
-    Glimpse:DebugTagged(self:GetName(), ...)
+    if not Glimpse:IsDebug() then return end
+    Glimpse:DebugFrom(Glimpse:FindCallerAddon(2), self:GetName(), ...)
 end
 
 Glimpse:SetDefaultModulePrototype(ModuleProto)

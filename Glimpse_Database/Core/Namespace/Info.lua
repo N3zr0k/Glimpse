@@ -28,6 +28,7 @@ end
 
 --- Angaben zu einem Namespace, nil wenn unbekannt:
 --   area, version, loaded (Bereich geladen), reason (warum nicht), writer (Addon-Name, true = ohne Namen, nil = keiner)
+--   owner (Addon-Ordner, dem der Namespace gehört, nil = keiner)
 --   sources[own|imported|baseline] = { total, chars }   Summe aller Zähler und Anzahl Charaktere
 --   kinds[kind][source] = Summe                         nur mit detail = true
 --   places[source] = Anzahl Orte
@@ -40,6 +41,7 @@ function DB:GetNamespaceInfo(name, detail)
     local info = {
         area = meta.area, version = meta.version, sources = {}, places = {}, adapters = {},
         writer = P.writers[name] and (P.writerAddons[name] or true) or nil,
+        owner = P.Owner(name),
         kinds = detail and {} or nil,
     }
     for source, adapter in pairs(P.adapters[name] or {}) do

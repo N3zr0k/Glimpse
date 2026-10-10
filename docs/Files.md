@@ -24,20 +24,28 @@ Namespace `combat` und `travel` liegen im Bereich Core (`GlimpseDB_Core`). Ein S
 | `Core/Commands.lua` | Liste der Unterbefehle von `/gli` (`Glimpse:RegisterCommand`); `/gli` selbst meldet Init.lua an | – | Init.lua |
 | `Core/Tooltip.lua` | Tooltip-API: ein PostCall, Handler und Zeilen-Provider, Trennlinie, `Glimpse:IsSecret` | – | TooltipDataProcessor |
 | `Core/Modifiers.lua` | Tooltip-Zeilen nur bei gehaltener Shift/Strg/Alt-Taste, Optionsgruppe dazu | – | – |
+| `Core/DoubleClick/DoubleClick.lua` | Doppelklick-Verteiler: Handler anmelden, Einstellungen, Handler wählen (Priorität, Bedingungen) | – (Einstellungen in `Glimpse.db` Namespace „DoubleClick“) | – |
+| `Core/DoubleClick/DoubleClickSituation.lua` | Lage beim Klick: Stehen, Bewegung, Fallen, Wasser, Mount, drinnen/draußen | – | – |
+| `Core/DoubleClick/DoubleClickButton.lua` | Erkennung per `GLOBAL_MOUSE_DOWN`, Secure-Button, Override-Bindung, Mouselook | – | DoubleClick.lua, DoubleClickSituation.lua |
+| `Core/DoubleClick/DoubleClickOptions.lua` | Block „Doppelklick“ im Tab „Allgemein“: zentrale Taste, je Handler an/aus und Priorität | – | Core/Options.lua |
+| `Core/DoubleClick/DoubleClickDebug.lua` | Log der letzten Doppelklicks, Probe `click handlers` | – | Core/Debug |
 | `Core/Options.lua` | Optionsfenster: Übersicht, Erweiterungen mit Version und Mindestversion, Profile | – | AceConfig, AceConfigDialog, AceDBOptions |
+| `Core/Credits.lua` | Credits der Suite (Autor, Bildnachweise aller Addons, Dank) einmal in der Übersicht | – | Core/Options.lua |
 | `Core/Data.lua` | Tab „Daten“: Bereiche mit Größe, Export, Import, Zurücksetzen; Probe `db migration` | liest alle Bereiche (Größe), Export, Import, Zurücksetzen | Glimpse_Database optional |
 | `Core/IDs.lua` | ID-Helfer: GUID zerlegen, NPC-ID, Namen von Item/Zauber/Karte, Zonen-Schlüssel, Position | – | Modul Locations |
 | `Core/Debug/Debug.lua` | Debug-Modus an/aus, einfache Ausgabe `module:Debug` | – | AceConfigRegistry |
+| `Core/Debug/DebugTag.lua` | Addon-Kennung `[Glimpse: Name]` in Blau für Debug-Ausgaben in Chat und Tooltip, Addon aus dem Aufrufstapel | – | – |
 | `Core/Debug/Debugger.lua` | Debugger mit Kategorien (`Glimpse:NewDebugger`), Log im Speicher | – | – |
 | `Core/Debug/LogWindow.lua` | Fenster mit dem Debug-Log zum Kopieren | – | AceGUI |
 | `Core/Debug/Probes.lua` | Probes für Tester (`Glimpse:RegisterProbe`) | – | – |
-| `Core/Debug/Sources.lua` | Probe `db sources`: Herkunft der Daten aller Namespaces, alte SavedVariables, `Glimpse:RegisterDataSource` | liest alle Namespaces (`GetNamespaceInfo`) | Glimpse_Database optional |
+| `Core/Debug/Sources.lua` | Probe `db sources`: Herkunft der Daten aller Namespaces mit Besitzer, alte SavedVariables, `Glimpse:RegisterDataSource` | liest alle Namespaces (`GetNamespaceInfo`) | Glimpse_Database optional |
 | `Commands/Commands.xml` | Lädt die Slash-Befehle | – | – |
 | `Commands/Config.lua` | `/gli config`: öffnet die Optionen | – | – |
 | `Commands/Debug.lua` | `/gli debug`: Modus, Log-Fenster, Kategorien schalten | – | – |
 | `Commands/Help.lua` | `/gli help`: alle Befehle | – | – |
 | `Commands/Info.lua` | `/gli info`: Version, Autor, Links aus der TOC | – | – |
 | `Commands/Probe.lua` | `/gli probe`: Probes auflisten und ausführen | – | – |
+| `Commands/Database.lua` | `/gli db owner <Namespace> [reset]`: Besitzer eines Namespace zeigen oder freigeben | liest/schreibt `GlimpseDB_Meta.namespaces` (Besitzer) | Glimpse_Database optional |
 | `Modules/Modules.xml` | Lädt die Module | – | – |
 | `Modules/Example/Example.lua` | Vorlage für ein Modul, kann gelöscht werden | – | – |
 | `Modules/TooltipDebug/TooltipDebug.lua` | Tooltip-Infos für Entwickler im Debug-Modus (Ziel, ID, Datentyp) | – | – |
@@ -58,9 +66,14 @@ Namespace `combat` und `travel` liegen im Bereich Core (`GlimpseDB_Core`). Ein S
 | `Modules/Locations/Units.lua` | Entfernung in Yards/Meilen oder Metern/Kilometern, Option dazu | – (Einstellung in `GlimpseSettings`) | – |
 | `Modules/Locations/Waypoint.lua` | Wegpunkt über TomTom, sonst Spielmarkierung | – | TomTom optional |
 | `Modules/Travel/Travel.xml` | Lädt das Modul Travel | – | – |
-| `Modules/Travel/Travel.lua` | Modul Travel: `api`-Tabelle, Anmeldung als Schreiber, `Count` | **schreibt** `travel` (Anmeldung) | Glimpse_Database optional, HereBeDragons |
-| `Modules/Travel/TravelDistance.lua` | Strecke je Fortbewegungsart, Sprünge werden verworfen | **schreibt** `travel`: `distance` | Travel.lua, HereBeDragons |
+| `Modules/Travel/Travel.lua` | Modul Travel: `api`-Tabelle, Anmeldung als Schreiber mit Tageswerten, `Count` | **schreibt** `travel` (Anmeldung) | Glimpse_Database optional, HereBeDragons |
+| `Modules/Travel/TravelDistance.lua` | Strecke und Reisezeit je Fortbewegungsart (auch Schiff/Zeppelin, Tiefenbahn, unter Wasser), Sprünge werden verworfen; Takt für die Flugzeit | **schreibt** `travel`: `distance`, `traveltime` | Travel.lua, HereBeDragons |
+| `Modules/Travel/TravelTeleports.lua` | Teleport, Ruhestein, Portal je Charakter, mit und ohne Ladebildschirm | **schreibt** `travel`: `teleport` | Travel.lua, TravelDistance.lua, HereBeDragons |
+| `Modules/Travel/TravelJumps.lua` | Sprünge mit der Leertaste je Charakter (Hook auf JumpOrAscendStart) | **schreibt** `travel`: `jump` | Travel.lua |
+| `Modules/Travel/TravelTram.lua` | Fahrten mit der Tiefenbahn: Startstadt, Ziel, Erkennung in der Instanz (Haltestelle oder Verlassen der Instanz beendet eine Fahrt, Laufen im Wagen nicht), Probe `travel tram` mit Geschwindigkeitsprofil | **schreibt** `travel`: `tram`; sendet `GLIMPSE_TRAVEL_RIDE_*` | Travel.lua, TravelDistance.lua |
 | `Modules/Travel/TravelZones.lua` | Betretene Zonen und Aufenthaltsdauer | **schreibt** `travel`: `zone`, `zonetime` | Travel.lua |
+| `Modules/Travel/TravelFlightPoints.lua` | Flugpunkte von der offenen Flugkarte, bekannte je Charakter | **schreibt** `travel`: Orte, `flightpoint` | Travel.lua, C_TaxiMap |
+| `Modules/Travel/TravelFlights.lua` | Flugzeit und Strecke je Route vom Abheben bis zur Landung | **schreibt** `travel`: `flight`, `flighttime`, `flightdistance` | Travel.lua, TravelFlightPoints.lua |
 
 ## Glimpse_Database
 
@@ -68,7 +81,8 @@ Keine Oberfläche, kein Ace3. API über das Global `GlimpseDB`, private Tabelle 
 
 | Datei | Beschreibung | Datenbank | Abhängigkeiten |
 | --- | --- | --- | --- |
-| `Glimpse_Database.toc` | Addon-Info, SavedVariables `GlimpseDB_Meta`, `GlimpseDB_Core` | – | – |
+| `Glimpse_Database.toc` | Addon-Info, Icon, SavedVariables `GlimpseDB_Meta`, `GlimpseDB_Core` | – | – |
+| `Media/Icon.tga` | Addon-Icon (TOC `IconTexture`) | – | – |
 | `Glimpse_Database.xml` | Lädt Libs und Core | – | – |
 | `LICENSE` | MIT-Lizenz | – | – |
 | `Libs/Libs.xml` | Lädt die eingebetteten Bibliotheken | – | – |
@@ -81,13 +95,14 @@ Keine Oberfläche, kein Ace3. API über das Global `GlimpseDB`, private Tabelle 
 | `Core/Characters.lua` | Charakterliste (Schlüssel aus der GUID), Weltwissen-Charakter `world` | schreibt `GlimpseDB_Meta.characters` | – |
 | `Core/Events.lua` | SavedVariables beim Laden übernehmen, Charakter beim Login, startet die Alpha-Übernahme | schreibt `GlimpseDB_Meta`, `GlimpseDB_Core` | – |
 | `Core/AlphaMigration.lua` | Nur Alpha: übernimmt Statistics (je Charakter über GUID) und GatheringDB (Weltwissen) | liest `GlimpseStatisticsDB`, `GlimpseGatheringDB`; **schreibt** `combat`, `fishing`, `gathering`, `GlimpseDB_Meta.migrated` | alte Addons müssen aktiv sein |
-| `Core/Namespace/Namespace.lua` | Namespaces anmelden (ein Schreiber), lesen, Umzug zwischen Bereichen | schreibt `GlimpseDB_Meta.namespaces` | Areas.lua |
+| `Core/Namespace/Namespace.lua` | Namespaces anmelden (ein Schreiber), Besitzer je Addon-Ordner, lesen, Umzug zwischen Bereichen | schreibt `GlimpseDB_Meta.namespaces` | Areas.lua, `debugstack` |
 | `Core/Namespace/Query.lua` | `scope` und Herkunft (own, imported, baseline, external) für alle Abfragen | liest | – |
 | `Core/Namespace/Counters.lua` | Zähler je Charakter, Art, ID und Zone, Startwerte, Summen | schreibt/liest Namespace-Daten | Buckets.lua |
 | `Core/Namespace/Buckets.lua` | Stunden-Buckets für Zeiträume | schreibt/liest Namespace-Daten | Time.lua |
+| `Core/Namespace/Days.lua` | Tageswerte (ein Wert je Tag) für Namespaces mit `days = true`, heute und letzte 7 Tage | schreibt/liest Namespace-Daten | Time.lua |
 | `Core/Namespace/Locations.lua` | Orte (Karte, X, Y) verpackt speichern und abfragen | schreibt/liest Namespace-Daten | Adapters.lua |
 | `Core/Namespace/Adapters.lua` | Externe Quellen (z. B. GatherMate2) live lesen, nie kopieren | liest externe Addons | – |
-| `Core/Namespace/Info.lua` | `DB:GetNamespaceInfo`: Bereich, Schreiber, Summen je Herkunft (für `db sources`) | liest alle Namespaces | – |
+| `Core/Namespace/Info.lua` | `DB:GetNamespaceInfo`: Bereich, Schreiber, Besitzer, Summen je Herkunft (für `db sources`) | liest alle Namespaces | – |
 | `Core/Transfer/Async.lua` | Export/Import über mehrere Frames verteilen | – | LibSerialize |
 | `Core/Transfer/Codec.lua` | Textform eines Exports (Kopfzeile, Serialisieren, Packen) | – | LibSerialize, LibDeflate |
 | `Core/Transfer/Export.lua` | Export: Weltwissen und persönliche Daten, nur `own` | liest alle Namespaces | Codec.lua, Async.lua |

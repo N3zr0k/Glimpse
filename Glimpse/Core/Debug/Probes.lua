@@ -11,7 +11,7 @@ Glimpse.probes = {}
 function Glimpse:RegisterProbe(group, name, func, help)
     group, name = strlower(group), strlower(name)
     self.probes[group] = self.probes[group] or {}
-    self.probes[group][name] = { func = func, help = help }
+    self.probes[group][name] = { func = func, help = help, addon = self:FindCallerAddon(2) }
 end
 
 local function Sorted(t)
@@ -49,9 +49,9 @@ function Glimpse:RunProbe(group, name, args)
         result = { tostring(result or "") }
     end
 
-    local prefix = format("[%s:%s/%s]", self.name, group, name)
+    local prefix = format("%s/%s:", group, name)
     for _, line in ipairs(result) do
-        self:AddLogLine(prefix .. " " .. line)
-        self:Print(prefix .. " " .. line)
+        self:AddLogLine(self:DebugTag(probe.addon, true) .. " " .. prefix .. " " .. line)
+        self:Print(self:DebugTag(probe.addon) .. " " .. prefix .. " " .. line)
     end
 end

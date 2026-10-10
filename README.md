@@ -52,14 +52,14 @@ For WoW Forever (interface 16001).
 
 Open them with `/gli config` or in the game options under Addons > Glimpse.
 
-* **Overview:** installed extensions.
+* **Overview:** installed extensions and, below a divider, the credits of the whole suite: author, contributors,
+  image credits of all extensions and thanks.
 * **General:** debug mode and the distance unit for all extensions (automatic by client language, yards or metres).
 * **Combat:** kills and deaths in creature tooltips, with account values and position next to the name, the level or
   in an own line.
 * **Data:** the data areas of Glimpse: Database with their size, export and import (to share or move to another computer),
   and resetting an area.
 * **Profiles:** settings per profile, can be copied, reset and shared between characters.
-* **Credits:** author, contributors, image credits and thanks. Every extension page has the same tab.
 
 Extensions can offer "Only while a key is held": their tooltip lines then appear only while Shift, Ctrl and/or Alt are held.
 

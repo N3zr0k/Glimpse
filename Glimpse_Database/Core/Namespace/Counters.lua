@@ -31,6 +31,7 @@ function Writer:Count(kind, id, mapID, amount)
     end
 
     P.AddHour(block, char, kind, id, DB:HourOf(now), amount)
+    if self.days then P.AddDay(block, char, kind, id, DB:DayOf(now), amount) end
     P.Fire(self.name, kind, id)
     return true
 end

@@ -18,22 +18,18 @@ function Glimpse:SetDebug(enabled)
     self:Print(self.db.profile.debug and L["Debug mode enabled"] or L["Debug mode disabled"])
 end
 
---- Debug-Ausgabe mit Quelle, Module erscheinen als Glimpse(Modulname)
-function Glimpse:DebugTagged(tag, ...)
+--- Debug-Ausgabe mit Addon-Kennung und Quelle: [Glimpse: Gathering] GatheringTooltip: Text.
+-- addon = Addon-Ordner (nil = Core), tag = Modulname oder nil
+function Glimpse:DebugFrom(addon, tag, ...)
     if not self:IsDebug() then return end
 
-    local source
-    if tag then
-        source = format("%s(%s)", self.name, tag)
-    else
-        source = self.name
-    end
-
-    local text = format("%s: %s", source, strjoin(" ", tostringall(...)))
-    self:AddLogLine(text)
-    self:Print("|cff9d9d9d[DEBUG]|r " .. text)
+    local text = strjoin(" ", tostringall(...))
+    if tag then text = tag .. ": " .. text end
+    self:AddLogLine(self:DebugTag(addon, true) .. " " .. text)
+    self:Print(self:DebugTag(addon) .. " |cff9d9d9d" .. text .. "|r")
 end
 
 function Glimpse:Debug(...)
-    self:DebugTagged(nil, ...)
+    if not self:IsDebug() then return end
+    self:DebugFrom(self:FindCallerAddon(2), nil, ...)
 end

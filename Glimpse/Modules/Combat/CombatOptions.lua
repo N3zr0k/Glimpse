@@ -15,6 +15,7 @@ function Glimpse:BuildCombatOptions(order)
             example = {
                 type = "description", order = 1, fontSize = "medium", width = "full",
                 name = function()
+                    -- nur das Beispiel folgt den Schaltern, die Erklärungen bleiben immer stehen
                     return format("%s  |cffffd100%s|r %s\n%s %s\n%s %s\n|cff999999%s|r", L["Example:"], L["Wild Boar"],
                         Combat:ExampleTooltipText(), Combat.KILL_ICON, L["How often you have killed it"],
                         Combat.DEATH_ICON, L["How often it has killed you"],

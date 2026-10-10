@@ -6,7 +6,8 @@ local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 --   debug:Warn("lure", ...)                          wie Log, gelb
 --   debug:Error("lure", ...)                         immer sichtbar, rot
 --   if debug:IsOn("lure") then ... end               vor teurer Arbeit für eine Debug-Zeile
--- Ausgabe einheitlich als [Glimpse:Professions/lure]. Kategorien sind standardmäßig an und werden einzeln mit
+-- Ausgabe einheitlich als [Glimpse: Professions] Professions/lure: Text, die Addon-Kennung blau (DebugTag.lua).
+-- Das Addon merkt sich der Debugger beim Anlegen aus dem Aufrufstapel. Kategorien sind standardmäßig an und werden einzeln mit
 -- /gli debug Professions lure off abgeschaltet. Gleiche Meldungen kurz hintereinander werden zusammengefasst.
 
 local LOG_SIZE = 500    -- Zeilen im Speicher für /gli debug log
@@ -61,7 +62,7 @@ end
 
 local function Output(self, level, category, text, ...)
     if select("#", ...) > 0 then text = format(text, ...) end
-    local line = format("[%s:%s/%s] %s", Glimpse.name, self.name, category, text)
+    local line = format("%s/%s: %s", self.name, category, text)
 
     -- gleiche Zeile in kurzer Folge nur zählen, beim nächsten anderen Text nachreichen
     local now = GetTime()
@@ -71,14 +72,14 @@ local function Output(self, level, category, text, ...)
         return
     end
     if self.repeats > 0 then
-        local note = format("[%s:%s] (%dx) %s", Glimpse.name, self.name, self.repeats, self.lastLine)
-        Glimpse:AddLogLine(note)
-        Glimpse:Print(COLORS.log .. note .. "|r")
+        local note = format("(%dx) %s", self.repeats, self.lastLine)
+        Glimpse:AddLogLine(Glimpse:DebugTag(self.addon, true) .. " " .. note)
+        Glimpse:Print(Glimpse:DebugTag(self.addon) .. " " .. COLORS.log .. note:gsub("|", "||") .. "|r")
     end
     self.lastLine, self.lastTime, self.repeats = line, now, 0
 
-    Glimpse:AddLogLine(line)
-    Glimpse:Print(COLORS[level] .. line:gsub("|", "||") .. "|r")
+    Glimpse:AddLogLine(Glimpse:DebugTag(self.addon, true) .. " " .. line)
+    Glimpse:Print(Glimpse:DebugTag(self.addon) .. " " .. COLORS[level] .. line:gsub("|", "||") .. "|r")
 end
 
 function Debugger:Log(category, text, ...)
@@ -94,10 +95,12 @@ function Debugger:Error(category, text, ...)
 end
 
 --- Debugger zu einem Namen, gleicher Name gibt denselben zurück. categories = Liste der Kategorien (für die Hilfe).
-function Glimpse:NewDebugger(name, categories)
+-- addon = Addon-Ordner für die Kennung, Standard: das Addon, das NewDebugger aufruft.
+function Glimpse:NewDebugger(name, categories, addon)
     local debugger = self.debuggers[name]
     if not debugger then
-        debugger = setmetatable({ name = name, categories = {}, repeats = 0, lastTime = 0 }, DebuggerMeta)
+        addon = addon or self:FindCallerAddon(2) or self.name
+        debugger = setmetatable({ name = name, addon = addon, categories = {}, repeats = 0, lastTime = 0 }, DebuggerMeta)
         self.debuggers[name] = debugger
     end
     for _, category in ipairs(categories or {}) do

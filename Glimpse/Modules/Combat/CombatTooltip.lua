@@ -91,8 +91,14 @@ end
 --- Beispiel mit festen Zahlen für die Optionen
 function Combat:ExampleTooltipText()
     local showAccount = self:TooltipOption("account")
-    return Part(KILL_ICON, 3, 7, showAccount, COLOR.kill, COLOR.killAccount) .. SEPARATOR ..
-        Part(DEATH_ICON, 1, 3, showAccount, COLOR.death, COLOR.deathAccount)
+    local parts = {}
+    if self:TooltipOption("kills") then
+        parts[#parts + 1] = Part(KILL_ICON, 3, 7, showAccount, COLOR.kill, COLOR.killAccount)
+    end
+    if self:TooltipOption("deaths") then
+        parts[#parts + 1] = Part(DEATH_ICON, 1, 3, showAccount, COLOR.death, COLOR.deathAccount)
+    end
+    return table.concat(parts, SEPARATOR)
 end
 
 --- Text für eine Kreatur, nil wenn nichts zu zeigen ist

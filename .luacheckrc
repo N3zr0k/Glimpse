@@ -36,6 +36,11 @@ read_globals = {
     "GetBuildInfo", "GetNumAddOns", "GetAddOnInfo", "GetAddOnDependencies", "MAX_ACCOUNT_MACROS",
     "GetNumBindings", "GetBinding", "GetShapeshiftFormInfo", "GetNumMacros", "GetMacroItem",
     "GetMacroSpell", "ITEM_QUALITY_COLORS",
+    -- Doppelklick-Verteiler (Core/DoubleClick)
+    "GetUnitSpeed", "IsFalling", "IsFlying", "IsFlyableArea", "IsSubmerged", "GetMirrorTimerInfo", "IsIndoors", "IsOutdoors", "UnitAffectingCombat",
+    "C_TaxiMap", "GetTaxiMapID",
+    "SetOverrideBindingClick", "ClearOverrideBindings", "IsMouselooking", "MouselookStop", "IsMouseButtonDown",
+    "SHIFT_KEY_TEXT", "CTRL_KEY_TEXT", "ALT_KEY_TEXT",
     -- Orte, Wegpunkte und Fehlerfenster (Modul Locations, GatheringTooltip); TomTom ist optional
     "C_Map", "C_SuperTrack", "UiMapPoint", "CreateVector2D", "IsInInstance", "GetInstanceInfo", "TomTom",
     "StaticPopup_Show", "OKAY", "UISpecialFrames", "YES", "NO",

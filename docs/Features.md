@@ -1,0 +1,56 @@
+# Funktionen
+
+Alle Funktionen, die in diesem Repository (Glimpse und Glimpse: Database) eingebaut sind, mit kurzer Beschreibung. Die
+Tabelle am Ende zeigt, welche Funktion Daten in der Datenbank liest, schreibt oder beides. Die Dateien dazu stehen in
+[Files.md](Files.md), alle gespeicherten Werte in [API.md](API.md).
+
+Stand: Core 0.3.31-alpha.1.
+
+## Glimpse (Core)
+
+| Funktion | Beschreibung |
+| --- | --- |
+| Übersicht und Optionen | Optionsfenster unter Addons > Glimpse (`/gli config`): Liste der Erweiterungen mit Symbol, Version und Warnung bei zu alter Core-Version, Profile. |
+| Credits | Autor, Bildnachweise aller Addons und Dank einmal in der Übersicht unter einem Trenner. |
+| Tooltip-API | Erweiterungen hängen Zeilen und Handler an Tooltips (ein gemeinsamer PostCall), mit Trennlinie fester Breite und Schutz vor geheimen Werten (Secrets). |
+| Modifier-Tasten | Tooltip-Zeilen nur bei gehaltener Umschalt-, Strg- und/oder Alt-Taste. |
+| Doppelklick-Verteiler | Erweiterungen melden Doppelklick-Aktionen an (Taste, Priorität, Bedingungen); der Core erkennt den Doppelklick, bestimmt die Lage (stehen, schwimmen, Mount ...) und führt die passende Aktion aus. Zentrale Taste, Priorität und An/Aus je Aktion in den Optionen. |
+| Debug | Debug-Modus mit Kategorien je Modul, Log-Fenster zum Kopieren, Addon-Kennung `[Glimpse: Name]` in Chat und Tooltip, Probes für Tester (`/gli probe`), Tooltip-Infos für Entwickler. |
+| Slash-Befehle | `/gli` (auch `/glimpse`): `config`, `info`, `help`, `debug`, `probe`, `db owner`; Erweiterungen melden eigene Befehle an. |
+| Locations | Kartennamen, Spielerposition, Entfernungen in Yards oder Metern, Koordinaten als Text, Wegpunkt über TomTom oder Spielmarkierung. |
+| ID-Helfer | GUID zerlegen, NPC-ID, Namen von Item, Zauber und Karte, Zonen-Schlüssel. |
+| Kampf | Zählt Kills (auch aus geplünderten Leichen, je GUID einmal), eigene Tode mit Verursacher, Kampfzeit und Beute je Kreatur. Kills und Tode stehen im Kreatur-Tooltip, mit Account-Wert und wählbarer Position. |
+| Reisen | Misst Strecke und Zeit je Fortbewegungsart (laufen, reiten, schwimmen, Flugroute, Geist, Schiff/Zeppelin, tauchen, Tiefenbahn), mit Tageswerten. Zählt betretene Zonen samt Aufenthaltsdauer, Teleports (Ruhestein, Portale), Sprünge mit der Leertaste, bekannte Flugpunkte sowie Flüge je Route (Anzahl, Zeit, Strecke). |
+| Tiefenbahn | Erkennt Fahrten nur in der Instanz (selbst stehen, schneller bewegt als Laufen). Startstadt und Ziel (Sturmwind, Eisenschmiede) ergeben sich aus der zuletzt besuchten Stadt, die Fahrzeit ist fest 58 Sekunden. Meldet Start und Ende als Nachrichten `GLIMPSE_TRAVEL_RIDE_START` und `_END` (auch für Flüge). |
+| Daten | Tab „Daten“: Bereiche mit Größe, Export und Import als Text, Zurücksetzen. |
+| Übernahme (nur Alpha) | Übernimmt beim Login die alten Daten von Statistics und GatheringDB in die Database. |
+| Beispielmodul | Vorlage für eigene Module. |
+
+## Glimpse: Database
+
+| Funktion | Beschreibung |
+| --- | --- |
+| Namespaces | Jedes Addon meldet einen Namespace an (ein Schreiber, der Besitzer ist der Addon-Ordner, der ihn zuerst anmeldet); gelesen werden darf von allen. |
+| Zähler | Werte je Charakter, Art, ID und optional Zone, mit Summen für den Charakter, den Account oder alle. |
+| Zeiträume | Stundenwerte (heute, Woche, Monat, frei wählbar) und Tageswerte (ein Wert je Tag, letzte 7 Tage). |
+| Orte | Karte, X und Y, kompakt gespeichert; fremde Fundorte (z. B. GatherMate2) werden live gelesen und nie kopiert. |
+| Herkunft | Eigene, importierte, Blizzard-Startwerte und externe Daten bleiben getrennt. |
+| Datenbereiche | Große Teile liegen in vier Bereichen (Gathering, Professions, Reputation, Misc), die erst bei Bedarf laden. |
+| Export und Import | Text zum Kopieren; Weltwissen (Orte, Beute) teilbar, persönliche Zahlen nur zurück an denselben Charakter. Import führt per Maximum zusammen. |
+| Änderungsmeldung | Callback bei geänderten Daten für Addons, die Anzeigen aktuell halten. |
+
+## Datenbank-Zugriff je Funktion
+
+Spalten **Liest**, **Schreibt** und **Beides**: ein Haken zeigt, wie die Funktion den Namespace nutzt. „–“ heißt kein Zugriff.
+
+| Funktion | Namespace | Liest | Schreibt | Beides |
+| --- | --- | :-: | :-: | :-: |
+| Kampf: Kills, Tode, Zeit, Beute | `combat` | | ✔ | |
+| Kampf: Kreatur-Tooltip | `combat` | ✔ | | |
+| Reisen: Strecke, Zeit, Zonen, Teleports, Sprünge, Flugpunkte, Flüge, Tiefenbahn | `travel` | | ✔ | |
+| Daten-Tab: Größe, Export, Import, Zurücksetzen | alle | | | ✔ |
+| Probe `db sources` | alle | ✔ | | |
+| Befehl `/gli db owner` | Besitzer der Namespaces (`GlimpseDB_Meta`) | | | ✔ |
+| Übernahme (Alpha) | alte Daten von Statistics und GatheringDB, Ziel `combat`, `fishing`, `gathering` | | | ✔ |
+| Glimpse: Database | alle (`GlimpseDB_Core` und die Bereiche) | | | ✔ |
+| Übrige Funktionen (Optionen, Tooltip-API, Doppelklick, Debug, Locations, ID-Helfer) | – | | | |

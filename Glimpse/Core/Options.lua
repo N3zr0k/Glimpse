@@ -9,6 +9,8 @@ local GetAddOnDependencies = AddOns.GetAddOnDependencies or GetAddOnDependencies
 local IsAddOnLoaded = AddOns.IsAddOnLoaded or IsAddOnLoaded
 
 local ICON_SIZE = 16
+-- Icon neben der Beschreibung, Pixel
+local PAGE_ICON_SIZE = 48
 
 -- ---------------------------------------------------------------------------
 -- Icons und Versionen
@@ -43,6 +45,19 @@ local function IsOlder(version, minimum)
     if a1 ~= b1 then return a1 < b1 end
     if a2 ~= b2 then return a2 < b2 end
     return a3 < b3
+end
+
+--- Beschreibung (Notes aus der TOC, klein und grau) mit dem Icon daneben. Gleich für jede Seite.
+function Glimpse:BuildNotes(addonName, order)
+    return {
+        type = "description", order = order, width = "full", fontSize = "small",
+        name = function()
+            local notes = self:GetMeta("Notes", addonName)
+            return notes and ("|cff999999" .. notes .. "|r") or ""
+        end,
+        image = function() return self:GetIcon(addonName) end,
+        imageWidth = PAGE_ICON_SIZE, imageHeight = PAGE_ICON_SIZE,
+    }
 end
 
 -- ---------------------------------------------------------------------------
@@ -109,80 +124,19 @@ local function Field(label, value)
     return format("|cffffd100%s:|r %s", label, value)
 end
 
--- Standard für credits.thanks auf allen Optionsseiten: { Name, Rolle (Locale-Key) }
-local SPECIAL_THANKS = {
-    { "Flovy", "Tester" },
-    { "sMash", "Tester" },
-}
-
-local function DefaultThanks()
-    local list = {}
-    for _, entry in ipairs(SPECIAL_THANKS) do
-        list[#list + 1] = format("%s (%s)", entry[1], L[entry[2]])
-    end
-    return list
-end
-
---- Credits-Bereich (Header + Text) zum Einhängen in args. Autor aus ## Author, credits optional:
---   { contributors = { "Name (wofür)", ... }, thanks = { "..." }, images = { "Pin - Autor (Flaticon)", ... } }
-function Glimpse:BuildCreditsArgs(addonName, credits, order)
-    credits = credits or {}
-    order = order or 90
-
-    local function List(label, entries)
-        if type(entries) ~= "table" or #entries == 0 then return nil end
-        local lines = { format("|cffffd100%s:|r", label) }
-        for _, entry in ipairs(entries) do lines[#lines + 1] = "- " .. entry end
-        return table.concat(lines, "\n")
-    end
-
-    return {
-        creditsHeader = { type = "header", order = order, name = L["Credits"] },
-        credits = {
-            type = "description", order = order + 1, width = "full", fontSize = "medium",
-            name = function()
-                local blocks = {}
-                local author = self:GetMeta("Author", addonName)
-                if author and author ~= "" then blocks[#blocks + 1] = Field(L["Author"], author) end
-                -- Schleife statt Tabellenliteral, ein nil würde die folgenden Listen abschneiden
-                for _, block in ipairs({
-                    { L["Contributors"], credits.contributors },
-                    { L["Image credits"], credits.images },
-                    { L["Special thanks"], credits.thanks or DefaultThanks() },
-                }) do
-                    local text = List(block[1], block[2])
-                    if text then blocks[#blocks + 1] = text end
-                end
-                return table.concat(blocks, "\n\n")
-            end,
-        },
-    }
-end
-
 function Glimpse:BuildOverview()
     local overview = {
         type = "group", order = 1, name = L["Overview"],
         args = {
-            title = {
-                type = "description", order = 1, fontSize = "large",
-                name = function() return self:GetMeta("Title") or self.name end,
-                image = function() return self:GetIcon(self.name) end,
-                imageWidth = 32, imageHeight = 32,
-            },
-            -- Notes-<locale> mit Fallback auf Notes kommt direkt von GetAddOnMetadata
-            notes = {
-                type = "description", order = 2, fontSize = "medium",
-                name = function() return self:GetMeta("Notes") or "" end,
-            },
             -- erst beim Anzeigen auslesen
             info = {
                 type = "description", order = 3, fontSize = "medium",
                 name = function()
                     local _, _, _, toc = GetBuildInfo()
-                    return table.concat({
-                        Field(L["Version"], self:GetMeta("Version") or "?"),
-                        Field(L["Game version"], "Interface " .. tostring(toc)),
-                    }, "\n")
+                    local game = Field(L["Game version"], "Interface " .. tostring(toc))
+                    -- Ohne Fußzeile steht die Version hier
+                    if self.versionFooter then return game end
+                    return Field(L["Version"], self:GetMeta("Version") or "?") .. "\n" .. game
                 end,
             },
             extensionsHeader = { type = "header", order = 10, name = L["Installed extensions"] },
@@ -192,6 +146,7 @@ function Glimpse:BuildOverview()
             },
         },
     }
+    for key, option in pairs(self:BuildCreditsArgs(20)) do overview.args[key] = option end
     return overview
 end
 
@@ -207,6 +162,8 @@ function Glimpse:BuildOptions()
         -- TOC-Titel ist schon lokalisiert (Title-deDE)
         name = self:GetMeta("Title") or self.name,
         args = {
+            -- wie bei den Erweiterungen: Icon und Beschreibung stehen über den Tabs
+            notes = self:BuildNotes(self.name, 0),
             overview = self:BuildOverview(),
             general = {
                 type = "group", order = 2, name = L["General"],
@@ -221,11 +178,11 @@ function Glimpse:BuildOptions()
                         set = function(_, value) self:SetDebug(value) end,
                     },
                     distanceUnit = self:BuildDistanceOptions(2),
+                    doubleclick = self:BuildDoubleClickOptions(3),
                 },
             },
             combat = self:BuildCombatOptions(2.5),
             data = self:BuildDataOptions(3),
-            credits = { type = "group", order = 110, name = L["Credits"], args = self:BuildCreditsArgs(self.name, nil, 1) },
             -- "profiles" (order 100) kommt in SetupOptions dazu
         },
     }
@@ -235,7 +192,7 @@ end
 --
 --   [Icon] Glimpse: Name        (TOC-Titel, gesetzt in RegisterAddonOptions)
 --   Beschreibung                (Notes aus der TOC, klein und grau)
---   [Optionen] [...] [Credits]  (Tabs; Credits ist immer der letzte)
+--   [Optionen] [...]            (Tabs; Credits stehen gesammelt in der Core-Übersicht)
 --   +-------------------------+
 --   |  args der Erweiterung   |
 --   +-------------------------+
@@ -243,21 +200,11 @@ end
 --
 -- args = Inhalt von "args" im AceConfig-Format
 function Glimpse:BuildAddonPage(addonName, args, tabs, credits)
-    local function Grey(text) return "|cff999999" .. text .. "|r" end
-
     local page = {
         type = "group",
         name = self:GetMeta("Title", addonName) or addonName,
         args = {
-            notes = {
-                type = "description", order = 2, width = "full", fontSize = "small",
-                name = function()
-                    local notes = self:GetMeta("Notes", addonName)
-                    return notes and Grey(notes) or ""
-                end,
-                image = function() return self:GetIcon(addonName) end,
-                imageWidth = 32, imageHeight = 32,
-            },
+            notes = self:BuildNotes(addonName, 2),
         },
     }
 
@@ -269,7 +216,7 @@ function Glimpse:BuildAddonPage(addonName, args, tabs, credits)
     else
         page.args.options = { type = "group", order = 1, name = L["Options"], args = args }
     end
-    page.args.creditsTab = { type = "group", order = 900, name = L["Credits"], args = self:BuildCreditsArgs(addonName, credits, 1) }
+    self:AddCredits(addonName, credits)
 
     return page
 end
@@ -386,8 +333,12 @@ function Glimpse:SetupOptions()
     -- 2. Rückgabe = Kategorie-ID fürs Settings-Fenster. Öffnet /gli config nichts, hier zuerst schauen (Ace3-Version).
     local title = self:WithAddonIcon(self:GetMeta("Title") or self.name, self.name)
     self.categoryName = title
-    local _, categoryID = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(self.name, title)
+    local frame, categoryID = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(self.name, title)
     self.categoryID = categoryID
+
+    -- Version unter dem Tab-Rahmen wie bei den Erweiterungen
+    local ok, done = pcall(self.AddVersionFooter, self, frame and frame.obj, self.name)
+    self.versionFooter = ok and done
 end
 
 function Glimpse:OpenOptions()

@@ -3,7 +3,7 @@ local L = Glimpse.L
 
 -- Tooltip-Infos für Entwickler, nur im Debug-Modus (/gli debug on):
 --
---   [DEBUG] Glimpse(TooltipDebug)
+--   [Glimpse] TooltipDebug          <- Addon-Kennung blau (Glimpse:DebugTag)
 --   Ziel: NPC (ID 1234)
 --   Datentyp: Unit (2)
 --   Tooltip-Frame: GameTooltip
@@ -68,7 +68,7 @@ local function BuildLines(module, data, tooltip, hidden, target, resolve)
     if not frame or Glimpse:IsSecret(frame) then frame = "?" end
 
     local lines = {
-        { format("|cff9d9d9d[DEBUG]|r %s(%s)", Glimpse.name, module:GetName()), nil, 0.6, 0.6, 0.6 },
+        { Glimpse:DebugTag(Glimpse.name) .. " " .. module:GetName(), nil, 0.6, 0.6, 0.6 },
         { targetLine, nil, 0.6, 0.6, 0.6 },
         { L["Data type"] .. ": " .. typeText, nil, 0.6, 0.6, 0.6 },
         { L["Tooltip frame"] .. ": " .. frame, nil, 0.6, 0.6, 0.6 },

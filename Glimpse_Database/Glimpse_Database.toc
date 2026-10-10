@@ -3,13 +3,14 @@
 ## Notes: Stores the data of all Glimpse addons in one place, with export and import.
 ## Notes-deDE: Speichert die Daten aller Glimpse-Addons an einem Ort, mit Export und Import.
 
-## Version: 0.3.4-alpha.3
+## Version: 0.3.31-alpha.1
 ## Author: N3zr0k
 ## X-License: MIT
 ## X-Website: https://github.com/N3zr0k/Glimpse
 ## X-Repo: https://github.com/N3zr0k/Glimpse
 
-## Category: Glimpse
+## IconTexture: Interface\AddOns\Glimpse_Database\Media\Icon
+## Category: Tooltip
 ## SavedVariables: GlimpseDB_Meta, GlimpseDB_Core
 
 # Main XML Loader

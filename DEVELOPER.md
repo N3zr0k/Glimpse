@@ -148,7 +148,7 @@ Der Name steht in der ersten Tooltip-Zeile (`tooltip:GetName() .. "TextLeft1"`).
 | `Glimpse:GetIcon(addonName)` / `Glimpse:WithAddonIcon(text, addonName)` | TOC-Icon holen / vor Text setzen |
 
 `RegisterAddonOptions` baut die Seite immer gleich auf: Überschrift mit Icon, Notes (klein, grau), die
-`args` im ersten Tab "Optionen", dazu ein letzter Tab "Credits", die Version klein unter dem ganzen Rahmen. Mit `tabs = true` sind `args` keine Optionen, sondern
+`args` im ersten Tab "Optionen", die Version klein unter dem ganzen Rahmen. Mit `tabs = true` sind `args` keine Optionen, sondern
 Gruppen (`type = "group"`), die als Tabs erscheinen. Alle Optionen mit `width = "full"` stehen untereinander.
 
 Aufruf frühestens in `OnInitialize` des Moduls, weil das Haupt-Panel vorher noch nicht existiert.
@@ -170,6 +170,49 @@ self:RegisterEvent("MODIFIER_STATE_CHANGED", function()
     if Glimpse:ModifiersRequired(self.db.profile) then self:RefreshTooltip() end
 end)
 ```
+
+### Doppelklick (`Core/DoubleClick/`)
+
+Erweiterungen reagieren auf einen Doppelklick in der Spielwelt (z. B. Angel auswerfen). Der Core erkennt den Doppelklick
+über `GLOBAL_MOUSE_DOWN`, bestimmt die Lage, wählt den Handler und legt die Taste für diesen einen Klick per
+Override-Bindung auf einen gemeinsamen Secure-Button. Der erste Klick bleibt beim Spiel.
+
+```lua
+Glimpse:RegisterDoubleClick("fishing", {
+    title    = "Professions: Angeln",       -- Name im Block "Doppelklick", sonst der Schlüssel
+    modifier = function() return P:CastModifier() end,  -- oder "SHIFT", "CTRL", "ALT", "NONE"
+    button   = "RightButton",               -- oder Left/MiddleButton, Button4, Button5; Standard RightButton
+    priority = 10,                          -- höher gewinnt, Standard 0
+    when     = { standing = true, mounted = false },    -- Felder aus ctx, die genau so sein müssen
+    Match    = function(ctx) return true end,           -- optional, weitere Bedingungen
+    Prepare  = function(ctx)                -- im PreClick, einmal je Klick
+        return { type = "spell", spell = name }          -- oder type "macro" mit macrotext, "item" mit item
+    end,                                    -- nil: dieser Klick wirkt nichts
+    Done     = function(ctx, action) end,   -- optional, nach dem Klick
+})
+Glimpse:UnregisterDoubleClick("fishing")
+Glimpse:IsDoubleClickCentral()              -- true: Taste zentral, eigene Tasten-Option ausgrauen
+Glimpse:GetDoubleClickKey("fishing")        -- wirksame Zusatztaste, Maustaste
+Glimpse:GetDoubleClickText("fishing")       -- "Umschalt + Doppelklick rechts"
+
+-- Tastenauswahl in den eigenen Optionen, gleich in allen Addons (ausgegraut, wenn die Taste zentral ist)
+Glimpse:AddDoubleClickKeyOptions(args, self.db.profile, 22, {
+    modifier = "castKey", button = "castButton",  -- Felder im Profil, Standard "modifier" und "button"
+    onChange = function() end, disabled = function() return false end,  -- optional
+    hidden = function() return not profile.autoMount end,                -- optional, Funktion im Addon aus
+})
+-- Ist die Funktion im Addon aus, meldet es den Handler ab (UnregisterDoubleClick); dann verschwindet er auch im Core-Block.
+```
+
+`ctx` enthält `standing`, `moving`, `falling`, `swimming`, `underwater`, `mounted`, `canMount`, `flying`, `flyable`,
+`indoors`, `outdoors` (true/false), dazu `modifier`, `button`, `now`. Die Namen folgen den Makro-Bedingungen.
+`canMount` ist geschätzt (draußen, nicht im Wasser, nicht aufgesessen, nicht im Kampf). Bedingungen, die nur ein Makro
+kennt, prüft der Client, wenn `Prepare` einen `macrotext` liefert.
+
+Passen mehrere Handler, gewinnt die höhere Priorität, bei Gleichstand der Name. Im Block „Doppelklick“ unter „Allgemein“ der Glimpse-Optionen
+lässt sich je Handler die Priorität überschreiben oder der Handler abschalten, und die Taste zentral für alle festlegen.
+Im Kampf sperrt der Client Bindungen und Secure-Attribute für alle Addons; dann passiert nichts. Diagnose:
+`/gli probe click handlers`, Debug-Kategorie `DoubleClick click`.
 
 ### Orte (`Modules/Locations/`)
 
@@ -209,21 +252,22 @@ Der Spieler stellt die Einheit in den Glimpse-Optionen (Allgemein) ein: automati
 `Glimpse:FormatDistance`, `Glimpse:GetDistanceUnit` und `Glimpse:BuildDistanceOptions` gibt es weiterhin als Kurzwege.
 Für Tests ersetzt man Einträge in `Locations.api` (die Blizzard-Funktionen).
 
-### Credits (`Glimpse:BuildCreditsArgs`)
+### Credits (`Core/Credits.lua`)
 
-Jede Optionsseite (und der Kern) hat einen letzten Tab "Credits" mit einem Bereich wie bei TomTom: Trennlinie mit Überschrift,
-goldene Bezeichnungen, weißer Text. Der Autor kommt automatisch aus der TOC (`## Author`). Weitere Angaben übergibt die
-Erweiterung als vierten Parameter von `RegisterAddonOptions(addonName, args, tabs, credits)`:
+Die Credits der ganzen Suite stehen einmal in der Core-Übersicht unter einer Trennlinie mit Überschrift: Autor aus der
+TOC (`## Author`), Mitwirkende, Bildnachweise und Dank. Erweiterungen haben keinen eigenen Credits-Tab. Bildnachweise
+der Erweiterungen stehen fest in `IMAGE_CREDITS` (Addon-Ordner -> Bild, Autor, Link), der Dank an die Tester in
+`SPECIAL_THANKS`. Was eine Erweiterung als vierten Parameter von `RegisterAddonOptions(addonName, args, tabs, credits)`
+mitgibt, erscheint dort ebenfalls, mit dem Titel des Addons davor; Links, die schon in `IMAGE_CREDITS` stehen, nicht doppelt:
 
 ```lua
 Glimpse:RegisterAddonOptions(ADDON_NAME, options, false, {
     contributors = { "Name (wofür)" },
-    images = { "Pin - Autor (Flaticon)" },   -- Bildnachweis
-    thanks = { "..." },
+    images = { "Pin - Autor (Flaticon) |cff66ccff(https://...)|r" },
 })
 ```
 
-Der Tab "Credits" steht bei jeder Seite ganz hinten. Im Kern steht der Autor nur dort, nicht in der Übersicht.
+Neues Bild in einer Erweiterung: Eintrag in `IMAGE_CREDITS` im Core ergänzen (und in der README der Erweiterung).
 
 ### Slash-Befehle (`Core/Commands.lua`)
 
@@ -250,7 +294,11 @@ debug:Error("lure", ...)                -- immer sichtbar
 if debug:IsOn("lure") then ... end      -- vor teurer Arbeit
 ```
 
-* Ausgabe einheitlich als `[Glimpse:Professions/lure] ...`; gleiche Zeilen kurz hintereinander werden gezählt statt wiederholt.
+* Ausgabe einheitlich als `[Glimpse: Professions] Professions/lure: ...`; gleiche Zeilen kurz hintereinander werden gezählt statt wiederholt.
+* Jede Debug-Ausgabe (Debugger, `module:Debug`, `Glimpse:Debug`, Probes) beginnt mit der Addon-Kennung in eckigen Klammern,
+  Name aus der TOC; nur der Teil hinter „Glimpse: “ ist dezent blau (beim Core „Glimpse“). Das Addon ermittelt der Core aus dem Aufrufstapel (beim Debugger beim Anlegen,
+  sonst beim Aufruf). Debug-Zeilen im Tooltip beginnen mit `Glimpse:DebugTag()`, z. B.
+  `return Glimpse:DebugTag() .. " GatheringDB", 0.6, 0.6, 0.6`. Im Log (`/gli debug log`) steht die Kennung ohne Farbe.
 * Kategorien sind an, solange der Debug-Modus an ist; `/gli debug Professions lure off` schaltet eine ab, `/gli debug list` zeigt alle.
 * Die letzten 500 Zeilen bleiben im Speicher, `/gli debug log` öffnet sie in einem Fenster zum Kopieren.
 
@@ -281,6 +329,7 @@ end
 
 ### Daten (Glimpse: Database)
 
+Alle gespeicherten Daten der Suite mit Beispielen zum Abruf stehen in `docs/API.md`.
 Glimpse_Database liegt im selben Repo und Paket (Kapitel unten). Der Core führt es unter `## OptionalDeps`, damit es
 vorher lädt; fehlt es, laufen die Module still. Kampf und Reisen erfassen für jeden Charakter; Kampf zeigt Kills und
 Tode im Kreatur-Tooltip (`Modules/Combat/CombatTooltip.lua`, Tab "Kampf"). Erfasst wird in `CombatKills.lua`,
@@ -293,12 +342,26 @@ Tode im Kreatur-Tooltip (`Modules/Combat/CombatTooltip.lua`, Tab "Kampf"). Erfas
 | `combat` | `time` | 0 | Sekunden im Kampf |
 | `combat` | `looted` | NPC-ID | geplünderte Leichen (Weltwissen) |
 | `combat` | `loot:<NPC-ID>` | Item-ID | Anzahl erbeutet (Weltwissen) |
-| `travel` | `distance` | 1 gelaufen, 2 beritten, 3 geschwommen, 4 Flugroute, 5 Geist | Yards |
+| `travel` | `distance` | 1 gelaufen, 2 beritten, 3 geschwommen (Oberfläche), 4 Flugroute, 5 Geist, 6 Schiff/Zeppelin, 7 unter Wasser, 8 Tiefenbahn | Yards |
 | `travel` | `zone` | uiMapID, in Instanzen `-instanceID` | Betreten |
 | `travel` | `zonetime` | wie `zone` | Sekunden |
+| `travel` | `teleport` | 0 | Teleport, Ruhestein, Portal, ohne Strecke |
+| `travel` | `jump` | 0 | Sprünge mit der Leertaste (vom Boden) |
+| `travel` | `tram` | Ziel (1 Sturmwind, 2 Eisenschmiede, 0 unbekannt) | Fahrten je Ziel (feste Fahrzeit 58 s, `Travel.TRAM_SECONDS`, als `traveltime` Art 8 je Fahrt fest eingetragen); Nachrichten `GLIMPSE_TRAVEL_RIDE_START/_END` (kind `tram` oder `flight`) |
+| `travel` | `traveltime` | wie `distance` (4 = Flugroute) | Sekunden in Bewegung |
+| `travel` | `flightpoint` | nodeID | 1 = dem Charakter bekannt |
+| `travel` | `flight` | Strecke `von * 10000 + nach` (nodeIDs) | Flüge |
+| `travel` | `flighttime` | wie `flight` | Sekunden; Schnitt = `flighttime` / `flight` |
+| `travel` | `flightdistance` | wie `flight` | Yards; Tempo = `flightdistance` / `flighttime` |
 
 Zonen sind uiMapIDs, in Instanzen `-instanceID`. Reisen misst alle 0,5 s über HereBeDragons und verwirft Sprünge
-(Teleport, Ladebildschirm). Der Tab "Daten" in den Optionen zeigt die Bereiche, Export, Import und Zurücksetzen.
+(Teleport, Ladebildschirm). Schiff/Zeppelin: Position ändert sich, die eigene Geschwindigkeit ist in zwei Schritten
+hintereinander 0 (Kurzes Laufen zwischen zwei Stillständen zählt als Laufen). Die Tiefenbahn gilt nur in der Instanz 369, wenn der Charakter selbst steht und seit 2 Sekunden schneller als 10 Yards pro Sekunde bewegt wird; `/gli probe travel tram` zeigt Stadt, Start und Fahrt, `... tram profile` schaltet ein Geschwindigkeitsprofil im Debug um (Anfahren, Maximum, Bremsen); Startstadt und Ziel siehe `TravelTram.lua`. Teleports zählt `TravelTeleports.lua`: ohne Ladebildschirm ab
+`MAX_SPEED`, mit Ladebildschirm, wenn der Charakter danach woanders ist; nicht bei Schiff, Zeppelin, Flugroute und
+Instanzen und nicht, wenn man in den Ladebildschirm hineinläuft (Tiefenbahn). Eine Gesamtstrecke gibt es nicht als eigenen Zähler, sie ist `GetCount("distance")` über alle Arten. Flugpunkte stehen als Orte im Namespace (`GetLocations(mapID)`, id = nodeID auf der
+Zonenkarte), erfasst beim Öffnen der Flugkarte; Namen liefert der Client über `C_TaxiMap`. Die Flugzeit läuft vom
+Abheben bis zur Landung. `travel` speichert alle Arten zusätzlich als Tageswerte: Strecke und Zeit je Charakter
+insgesamt über `GetCount`, heute und die letzten 7 Tage über `GetDayCount(kind, id, scope, 1 | 7)`. Der Tab "Daten" in den Optionen zeigt die Bereiche, Export, Import und Zurücksetzen.
 
 ### Lokalisierung
 
@@ -355,6 +418,21 @@ Erweiterung, die einen Bereich immer braucht, kann ihn auch in der TOC unter `##
 Namespace und Bereich sind getrennt: Meldet ein Addon seinen Namespace mit einem anderen Bereich an, ziehen die Daten
 beim nächsten Login mit um.
 
+### Besitzer eines Namespace
+
+Ein Namespace gehört dem Addon-Ordner, der ihn zuerst mit `DB:Register` anmeldet; Database merkt sich das in
+`GlimpseDB_Meta` (`owner`). Den Ordner liest Database aus dem Aufrufstapel (`debugstack`), Erweiterungen geben nichts mit.
+Meldet ein anderer Ordner denselben Namespace an, bekommt er `nil, "NOT_OWNER"`, auch wenn er in einer Sitzung zuerst
+lädt. Code ohne Addon-Ordner (z. B. `loadstring`) bekommt `nil, "NO_ADDON"`. Lesen über `DB:Get` darf jeder.
+
+Die Namespaces aus der Zeit vor dem Schutz haben feste Besitzer: `combat` und `travel` (Glimpse), `fishing`
+(Glimpse_Professions), `gathering` (Glimpse_GatheringDB). Nach dem Umbenennen eines Addon-Ordners gibt
+`/gli db owner <Namespace> reset` den Namespace frei (`DB:ResetOwner`, nur aus Glimpse); der nächste Register wird
+Besitzer. `/gli db owner <Namespace>` zeigt den Besitzer.
+
+Der Schutz gilt für die API, gegen Versehen. Gegen Absicht schützt er nicht: SavedVariables sind für jedes Addon offen.
+Außerhalb des Clients (Tests ohne `debugstack`) ist er aus.
+
 ### API
 
 ```lua
@@ -366,9 +444,9 @@ local ns = DB:Register("fishing", {
     version = 1,                      -- Schema-Version, Standard 1
     migrate = function(data, from, to) end,
     zones = true,                     -- Zähler auch pro Zone
+    days = true,                      -- Zähler auch als ein Wert je Tag (lokales Datum)
     world = { loot = true },          -- Arten, die als Weltwissen exportiert werden
-    addon = "Glimpse_Professions",    -- Schreiber für die Diagnose, sonst aus dem Aufrufstapel
-})                                    -- nil, Grund ("DISABLED", "NEWER_DATA" ...), wenn es nicht geht
+})                                    -- nil, Grund ("NOT_OWNER", "NO_ADDON", "DISABLED", "NEWER_DATA" ...)
 
 ns:Count(kind, id, mapID, amount)     -- id Standard 0, amount Standard 1; schreibt Zähler, Zone, Zeiten, Stunden
 ns:SetBaseline(kind, id, value)       -- Startwert vor Glimpse, nur einmal
@@ -382,6 +460,8 @@ reader:GetCounts(kind, scope)         -- { [id] = n }
 reader:GetZones(kind, id, scope)      -- { [mapID] = n }
 reader:GetSeen(kind, id, scope)       -- erster, letzter Zeitpunkt
 reader:GetSeries(kind, id, scope)     -- { [Stunde] = n }, scope braucht range oder from/to
+reader:GetDays(kind, id, scope, count)     -- nur mit days = true: { [JJJJMMTT] = n } der letzten count Tage (Standard 7)
+reader:GetDayCount(kind, id, scope, count) -- Summe daraus; count = 1 heute, 7 letzte 7 Tage
 reader:GetLocations(mapID, id, scope) -- Liste { mapID, x, y, id, source }
 
 -- scope: "char" (Standard), "account", "all" (mit fremden Charakteren aus Importen), Charakter-Index oder
@@ -400,7 +480,9 @@ DB:RegisterImportConverter(name, detect, convert)           -- fremde Exportform
 DB:GetCharacters()                    -- eigene Charaktere (Index), aktueller zuerst
 DB:GetCharacterInfo(index)            -- name, realm, class, key, foreign
 DB:GetNamespaces()
-DB:GetNamespaceInfo(name, detail)     -- Bereich, Schreiber, Summen je Herkunft, Orte, Adapter (für /gli probe db sources)
+DB:GetNamespaceInfo(name, detail)     -- Bereich, Schreiber, Besitzer, Summen je Herkunft, Orte, Adapter (db sources)
+DB:GetOwner(name)                     -- Addon-Ordner, dem der Namespace gehört, oder nil
+DB:ResetOwner(name)                   -- Besitzer freigeben, nur aus Glimpse (/gli db owner <Namespace> reset)
 DB:LoadArea(area) / DB:GetAreaSize(area) / DB:ResetArea(area)
 DB:GetRange("week")                   -- from, to; lokale Mitternacht über date/time
 DB:HourOf(stamp) / DB:HourStart(hour) / DB:PackXY(x, y) / DB:UnpackXY(xy)

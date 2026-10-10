@@ -49,7 +49,8 @@ local function MergePersonal(data, char, part)
     for field, kinds in pairs(part) do
         if field == "seen" then
             P.MergeSeen(P.Path(block, "seen", char), kinds)
-        elseif field == "counts" or field == "zones" or field == "hours" or field == "idHours" then
+        elseif field == "counts" or field == "zones" or field == "hours" or field == "idHours"
+            or field == "days" then
             P.MergeMax(P.Path(block, field, char), kinds)
         end
     end

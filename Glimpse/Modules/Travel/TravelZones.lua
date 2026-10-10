@@ -15,6 +15,7 @@ function Travel:LeaveZone()
 end
 
 function Travel:UpdateZone()
+    self:CheckCity()
     local zone = Glimpse.IDs:ZoneKey()
     if zone == current then return end
 

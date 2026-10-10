@@ -40,8 +40,14 @@ local function SourceText(info)
 end
 
 local function WriterText(info)
-    if info.writer == nil then return L["no writer"] end
-    return info.writer == true and L["writer active"] or format(L["writer %s"], info.writer)
+    local text
+    if info.writer == nil then
+        text = L["no writer"]
+    else
+        text = info.writer == true and L["writer active"] or format(L["writer %s"], info.writer)
+    end
+    if info.owner then text = text .. ", " .. format(L["owner %s"], info.owner) end
+    return text
 end
 
 local function Overview(DB)

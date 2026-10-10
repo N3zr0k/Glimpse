@@ -30,9 +30,19 @@ Verbindliche Regeln für alle Glimpse-Addons, festgelegt von Sven. Sie gelten f�
 * Im Repo hat jedes Addon einen eigenen Unterordner mit nur den Dateien, die WoW lädt. Tests, Tools, Doku und CI liegen
   daneben.
 * TOC-Titel immer `Glimpse: Name`.
+* Alle Glimpse-Addons (Core, Database, Erweiterungen) tragen `## Category: Tooltip` (Sven, 2026-10-10).
 * `docs/Files.md` listet als Tabelle alle Dateien des Addons (nur was WoW lädt) mit kurzer Beschreibung, ob die Datei
   in die Datenbank schreibt oder daraus liest und in welchen Namespace bzw. Bereich, und weiteren wichtigen
   Abhängigkeiten. Bei jeder neuen, umbenannten oder gelöschten Datei mitpflegen.
+* `docs/API.md` im Glimpse-Repo listet alle gespeicherten Daten der Suite (Namespace, Art, ID, Wert) und wie man sie
+  abruft. Jeder neue oder geänderte gespeicherte Wert, auch aus Erweiterungen, wird dort eingetragen.
+* `docs/Features.md` im Repo listet die aktuell eingebauten Funktionen mit kurzer Beschreibung. Eine Tabelle zeigt, ob
+  und was ein Addon in welchem Namespace der Datenbank liest, schreibt oder beides; Lesen, Schreiben und Beides haben
+  je eine eigene Spalte.
+* `docs/CURSEFORGE.md` im Repo sammelt alle Texte für das CurseForge-Projekt (Felder, Summary, Description), damit
+  Sven sie von dort kopieren kann.
+* Die Badges werden unverändert übernommen, sie funktionieren: README wie bisher, CurseForge-Zeile ohne `status`
+  wie in `curseforge-badges.txt`.
 
 ## Daten
 
@@ -73,3 +83,19 @@ Verbindliche Regeln für alle Glimpse-Addons, festgelegt von Sven. Sie gelten f�
 
 * Commits laufen unter Svens Identität, nie mit Claude als Co-Autor.
 * Repo-ZIPs tragen die Version im Namen (`Glimpse_Repo_0.3.4-alpha.3.zip`) und enthalten keinen `.git`-Ordner.
+
+## Repo-Bauweise (Pflicht, AddonHelper)
+
+Der AddonHelper und `TesterZip` setzen diese Bauweise voraus. Weicht ein Repo ab, schlägt das Update fehl. Quelle:
+`/mnt/project-files/dev-helper/Repo-Bauweise.md`.
+
+* ZIP-Name: `<Repo>_Repo_<X.Y.Z-PHASE.N>.zip`, `<Repo>` heißt wie der Git-Clone (`Glimpse`, `Glimpse_Gathering`, ...).
+* Genau ein Wurzelordner in der ZIP, exakt wie das Repo benannt (`Glimpse/`, nicht `Glimpse_Repo_0.3.25-alpha.1/`).
+* Kein `.git` in der ZIP, Pfadtrenner `/`.
+* Jeder Addon-Ordner liegt direkt unter dem Wurzelordner und hat eine gleichnamige TOC (`<Addon>/<Addon>.toc`).
+* Dev-Dateien (`.github/`, `docs/`, `tests/`, `tools/`, README, CHANGELOG, LICENSE, `.pkgmeta`, `.luacheckrc`,
+  `.gitattributes`, `.gitignore`) liegen neben den Addon-Ordnern, nie darin.
+* Das Script löscht beim Update alles außer `.git`: was nicht in der ZIP steht, ist danach weg.
+* `## Version:` in allen TOCs ist gleich und entspricht der Version im ZIP-Namen.
+* Build-Ablauf: Repo in einen Ordner mit dem Repo-Namen kopieren und von dort zippen, nie in einen Ordner mit
+  Versionsnummer.

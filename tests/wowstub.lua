@@ -70,6 +70,7 @@ end
 function stub.newGlimpse()
     local Glimpse = { L = setmetatable({}, { __index = function(_, key) return key end }), modules = {} }
     function Glimpse:IsSecret() return false end
+    function Glimpse:GetMeta() return nil end
     function Glimpse:GetModule(name) return self.modules[name] end
     function Glimpse:NewModule(name)
         local module = {

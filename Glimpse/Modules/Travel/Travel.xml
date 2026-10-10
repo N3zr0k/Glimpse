@@ -10,6 +10,7 @@
     <Script file="TravelRecordsSpeed.lua"/>
     <Script file="TravelRecordsFall.lua"/>
     <Script file="TravelRecordsWater.lua"/>
+    <Script file="TravelRecordsWalk.lua"/>
     <Script file="TravelRecordsJumps.lua"/>
     <Script file="TravelRecordsList.lua"/>
     <Script file="TravelRecordsOptions.lua"/>

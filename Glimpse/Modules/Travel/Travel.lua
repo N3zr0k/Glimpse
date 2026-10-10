@@ -71,6 +71,11 @@ function Travel.Ask(func, ...)
     return value == true or value == 1
 end
 
+-- Der Client meldet "angehalten" bei den Atemleisten als 1/0, nicht als true/false
+function Travel.TimerPaused(value)
+    return value == true or value == 1
+end
+
 function Travel:OnInitialize()
     if Glimpse.db and Glimpse.db.RegisterNamespace then
         self.recordSettings = Glimpse.db:RegisterNamespace("TravelRecords", { profile = self.RECORD_DEFAULTS })
@@ -78,6 +83,8 @@ function Travel:OnInitialize()
     self.debug = Glimpse:NewDebugger("Travel", { "distance", "zone", "flight", "records" })
     Glimpse:RegisterProbe("travel", "tram", function(args) return self:TramProbe(args) end,
         "Stadt, Start und Fahrt der Tiefenbahn; \"profile\" schaltet das Geschwindigkeitsprofil um")
+    Glimpse:RegisterProbe("travel", "water", function() return self:WaterProbe() end,
+        "Schwimmen, Atemleiste und die laufende Messung von Tauchzeit und Schwimmstrecke")
 end
 
 function Travel:OnEnable()

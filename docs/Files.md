@@ -79,7 +79,8 @@ Namespace `combat` und `travel` liegen im Bereich Core (`GlimpseDB_Core`). Ein S
 | `Modules/Travel/TravelRecordsTexts.lua` | Meldungstexte (mehrere Varianten je Art, ein Text je Sprung-Meilenstein), Deutsch und Englisch | – | – |
 | `Modules/Travel/TravelRecordsSpeed.lua` | Tempo-Rekord zu Fuß und beim Reiten (Abschnitte von 5 Sekunden, Höchstwert zählt), Name des Reittiers | **schreibt** `travel`: `speedmax`, `speedmin` | TravelDistance.lua, C_MountJournal oder Buff-Symbol |
 | `Modules/Travel/TravelRecordsFall.lua` | Fallrekord aus der Fallzeit (Aufprall ab 23 Yards pro Sekunde, Sprung vom Boden setzt neu an), Prüfung alle 0,1 s | **schreibt** `travel`: `fallmax` | Blizzard: `IsFalling` |
-| `Modules/Travel/TravelRecordsWater.lua` | Zeit unter Wasser am Stück und Schwimmstrecke am Stück, gewertet beim Auftauchen | **schreibt** `travel`: `breathmax`, `swimmax` | TravelDistance.lua, `GetMirrorTimerInfo` |
+| `Modules/Travel/TravelRecordsWater.lua` | Zeit mit angehaltenem Atem (ab Start der Atemleiste), dabei getauchte Strecke und Schwimmstrecke am Stück, gewertet beim Auftauchen; Probe `travel water` mit den Rohwerten | **schreibt** `travel`: `breathmax`, `divemax`, `swimmax` | TravelDistance.lua, `GetMirrorTimerInfo` |
+| `Modules/Travel/TravelRecordsWalk.lua` | Längste Strecke am Stück gelaufen (endet nach 5 Sekunden Stehen oder bei anderer Fortbewegungsart) | **schreibt** `travel`: `walkmax` | TravelDistance.lua |
 | `Modules/Travel/TravelRecordsJumps.lua` | Sprung-Meilensteine mit Spruch, einmal je Charakter | **liest** `travel`: `jump`; **schreibt** `jumpmilestone` | TravelJumps.lua |
 | `Modules/Travel/TravelRecordsList.lua` | Rekordliste im Chat (Knopf „Rekorde anzeigen“) | **liest** `travel`: Rekordarten, Charakter und Account | – |
 | `Modules/Travel/TravelRecordsOptions.lua` | Tab „Rekorde“: Schalter je Art, Ausgabe, Knopf | – (Einstellungen in `GlimpseSettings`) | Core/Options.lua |

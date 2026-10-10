@@ -4,7 +4,7 @@ Alle Funktionen, die in diesem Repository (Glimpse und Glimpse: Database) eingeb
 Tabelle am Ende zeigt, welche Funktion Daten in der Datenbank liest, schreibt oder beides. Die Dateien dazu stehen in
 [Files.md](Files.md), alle gespeicherten Werte in [API.md](API.md).
 
-Stand: Core 0.3.37-alpha.1.
+Stand: Core 0.3.39-alpha.1.
 
 ## Glimpse (Core)
 
@@ -23,7 +23,7 @@ Stand: Core 0.3.37-alpha.1.
 | Reisen | Misst Strecke und Zeit je Fortbewegungsart (laufen, reiten, schwimmen, Flugroute, Geist, Schiff/Zeppelin, tauchen, Tiefenbahn), mit Tageswerten. Zählt betretene Zonen samt Aufenthaltsdauer, Teleports (Ruhestein, Portale), Sprünge mit der Leertaste, bekannte Flugpunkte sowie Flüge je Route (Anzahl, Zeit, Strecke). |
 | Tiefenbahn | Erkennt Fahrten nur in der Instanz (selbst stehen, schneller bewegt als Laufen). Startstadt und Ziel (Sturmwind, Eisenschmiede) ergeben sich aus der zuletzt besuchten Stadt, die Fahrzeit ist fest 58 Sekunden. Meldet Start und Ende als Nachrichten `GLIMPSE_TRAVEL_RIDE_START` und `_END` (auch für Flüge). |
 | Daten | Tab „Daten“: Bereiche mit Größe, Export und Import als Text, Zurücksetzen. |
-| Rekorde | Merkt sich Bestwerte: höchstes und niedrigstes Tempo zu Fuß und beim Reiten, tiefsten Sturz, längste Zeit unter Wasser am Stück, längste Schwimmstrecke am Stück. Bei einem neuen Rekord kommt eine Meldung mit lustigem Text (auf dem Bildschirm, im Chat oder beides, Standard beides); beim Reiten wird das Reittier gelobt. Dazu Sprung-Meilensteine bei 100, 500, 1000, 2500, 5000, 10000, 100000 und 1000000 Sprüngen mit je einem eigenen Spruch. Tab „Rekorde“: Schalter je Art, Ausgabe und die Liste „Rekorde anzeigen“. |
+| Rekorde | Merkt sich Bestwerte: höchstes und niedrigstes Tempo zu Fuß und beim Reiten, tiefsten Sturz, längste Zeit mit angehaltenem Atem, längste Tauchstrecke, längste Schwimmstrecke und längste Laufstrecke am Stück. Bei einem neuen Rekord kommt eine Meldung mit lustigem Text (auf dem Bildschirm, im Chat oder beides, Standard beides); beim Reiten wird das Reittier gelobt. Dazu Sprung-Meilensteine bei 100, 500, 1000, 2500, 5000, 10000, 100000 und 1000000 Sprüngen mit je einem eigenen Spruch. Tab „Rekorde“: Schalter je Art, Ausgabe und die Liste „Rekorde anzeigen“. |
 | Sichern | Zählt die Änderungen seit dem Start und fragt beim Betreten eines Ruhebereichs, ob neu geladen werden soll, damit die Daten auf die Platte kommen. Grenzen als Regler im Tab „Daten“: Änderungen (10 bis 1000, Standard 100) und Minuten (0 bis 120, Standard 30, 0 = aus). Mit Anzeige der ungesicherten Änderungen und „Jetzt sichern“. |
 | Übernahme (nur Alpha) | Übernimmt beim Login die alten Daten von Statistics und GatheringDB in die Database. |
 | Beispielmodul | Vorlage für eigene Module. |

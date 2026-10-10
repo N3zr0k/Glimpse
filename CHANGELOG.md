@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.39] - 2026-10-10
+
+### Added
+- Records: longest distance dived on one breath and longest distance walked without a break, with messages and switches
+
+## [0.3.38] - 2026-10-10
+
+### Fixed
+- Records: the time under water starts when the breath bar starts and is now measured correctly (the client reports the paused state of the breath bar as 0/1)
+
 ## [0.3.37] - 2026-10-10
 
 ### Changed

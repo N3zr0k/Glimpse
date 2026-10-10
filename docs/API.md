@@ -4,7 +4,7 @@ Alle Werte, die die Glimpse-Suite in Glimpse: Database speichert, und wie ein Ad
 eingetragen, sobald sie gespeichert werden (Regel in `REGELN.md`). Die vollständige Database-API steht in
 `DEVELOPER.md`, Kapitel „Glimpse: Database“.
 
-Stand: Core 0.3.37-alpha.1.
+Stand: Core 0.3.39-alpha.1.
 
 ## Grundlagen
 
@@ -95,8 +95,10 @@ Fortbewegungsarten (ID bei `distance` und `traveltime`):
 | `speedmax` | Fortbewegungsart: 1 gehen, 2 Reittier | **Rekord** (`GetMax`): höchster Wert eines Messabschnitts von mindestens 5 Sekunden (Yards pro Sekunde); nicht beim Fallen, auf Flugroute, Schiff oder Tiefenbahn |
 | `speedmin` | 1 gehen, 2 Reittier | **Rekord** (`GetMin`): niedrigster Durchschnitt eines Messabschnitts von 5 Sekunden (über 1 Yard pro Sekunde) |
 | `fallmax` | 0 | **Rekord**: tiefster Sturz in Yards, geschätzt aus der Fallzeit (Aufprall ab 23 Yards pro Sekunde, etwa 14 Yards Fallhöhe; Endgeschwindigkeit 60; jeder Sprung vom Boden setzt die Messung neu an) |
-| `breathmax` | 0 | **Rekord**: längste Zeit unter Wasser am Stück in Sekunden (ab 5 Sekunden, nur wenn die Atemleiste läuft) |
+| `breathmax` | 0 | **Rekord**: längste Zeit mit angehaltenem Atem am Stück in Sekunden, gemessen ab Start der Atemleiste (ab 5 Sekunden, nur wenn die Atemleiste läuft) |
 | `swimmax` | 0 | **Rekord**: längste Strecke am Stück geschwommen in Yards (ab 20 Yards) |
+| `divemax` | 0 | **Rekord**: längste Strecke, die mit einem Atemzug getaucht wurde (während die Atemleiste läuft), in Yards (ab 20 Yards) |
+| `walkmax` | 0 | **Rekord**: längste Strecke am Stück zu Fuß in Yards (ab 200 Yards); sie endet nach 5 Sekunden Stehen oder bei anderer Fortbewegungsart, Sprünge unterbrechen sie nicht |
 | `jumpmilestone` | 0 | **Rekord**: zuletzt gemeldeter Sprung-Meilenstein (100, 500, 1000, 2500, 5000, 10000, 100000, 1000000), je Charakter |
 | `tram` | Ziel: 1 Sturmwind, 2 Eisenschmiede, 0 unbekannt | Fahrten mit der Tiefenbahn; eine Fahrt endet an der Haltestelle (Bahn 3 Sekunden nicht schneller als Laufen) oder beim Verlassen der Instanz, Laufen im Wagen beendet sie nicht; hin und zurück ohne Aussteigen sind 2; alle Fahrten: `GetCount("tram")` |
 Die Fahrt der Tiefenbahn dauert immer gleich lang (58 Sekunden ab Start, `Glimpse.modules.Travel.TRAM_SECONDS`), deshalb wird ihre Zeit nicht gemessen
@@ -149,9 +151,9 @@ Besitzer: Glimpse_Professions (`Modules/Fishing/FishingRecord.lua`). Bereich `Pr
 
 | Art | ID | Wert | Weltwissen |
 | --- | --- | --- | --- |
-| `cast` | 0 | Würfe, pro Zone | nein |
+| `cast` | 0 | Würfe, die ausgehen (Beutefenster oder stehend ausgelaufen, ab Professions 0.3.15 nicht schon beim Auswerfen), pro Zone; Wurf ohne Fang = `cast` - `catch`, Fangquote = `catch` / `cast` | nein |
 | `casttier` | maximale Angelfertigkeit beim Wurf | Würfe | nein |
-| `castabort` | 0 | Würfe, die durch Bewegung oder einen Fall abgebrochen wurden, pro Zone (ab Professions 0.3.14); sie stehen zusätzlich in `cast`. Gültige Würfe = `cast` - `castabort`, Wurf ohne Fang = `cast` - `castabort` - `catch` | nein |
+| `castabort` | 0 | Würfe, die durch Bewegung, Fall oder Kampf abgebrochen wurden, pro Zone (ab Professions 0.3.15); sie stehen nicht in `cast` und werden nirgends verrechnet | nein |
 | `aborttier` | maximale Angelfertigkeit beim Abbruch | abgebrochene Würfe | nein |
 | `catch` | 0 | Fänge, pro Zone | nein |
 | `catchtier` | maximale Angelfertigkeit beim Fang | Fänge | nein |

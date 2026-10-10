@@ -38,7 +38,7 @@ local function Underwater()
     if not api.GetMirrorTimerInfo then return false end
     for index = 1, 3 do
         local timer, _, _, scale, paused = api.GetMirrorTimerInfo(index)
-        if timer == "BREATH" and (scale or 0) < 0 and not paused then return true end
+        if timer == "BREATH" and (scale or 0) < 0 and not Travel.TimerPaused(paused) then return true end
     end
     return false
 end

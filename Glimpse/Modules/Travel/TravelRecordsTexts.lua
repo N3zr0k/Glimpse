@@ -38,6 +38,18 @@ local TEXTS = {
             "Wet feet? For ages! New swimming record: {distance}.",
             "{distance} in the water without a pause: a new record, you water rat.",
         },
+        dive = {
+            "Submarine mode: {distance} dived on a single breath, a new record!",
+            "{distance} under water without a breath. Even the fish are impressed.",
+            "New dive record: {distance} on one breath. Gills would help, though.",
+            "Down and far: {distance} dived in one go, a new record.",
+        },
+        walkdist = {
+            "{distance} on foot without a break, a new record! Have you heard of mounts?",
+            "Your feet are asking questions: {distance} walked in one go, a new record.",
+            "New walking record: {distance} without stopping. The horizon is getting nervous.",
+            "On and on: {distance} on foot at a stretch, a new record.",
+        },
         jump = {
             [100] = "100 jumps! Your legs are warm and the ground feels a bit abandoned.",
             [500] = "500 jumps! Hopping seems to be your favorite way to travel.",
@@ -80,6 +92,18 @@ local TEXTS = {
             "Seepferdchen? Eher Hai! {distance} ohne Pause geschwommen, neuer Rekord.",
             "Nasse Füße? Schon lange! Neuer Schwimmrekord: {distance}.",
             "{distance} im Wasser ohne Pause: neuer Rekord, du Wasserratte.",
+        },
+        dive = {
+            "U-Boot-Modus: {distance} mit einem Atemzug getaucht, neuer Rekord!",
+            "{distance} unter Wasser ohne Luft zu holen. Sogar die Fische sind beeindruckt.",
+            "Neuer Tauchrekord: {distance} mit einem Atemzug. Kiemen würden trotzdem helfen.",
+            "Tief und weit: {distance} in einem Zug getaucht, neuer Rekord.",
+        },
+        walkdist = {
+            "{distance} zu Fuß ohne Pause, neuer Rekord! Schon mal von Reittieren gehört?",
+            "Deine Füße stellen Fragen: {distance} am Stück gelaufen, neuer Rekord.",
+            "Neuer Laufrekord: {distance} ohne Stehenbleiben. Der Horizont wird nervös.",
+            "Immer weiter: {distance} zu Fuß am Stück, neuer Rekord.",
         },
         jump = {
             [100] = "100 Sprünge! Die Beine sind warm, der Boden fühlt sich ein bisschen verlassen.",

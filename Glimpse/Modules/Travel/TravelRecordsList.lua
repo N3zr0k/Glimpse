@@ -36,6 +36,8 @@ function Travel:PrintRecords()
         { L["Deepest fall"], Both(ns, "GetMax", "fallmax", 0, Distance) },
         { L["Longest time under water"], Both(ns, "GetMax", "breathmax", 0, Duration) },
         { L["Longest swim"], Both(ns, "GetMax", "swimmax", 0, Distance) },
+        { L["Longest dive"], Both(ns, "GetMax", "divemax", 0, Distance) },
+        { L["Longest walk"], Both(ns, "GetMax", "walkmax", 0, Distance) },
         { L["Jump milestone"], Both(ns, "GetMax", "jumpmilestone", 0, Whole) },
     }
     Glimpse:Print(L["Records (this character, best of the account in brackets):"])

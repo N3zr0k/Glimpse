@@ -7,13 +7,15 @@ local L = Glimpse.L
 --   Speed   speedmax/speedmin   ID = Fortbewegungsart (walk, mount), Yards pro Sekunde
 --   Fall    fallmax             ID 0, Yards (Schätzung aus der Fallzeit)
 --   Water   breathmax           ID 0, Sekunden unter Wasser am Stück
+--           divemax             ID 0, Yards getaucht während eines Atemanhaltens
 --           swimmax             ID 0, Yards am Stück geschwommen
+--   Walk    walkmax             ID 0, Yards am Stück gelaufen (endet nach 5 s Stehen oder bei anderer Fortbewegungsart)
 --   Jumps   jumpmilestone       ID 0, zuletzt gemeldeter Meilenstein (Sprünge selbst zählt Travel als jump)
 
 local api = Travel.api
 
 Travel.RECORD_DEFAULTS = {
-    walk = true, mount = true, fall = true, jump = true, breath = true, swim = true,
+    walk = true, mount = true, fall = true, jump = true, breath = true, swim = true, dive = true, walkdist = true,
     output = "both", -- both, screen, chat
 }
 
@@ -101,6 +103,7 @@ function Travel:ResetRecords()
     self:ResetSpeed()
     self:ResetFall()
     self:ResetWater(api.GetTime())
+    self:FinishWalk()
 end
 
 function Travel:StartRecords()
@@ -113,6 +116,7 @@ function Travel:RecordsTick(mode, yards, state)
     local ok, err = pcall(function()
         self:RecordSpeedTick(mode, state and state.speed)
         self:RecordWaterTick(api.GetTime(), yards, mode)
+        self:RecordWalkTick(mode, yards)
     end)
     if not ok then self.debug:Error("records", "%s", tostring(err)) end
 end

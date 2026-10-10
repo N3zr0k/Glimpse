@@ -2,7 +2,7 @@
 
 Angaben und Texte zum Kopieren in den CurseForge Author Console (Projekt Glimpse, ID 1730173). Texte auf CurseForge
 auf Englisch. Das Repository enthält Glimpse, Glimpse: Database und die vier Datenbereiche; alles gehört zu diesem
-einen Projekt. Stand: Core 0.3.37-alpha.1. Alpha-Versionen gehen nicht auf CurseForge, die Texte sind für beta und
+einen Projekt. Stand: Core 0.3.39-alpha.1. Alpha-Versionen gehen nicht auf CurseForge, die Texte sind für beta und
 latest.
 
 ## Felder
@@ -37,7 +37,7 @@ For WoW Forever (interface 16001).
 - **One place for all extensions:** each extension has its own page under Glimpse in the game options. The overview lists them with icon and version and warns if one needs a newer Glimpse.
 - **Combat:** kills (also from looted corpses), deaths with the killer, combat time and loot per creature. Kills and deaths show up in the creature tooltip, with account values in brackets.
 - **Travel:** distance and time while walking, riding, swimming, diving, on flight paths, as a ghost, on ships and zeppelins and on the Deeprun Tram, with values per day and for the last 7 days. Also zones entered and time in them, teleports, jumps, known flight points and every flight per route (count, time, distance).
-- **Records:** remembers your best values: fastest and slowest speed on foot and mounted, deepest fall, longest time under water and longest swim. A new record shows a funny message on screen and in chat (switchable), and your mount gets praised. Jump milestones from 100 up to one million jumps have their own sayings.
+- **Records:** remembers your best values: fastest and slowest speed on foot and mounted, deepest fall, longest time under water, longest dive, longest swim and longest walk without a break. A new record shows a funny message on screen and in chat (switchable), and your mount gets praised. Jump milestones from 100 up to one million jumps have their own sayings.
 - **Double click:** extensions can register a double-click action. Glimpse detects the double click, checks the situation (standing, swimming, mounted ...) and runs the right action. One central key or one key per action.
 - **Per character and account-wide:** all numbers are kept per character and can be summed for the account.
 - **Backup and sharing:** export and import as text you can copy. Knowledge about the world (places, loot) can be shared with anyone, personal numbers only go back to the same character.

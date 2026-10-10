@@ -14,7 +14,7 @@ local function setup()
     stub.load("Core/Debug/Debug.lua", "Glimpse")
     stub.load("Core/Debug/Debugger.lua", "Glimpse")
     stub.load("Core/IDs.lua", "Glimpse")
-    for _, file in ipairs({ "Travel", "TravelDistance", "TravelTeleports", "TravelJumps", "TravelTram", "TravelRecords", "TravelRecordsTexts", "TravelRecordsSpeed", "TravelRecordsFall", "TravelRecordsWater", "TravelRecordsJumps", "TravelRecordsList", "TravelZones", "TravelFlightPoints", "TravelFlights" }) do
+    for _, file in ipairs({ "Travel", "TravelDistance", "TravelTeleports", "TravelJumps", "TravelTram", "TravelRecords", "TravelRecordsTexts", "TravelRecordsSpeed", "TravelRecordsFall", "TravelRecordsWater", "TravelRecordsWalk", "TravelRecordsJumps", "TravelRecordsList", "TravelZones", "TravelFlightPoints", "TravelFlights" }) do
         stub.load("Modules/Travel/" .. file .. ".lua", "Glimpse")
     end
 
@@ -705,7 +705,7 @@ test("Rekorde: jeder Meilenstein hat einen Spruch in beiden Sprachen", function(
         for _, milestone in ipairs(Travel.JUMP_MILESTONES) do
             assert(texts[milestone], locale .. " " .. milestone)
         end
-        for _, kind in ipairs({ "walk", "mount", "fall", "breath", "swim" }) do
+        for _, kind in ipairs({ "walk", "mount", "fall", "breath", "swim", "dive", "walkdist" }) do
             assert(#Travel:RecordTexts(kind) >= 3, locale .. " " .. kind)
         end
     end
@@ -740,4 +740,65 @@ test("Rekorde: Taste in der Luft startet den Sturz nicht neu", function()
     state.falling = false
     Travel:FallTick(12)
     near(ns.records.max["fallmax:0"], 0.5 * 19.29 * 4, "zwei Sekunden Fall")
+end)
+
+test("Rekorde: Atemleiste mit paused = 0 zählt als laufend", function()
+    local Travel, _, pos, state, _, _, ns = setup()
+    local bar = true
+    Travel.api.GetMirrorTimerInfo = function(index)
+        if bar and index == 1 then return "BREATH", 60000, 60000, -1, 0, "Atem" end -- der Client liefert 0/1
+        return nil
+    end
+    Travel.api.IsSubmerged = nil
+    stub.now = 100
+    Travel:Measure()
+    state.swimming = true
+    Run(Travel, pos, 0, 20)
+    bar = false -- Atemleiste endet beim Auftauchen
+    Run(Travel, pos, 0, 1)
+    near(ns.records.max["breathmax:0"], 10.5, "Tauchzeit trotz paused = 0")
+    eq(Travel.TimerPaused(1), true, "paused = 1 hält an")
+    Travel.api.GetMirrorTimerInfo = nil
+end)
+
+test("Probe travel water zeigt Rohwerte", function()
+    local Travel = setup()
+    Travel.api.GetMirrorTimerInfo = function() return "BREATH", 1, 1, -1, 0, "x" end
+    assert(#Travel:WaterProbe() >= 6, "Zeilen")
+    Travel.api.GetMirrorTimerInfo = nil
+end)
+
+test("Rekorde: längste Tauchstrecke bei angehaltenem Atem", function()
+    local Travel, _, pos, state, _, _, ns = setup()
+    local bar = true
+    Travel.api.GetMirrorTimerInfo = function(index)
+        if bar and index == 1 then return "BREATH", 60000, 60000, -1, 0, "Atem" end
+    end
+    stub.now = 100
+    Travel:Measure()
+    state.swimming, state.under = true, true
+    Run(Travel, pos, 4, 20) -- 40 Yards
+    eq(ns.records.max["divemax:0"], nil, "noch unter Wasser")
+    bar = false
+    Run(Travel, pos, 0, 1)
+    near(ns.records.max["divemax:0"], 40, "40 Yards getaucht")
+    Travel.api.GetMirrorTimerInfo = nil
+end)
+
+test("Rekorde: längste Strecke am Stück gelaufen", function()
+    local Travel, _, pos, state, _, _, ns = setup()
+    stub.now = 100
+    Travel:Measure()
+    Run(Travel, pos, 7, 100) -- 350 Yards
+    eq(ns.records.max["walkmax:0"], nil, "Strecke läuft noch")
+    Run(Travel, pos, 0, 10)  -- 5 Sekunden Stehen beenden sie
+    near(ns.records.max["walkmax:0"], 350, "350 Yards")
+    eq(#ns.shown.chat > 0, true, "Meldung")
+
+    -- aufsitzen beendet die Strecke ebenfalls, kurze Strecken zählen nicht
+    local before = ns.records.max["walkmax:0"]
+    Run(Travel, pos, 7, 10)  -- 35 Yards
+    state.mounted = true
+    Run(Travel, pos, 10, 2)
+    eq(ns.records.max["walkmax:0"], before, "35 Yards sind kein Rekord")
 end)

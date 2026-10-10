@@ -370,7 +370,7 @@ Die Database kennt neben Zählern Rekorde (`Writer:SetMax/SetMin`, `Reader:GetMa
 (`Travel:NewRecord`, nur ab 1 % besser) und meldet sie (`Travel:Announce`, Pause 30 Sekunden je Art, Ausgabe nach
 Option). Gespeichert wird immer, der Schalter betrifft nur die Meldung. Die Erkennung hängt an `Travel:Measure`
 (`RecordsTick`): Tempo aus der Streckenmessung in Abschnitten von 10 Messungen (5 Sekunden, Höchstwert zählt), Wasser (Atem, Strecke)
-im selben Takt, der Sturz in einem eigenen 0,1-Sekunden-Takt aus der Fallzeit (der Client nennt keine Höhe). Texte
+im selben Takt (Laufstrecke am Stück in `TravelRecordsWalk.lua`, Atemzeit und Tauchstrecke ab Start der Atemleiste, Probe `/gli probe travel water` zeigt die Rohwerte), der Sturz in einem eigenen 0,1-Sekunden-Takt aus der Fallzeit (der Client nennt keine Höhe). Texte
 stehen in `TravelRecordsTexts.lua`; neue Art: Texte dort, Schalter in `RECORD_DEFAULTS` und `TravelRecordsOptions.lua`,
 Zeile in `docs/API.md`.
 

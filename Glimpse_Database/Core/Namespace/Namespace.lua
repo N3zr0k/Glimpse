@@ -37,7 +37,12 @@ P.OWNERS = {
     combat = "Glimpse",
     travel = "Glimpse",
     fishing = "Glimpse_Professions",
-    gathering = "Glimpse_GatheringDB",
+    gathering = "Glimpse_Gathering",
+}
+
+-- Umbenannte Addon-Ordner: ein schon gespeicherter alter Besitzer zählt als der neue
+P.OWNER_RENAMES = {
+    Glimpse_GatheringDB = "Glimpse_Gathering",
 }
 
 --- Addon-Ordner des Aufrufers einer DB-Funktion. nil, wenn nicht erkennbar (z. B. loadstring);
@@ -54,7 +59,7 @@ end
 --- Besitzer eines Namespace oder nil. owner = false heißt freigegeben.
 function P.Owner(name)
     local info = P.meta.namespaces[name]
-    if info and info.owner ~= nil then return info.owner or nil end
+    if info and info.owner ~= nil then return info.owner and (P.OWNER_RENAMES[info.owner] or info.owner) or nil end
     return P.OWNERS[name]
 end
 

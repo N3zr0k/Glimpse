@@ -1,6 +1,6 @@
 local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 
--- Kampf: erfasst für jeden Charakter Kills, Tode, Kampfzeit und Beute. Schreibt in den Namespace "combat" von
+-- Kampf: erfasst für jeden Charakter Kills, Tode und Kampfzeit. Schreibt in den Namespace "combat" von
 -- Glimpse: Database; ohne Database bleibt das Modul still. Erfassung: CombatKills.lua, CombatDeaths.lua, CombatLoot.lua,
 -- CombatTime.lua. Anzeige im Kreatur-Tooltip: CombatTooltip.lua, Optionen: CombatOptions.lua.
 --
@@ -8,8 +8,8 @@ local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 --   kill          NPC-ID                 eigene Kills, pro Zone
 --   death         NPC-ID des Verursachers, 0 = unbekannt; pro Zone
 --   time          0                      Sekunden im Kampf
---   looted        NPC-ID                 geplünderte Leichen (Weltwissen, Nenner für Drop-Chancen)
---   loot:<NPC>    Item-ID                Anzahl erbeutet (Weltwissen)
+--   looted        NPC-ID                 Kontrolle für kill: geplünderte Leichen (Weltwissen), keine Beute-Statistik
+--   loot:<NPC>    Item-ID                Kontrolldaten zu looted (Weltwissen); Beute-Auswertung macht Gathering
 local Combat = Glimpse:NewModule("Combat")
 
 Combat.NAMESPACE = "combat"

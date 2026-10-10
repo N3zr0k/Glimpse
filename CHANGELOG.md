@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.33] - 2026-10-10
+
+### Changed
+- The gathering data belongs to the merged addon Glimpse: Gathering (an owner saved for the old Glimpse: GatheringDB is taken over)
+
+## [0.3.32] - 2026-10-10
+
+### Changed
+- Combat: the looted corpses counter is documented as a backup check for the kill counter
+
 ## [0.3.31] - 2026-10-10
 
 ### Changed

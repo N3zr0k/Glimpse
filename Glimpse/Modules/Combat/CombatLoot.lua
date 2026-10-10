@@ -1,6 +1,7 @@
 local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local Combat = Glimpse:GetModule("Combat")
 
+-- Backup und Kontrolle für den Killzähler, keine Beute-Statistik (die kommt von Gathering).
 -- Beute pro NPC aus dem Beutefenster: looted [NPC] einmal je Leiche, loot:<NPC> [Item] mit Menge.
 -- Jede geplünderte Leiche ist auch ein Kill (CombatKills.lua), sonst fehlen Kills ohne Ziel.
 -- Angelbeute und Knoten (GameObject) gehören nicht hierher. Ein Beutefenster direkt nach einem eigenen Zauber

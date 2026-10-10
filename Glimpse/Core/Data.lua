@@ -125,7 +125,7 @@ function Glimpse:BuildDataOptions(order)
 end
 
 -- /gli probe db migration: welche Daten alter Addons schon übernommen sind
-local MIGRATIONS = { statistics = "Glimpse: Statistics", gathering = "Glimpse: GatheringDB" }
+local MIGRATIONS = { statistics = "Glimpse: Statistics", gathering = "Glimpse: Gathering" }
 
 Glimpse:RegisterProbe("db", "migration", function()
     local DB = Database()

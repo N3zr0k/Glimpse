@@ -4,7 +4,7 @@ Alle Funktionen, die in diesem Repository (Glimpse und Glimpse: Database) eingeb
 Tabelle am Ende zeigt, welche Funktion Daten in der Datenbank liest, schreibt oder beides. Die Dateien dazu stehen in
 [Files.md](Files.md), alle gespeicherten Werte in [API.md](API.md).
 
-Stand: Core 0.3.31-alpha.2.
+Stand: Core 0.3.33-alpha.1.
 
 ## Glimpse (Core)
 
@@ -19,7 +19,7 @@ Stand: Core 0.3.31-alpha.2.
 | Slash-Befehle | `/gli` (auch `/glimpse`): `config`, `info`, `help`, `debug`, `probe`, `db owner`; Erweiterungen melden eigene Befehle an. |
 | Locations | Kartennamen, Spielerposition, Entfernungen in Yards oder Metern, Koordinaten als Text, Wegpunkt über TomTom oder Spielmarkierung. |
 | ID-Helfer | GUID zerlegen, NPC-ID, Namen von Item, Zauber und Karte, Zonen-Schlüssel. |
-| Kampf | Zählt Kills (auch aus geplünderten Leichen, je GUID einmal), eigene Tode mit Verursacher, Kampfzeit und Beute je Kreatur. Kills und Tode stehen im Kreatur-Tooltip, mit Account-Wert und wählbarer Position. |
+| Kampf | Zählt Kills (auch aus geplünderten Leichen, je GUID einmal), eigene Tode mit Verursacher, Kampfzeit. Geplünderte Leichen (`looted`) sind nur Backup und Kontrolle für den Killzähler, keine Beute-Statistik (die kommt von Gathering). Kills und Tode stehen im Kreatur-Tooltip, mit Account-Wert und wählbarer Position. |
 | Reisen | Misst Strecke und Zeit je Fortbewegungsart (laufen, reiten, schwimmen, Flugroute, Geist, Schiff/Zeppelin, tauchen, Tiefenbahn), mit Tageswerten. Zählt betretene Zonen samt Aufenthaltsdauer, Teleports (Ruhestein, Portale), Sprünge mit der Leertaste, bekannte Flugpunkte sowie Flüge je Route (Anzahl, Zeit, Strecke). |
 | Tiefenbahn | Erkennt Fahrten nur in der Instanz (selbst stehen, schneller bewegt als Laufen). Startstadt und Ziel (Sturmwind, Eisenschmiede) ergeben sich aus der zuletzt besuchten Stadt, die Fahrzeit ist fest 58 Sekunden. Meldet Start und Ende als Nachrichten `GLIMPSE_TRAVEL_RIDE_START` und `_END` (auch für Flüge). |
 | Daten | Tab „Daten“: Bereiche mit Größe, Export und Import als Text, Zurücksetzen. |
@@ -45,7 +45,7 @@ Spalten **Liest**, **Schreibt** und **Beides**: ein Haken zeigt, wie die Funktio
 
 | Funktion | Namespace | Liest | Schreibt | Beides |
 | --- | --- | :-: | :-: | :-: |
-| Kampf: Kills, Tode, Zeit, Beute | `combat` | | ✔ | |
+| Kampf: Kills, Tode, Zeit, Kontrolle (`looted`) | `combat` | | ✔ | |
 | Kampf: Kreatur-Tooltip | `combat` | ✔ | | |
 | Reisen: Strecke, Zeit, Zonen, Teleports, Sprünge, Flugpunkte, Flüge, Tiefenbahn | `travel` | | ✔ | |
 | Daten-Tab: Größe, Export, Import, Zurücksetzen | alle | | | ✔ |

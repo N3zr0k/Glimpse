@@ -45,7 +45,7 @@ local function Has(text, part)
 end
 
 local GATHERING = {
-    area = "Gathering", loaded = true, writer = "Glimpse_GatheringDB",
+    area = "Gathering", loaded = true, writer = "Glimpse_Gathering",
     sources = { own = { total = 12, chars = 2 }, imported = { total = 30, chars = 1 } },
     places = { own = 5 }, adapters = { GatherMate2 = true },
 }
@@ -55,7 +55,7 @@ test("Sources: Namespace mit Bereich, Schreiber und Herkünften", function()
         adapters = {} } })
     G:RunProbe("db", "sources")
     local text = Output(G)
-    eq(Has(text, "gathering|r: Gathering, writer Glimpse_GatheringDB"), true, "Kopf")
+    eq(Has(text, "gathering|r: Gathering, writer Glimpse_Gathering"), true, "Kopf")
     eq(Has(text, "own 12 (2 chars), imported 30 (1 chars), places own 5, external GatherMate2 (active)"), true,
         "Herkünfte")
     eq(Has(text, "travel|r: Core, no writer"), true, "ohne Schreiber")
@@ -72,13 +72,13 @@ end)
 test("Sources: alte SavedVariables und Angaben der Erweiterungen", function()
     local G = setup({})
     _G.GlimpseGatheringDB = {}
-    G:RegisterDataSource("Glimpse_GatheringDB", function() return { "names: GlimpseGatheringNames" } end)
+    G:RegisterDataSource("Glimpse_Gathering", function() return { "names: GlimpseGatheringNames" } end)
     G:RegisterDataSource("Glimpse_Broken", function() error("kaputt") end)
     G:RunProbe("db", "sources")
     local text = Output(G)
     eq(Has(text, "Old data GlimpseStatisticsDB: not loaded (addon not active)"), true, "Statistics fehlt")
     eq(Has(text, "Old data GlimpseGatheringDB: loaded"), true, "GatheringDB geladen")
-    eq(Has(text, "Glimpse_GatheringDB|r: names: GlimpseGatheringNames"), true, "Erweiterung")
+    eq(Has(text, "Glimpse_Gathering|r: names: GlimpseGatheringNames"), true, "Erweiterung")
     eq(Has(text, "kaputt"), true, "Fehler einer Erweiterung wird gezeigt")
     eq(Has(text, "Glimpse: Database holds no data yet."), true, "leer")
 end)

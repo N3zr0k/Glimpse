@@ -340,8 +340,8 @@ Tode im Kreatur-Tooltip (`Modules/Combat/CombatTooltip.lua`, Tab "Kampf"). Erfas
 | `combat` | `kill` | NPC-ID | Kills, pro Zone |
 | `combat` | `death` | NPC-ID des Verursachers, 0 = unbekannt | Tode, pro Zone |
 | `combat` | `time` | 0 | Sekunden im Kampf |
-| `combat` | `looted` | NPC-ID | geplünderte Leichen (Weltwissen) |
-| `combat` | `loot:<NPC-ID>` | Item-ID | Anzahl erbeutet (Weltwissen) |
+| `combat` | `looted` | NPC-ID | Kontrolle für `kill`: geplünderte Leichen (Weltwissen), keine Beute-Statistik |
+| `combat` | `loot:<NPC-ID>` | Item-ID | Kontrolldaten zu `looted` (Weltwissen); Beute-Auswertung macht Gathering |
 | `travel` | `distance` | 1 gelaufen, 2 beritten, 3 geschwommen (Oberfläche), 4 Flugroute, 5 Geist, 6 Schiff/Zeppelin, 7 unter Wasser, 8 Tiefenbahn | Yards |
 | `travel` | `zone` | uiMapID, in Instanzen `-instanceID` | Betreten |
 | `travel` | `zonetime` | wie `zone` | Sekunden |
@@ -426,7 +426,8 @@ Meldet ein anderer Ordner denselben Namespace an, bekommt er `nil, "NOT_OWNER"`,
 lädt. Code ohne Addon-Ordner (z. B. `loadstring`) bekommt `nil, "NO_ADDON"`. Lesen über `DB:Get` darf jeder.
 
 Die Namespaces aus der Zeit vor dem Schutz haben feste Besitzer: `combat` und `travel` (Glimpse), `fishing`
-(Glimpse_Professions), `gathering` (Glimpse_GatheringDB). Nach dem Umbenennen eines Addon-Ordners gibt
+(Glimpse_Professions), `gathering` (Glimpse_Gathering, früher Glimpse_GatheringDB; ein gespeicherter alter Besitzer zählt als der neue,
+`P.OWNER_RENAMES`). Nach dem Umbenennen eines Addon-Ordners gibt
 `/gli db owner <Namespace> reset` den Namespace frei (`DB:ResetOwner`, nur aus Glimpse); der nächste Register wird
 Besitzer. `/gli db owner <Namespace>` zeigt den Besitzer.
 
@@ -537,11 +538,11 @@ scope "account" oder "all".
 | combat | kill, death | NPC (0 = ohne Zuordnung) | Statistics, Startwerte im Block baseline |
 | fishing | cast, catch | 0, je Zone | Statistics, Startwert für catch |
 | fishing | fish | Item, je Zone | Statistics |
-| fishing | looted, loot:\<Zone>, drop:\<Zone> | Zone, Item | GatheringDB (Weltwissen), dazu Orte |
+| fishing | looted, loot:\<Zone>, drop:\<Zone> | Zone, Item | Glimpse_Gathering (Weltwissen), dazu Orte |
 | gathering | herb, ore, other, skin | Objekt bzw. NPC | Statistics |
-| gathering | node, nodeloot:\<Objekt>, nodedrop:\<Objekt> | Objekt, Item | GatheringDB (Weltwissen), dazu Zonen und Orte |
-| gathering | npc, npcloot:\<NPC>, npcdrop:\<NPC> | NPC, Item | GatheringDB (Weltwissen), Versuche = Kills |
-| gathering | skinned, skinloot:\<NPC>, skindrop:\<NPC> | NPC, Item | GatheringDB (Weltwissen) |
+| gathering | node, nodeloot:\<Objekt>, nodedrop:\<Objekt> | Objekt, Item | Glimpse_Gathering (Weltwissen), dazu Zonen und Orte |
+| gathering | npc, npcloot:\<NPC>, npcdrop:\<NPC> | NPC, Item | Glimpse_Gathering (Weltwissen), Versuche = Kills |
+| gathering | skinned, skinloot:\<NPC>, skindrop:\<NPC> | NPC, Item | Glimpse_Gathering (Weltwissen) |
 
 `*loot` zählt die Menge, `*drop` die Beutefenster mit dem Item (Grundlage der Drop-Chance). Wer einen dieser
 Namespaces später als Schreiber anmeldet, übernimmt die Arten und die `world`-Liste aus `AlphaMigration.lua`.

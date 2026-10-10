@@ -12,7 +12,7 @@ local SPECIAL_THANKS = {
 
 -- Bildnachweise der Erweiterungen: Addon-Ordner -> { Bild (Locale-Key), Autor, Link }
 local IMAGE_CREDITS = {
-    Glimpse_GatheringTooltip = {
+    Glimpse_Gathering = {
         { "Pin", "Karacis (Flaticon)", "https://www.flaticon.com/de/kostenloses-icon/ort_5338544" },
         { "Solid pin", "Magnific (Flaticon)", "https://www.flaticon.com/de/kostenloses-icon/standort_3699580" },
         { "Outline pin", "Magnific (Flaticon)", "https://www.flaticon.com/de/kostenloses-icon/ort_2794702" },

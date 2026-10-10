@@ -4,7 +4,7 @@ local stub = require("wowstub")
 -- Credits der Suite, einmal in der Core-Übersicht (Core/Credits.lua)
 local function setup()
     local Glimpse = stub.newGlimpse()
-    local titles = { Glimpse_GatheringTooltip = "Glimpse: Gathering", Glimpse_Statistics = "Glimpse: Statistics",
+    local titles = { Glimpse_Gathering = "Glimpse: Gathering", Glimpse_Statistics = "Glimpse: Statistics",
         Glimpse_Test = "Glimpse: Test" }
     Glimpse.GetMeta = function(_, key, addonName)
         if key == "Title" and addonName then return titles[addonName] end
@@ -34,7 +34,7 @@ end)
 test("Credits: Angaben einer Erweiterung erscheinen in der Übersicht, bekannte Links nicht doppelt", function()
     local G = setup()
     G:AddCredits("Glimpse_Test", { contributors = { "Anna (Grafik)" } })
-    G:AddCredits("Glimpse_GatheringTooltip", { images = { "Stecknadel - Karacis |cff66ccff(https://www.flaticon.com/de/kostenloses-icon/ort_5338544)|r" } })
+    G:AddCredits("Glimpse_Gathering", { images = { "Stecknadel - Karacis |cff66ccff(https://www.flaticon.com/de/kostenloses-icon/ort_5338544)|r" } })
     local text = G:BuildCreditsArgs().credits.name()
     eq(text:find("|cffffd100Contributors:|r\n- Glimpse: Test: Anna (Grafik)", 1, true) ~= nil, true, "Mitwirkende")
     eq(text:find("Stecknadel", 1, true), nil, "Link schon bekannt")

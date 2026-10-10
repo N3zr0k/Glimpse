@@ -4,7 +4,7 @@ Alle Werte, die die Glimpse-Suite in Glimpse: Database speichert, und wie ein Ad
 eingetragen, sobald sie gespeichert werden (Regel in `REGELN.md`). Die vollständige Database-API steht in
 `DEVELOPER.md`, Kapitel „Glimpse: Database“.
 
-Stand: Core 0.3.31-alpha.2.
+Stand: Core 0.3.33-alpha.1.
 
 ## Grundlagen
 
@@ -50,8 +50,8 @@ Besitzer: Glimpse (Core-Modul Kampf, `Modules/Combat/`). Bereich `Core`, mit Zon
 | `kill` | NPC-ID | Kills, pro Zone | nein |
 | `death` | NPC-ID des Verursachers, 0 = unbekannt | Tode, pro Zone | nein |
 | `time` | 0 | Sekunden im Kampf | nein |
-| `looted` | NPC-ID | geplünderte Leichen | ja |
-| `loot:<NPC-ID>` | Item-ID | Anzahl erbeutet | ja |
+| `looted` | NPC-ID | Kontrolle für `kill`: geplünderte Leichen (Backup, keine Beute-Statistik) | ja |
+| `loot:<NPC-ID>` | Item-ID | Kontrolldaten zu `looted`: Anzahl erbeutet (die Beute-Auswertung liefert `gathering`) | ja |
 
 ```lua
 local combat = GlimpseDB:Get("combat")
@@ -153,7 +153,7 @@ fishing:GetCounts("loot:1429", "all")                              -- Fänge in 
 
 ## Namespace `gathering`
 
-Besitzer: Glimpse_GatheringDB (`Core/Loot/`). Bereich `Gathering`, mit Zonen. Fundorte als Orte.
+Besitzer: Glimpse_Gathering (früher Glimpse_GatheringDB; ein gespeicherter alter Besitzer zählt als der neue). Bereich `Gathering`, mit Zonen. Fundorte als Orte.
 
 | Art | ID | Wert | Weltwissen |
 | --- | --- | --- | --- |
@@ -168,7 +168,7 @@ Besitzer: Glimpse_GatheringDB (`Core/Loot/`). Bereich `Gathering`, mit Zonen. Fu
 | `skinloot:<NPC-ID>`, `skindrop:<NPC-ID>` | Item-ID | wie bei node | ja |
 
 Orte: Fundorte der Vorkommen, `id` = Objekt-ID; in der Database liegen nur eigene Orte. Fremde Fundorte (GatherMate2)
-hängt Glimpse_GatheringDB selbst live über `GetSpots` an, nicht über einen Database-Adapter. Namen der Objekte und NPCs stehen in Glimpse_GatheringDB
+hängt Glimpse_Gathering selbst live an, nicht über einen Database-Adapter. Namen der Objekte und NPCs stehen in Glimpse_Gathering
 (SavedVariables `GlimpseGatheringNames`), nicht in der Database.
 
 ```lua

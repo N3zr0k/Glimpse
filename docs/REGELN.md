@@ -100,3 +100,13 @@ Der AddonHelper und `TesterZip` setzen diese Bauweise voraus. Weicht ein Repo ab
 * `## Version:` in allen TOCs ist gleich und entspricht der Version im ZIP-Namen.
 * Build-Ablauf: Repo in einen Ordner mit dem Repo-Namen kopieren und von dort zippen, nie in einen Ordner mit
   Versionsnummer.
+
+## Wer Daten erfasst (Sven, 2026-10-10)
+
+* Erweiterungen dürfen eigene Datenbank-Sammler haben, wenn es zur Erweiterung passt:
+  * Professions sammelt Daten zu den Berufen.
+  * Gathering sammelt Daten zu den Sammelberufen und die Beute von NPCs.
+* Allgemeine Daten, die dauerhaft erfasst werden müssen, sammelt Glimpse: Core: Kills, Tode, Reputation pro NPC,
+  alles was Travel betrifft (auch Flugpunkte, Flüge, Schiffe, Zeppeline, Tiefenbahn), Sprünge, gelaufene und
+  geschwommene Strecke, Teleports usw. Travel hat keinen eigenen Sammler und liest nur.
+* Diese Regel ersetzt die frühere Strategie, dass alle Sammler im Core liegen.

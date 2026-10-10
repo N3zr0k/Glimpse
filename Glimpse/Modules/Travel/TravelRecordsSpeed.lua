@@ -2,14 +2,14 @@ local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local Travel = Glimpse:GetModule("Travel")
 
 -- Tempo-Rekorde zu Fuß und beim Reiten. Gemessen wird die Geschwindigkeit aus der Strecke (TravelDistance.lua).
--- Ein Wert zählt erst, wenn er zwei Sekunden gehalten wurde (4 Messungen); kurze Spitzen, Rückstoß oder ein Sturz
--- lösen nichts aus. Der Höchstwert ist das Minimum des Fensters, der Tiefstwert das Maximum (und muss über 1 Yard
--- pro Sekunde liegen). speedmin hat keine Meldung.
+-- Ein Messabschnitt dauert mindestens 5 Sekunden (10 Messungen) ohne Stehen, Fallen oder Wechsel der Fortbewegungsart;
+-- erst danach wird gewertet: der höchste Wert des Abschnitts ist der Kandidat für speedmax, der Durchschnitt für
+-- speedmin (über 1 Yard pro Sekunde). Erst jetzt kommen Eintrag und Meldung. speedmin hat keine Meldung.
 
 local api = Travel.api
 local MODES = Travel.MODES
 
-local SAMPLES = 4
+local SAMPLES = 10 -- 5 Sekunden bei 0,5 s Takt
 local MOVING = 1 -- Yards pro Sekunde, darunter gilt der Charakter als stehend
 
 local window, windowMode = {}, nil
@@ -40,13 +40,13 @@ function Travel:MountName()
     end
 end
 
-function Travel:RecordSpeed(mode, low, high)
+function Travel:RecordSpeed(mode, peak, average)
     if not self.ns then return end
-    self:NewRecord("speedmin", mode, high, true)
-    if not self:NewRecord("speedmax", mode, low) then return end
+    self:NewRecord("speedmin", mode, average, true)
+    if not self:NewRecord("speedmax", mode, peak) then return end
 
     local kind = mode == MODES.mount and "mount" or "walk"
-    local vars = { speed = self:FormatSpeed(low) }
+    local vars = { speed = self:FormatSpeed(peak) }
     if kind == "mount" then vars.mount = self:MountName() or self:RecordTexts("mountFallback") end
     self:Announce(kind, vars)
 end
@@ -60,13 +60,13 @@ function Travel:RecordSpeedTick(mode, speed)
     if windowMode ~= mode then window, windowMode = {}, mode end
 
     window[#window + 1] = speed
-    if #window > SAMPLES then table.remove(window, 1) end
     if #window < SAMPLES then return end
 
-    local low, high = math.huge, 0
+    local peak, total, slowest = 0, 0, math.huge
     for _, value in ipairs(window) do
-        low, high = math.min(low, value), math.max(high, value)
+        peak, total, slowest = math.max(peak, value), total + value, math.min(slowest, value)
     end
-    if low < MOVING then return end
-    self:RecordSpeed(mode, low, high)
+    window = {}
+    if slowest < MOVING then return end
+    self:RecordSpeed(mode, peak, total / SAMPLES)
 end

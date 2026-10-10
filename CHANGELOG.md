@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.37] - 2026-10-10
+
+### Changed
+- Records: speed records for running and riding are measured over at least 5 seconds; the highest value of that stretch counts
+
 ## [0.3.36] - 2026-10-10
 
 ### Fixed

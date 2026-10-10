@@ -4,7 +4,7 @@ Alle Werte, die die Glimpse-Suite in Glimpse: Database speichert, und wie ein Ad
 eingetragen, sobald sie gespeichert werden (Regel in `REGELN.md`). Die vollständige Database-API steht in
 `DEVELOPER.md`, Kapitel „Glimpse: Database“.
 
-Stand: Core 0.3.36-alpha.1.
+Stand: Core 0.3.37-alpha.1.
 
 ## Grundlagen
 
@@ -92,8 +92,8 @@ Fortbewegungsarten (ID bei `distance` und `traveltime`):
 | `zonetime` | Zone | Sekunden in der Zone |
 | `teleport` | 0 | Teleport, Ruhestein, Portal (ohne Strecke) |
 | `jump` | 0 | Sprünge mit der Leertaste, nur vom Boden |
-| `speedmax` | Fortbewegungsart: 1 gehen, 2 Reittier | **Rekord** (`GetMax`): höchstes Tempo in Yards pro Sekunde, mindestens 2 Sekunden gehalten; nicht beim Fallen, auf Flugroute, Schiff oder Tiefenbahn |
-| `speedmin` | 1 gehen, 2 Reittier | **Rekord** (`GetMin`): niedrigstes Tempo über 1 Yard pro Sekunde, 2 Sekunden gehalten |
+| `speedmax` | Fortbewegungsart: 1 gehen, 2 Reittier | **Rekord** (`GetMax`): höchster Wert eines Messabschnitts von mindestens 5 Sekunden (Yards pro Sekunde); nicht beim Fallen, auf Flugroute, Schiff oder Tiefenbahn |
+| `speedmin` | 1 gehen, 2 Reittier | **Rekord** (`GetMin`): niedrigster Durchschnitt eines Messabschnitts von 5 Sekunden (über 1 Yard pro Sekunde) |
 | `fallmax` | 0 | **Rekord**: tiefster Sturz in Yards, geschätzt aus der Fallzeit (Aufprall ab 23 Yards pro Sekunde, etwa 14 Yards Fallhöhe; Endgeschwindigkeit 60; jeder Sprung vom Boden setzt die Messung neu an) |
 | `breathmax` | 0 | **Rekord**: längste Zeit unter Wasser am Stück in Sekunden (ab 5 Sekunden, nur wenn die Atemleiste läuft) |
 | `swimmax` | 0 | **Rekord**: längste Strecke am Stück geschwommen in Yards (ab 20 Yards) |
@@ -151,6 +151,8 @@ Besitzer: Glimpse_Professions (`Modules/Fishing/FishingRecord.lua`). Bereich `Pr
 | --- | --- | --- | --- |
 | `cast` | 0 | Würfe, pro Zone | nein |
 | `casttier` | maximale Angelfertigkeit beim Wurf | Würfe | nein |
+| `castabort` | 0 | Würfe, die durch Bewegung oder einen Fall abgebrochen wurden, pro Zone (ab Professions 0.3.14); sie stehen zusätzlich in `cast`. Gültige Würfe = `cast` - `castabort`, Wurf ohne Fang = `cast` - `castabort` - `catch` | nein |
+| `aborttier` | maximale Angelfertigkeit beim Abbruch | abgebrochene Würfe | nein |
 | `catch` | 0 | Fänge, pro Zone | nein |
 | `catchtier` | maximale Angelfertigkeit beim Fang | Fänge | nein |
 | `fish` | Item-ID | Anzahl gefangen, pro Zone | nein |

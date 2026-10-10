@@ -573,15 +573,15 @@ local function Run(Travel, pos, speed, steps)
     end
 end
 
-test("Rekorde: Lauftempo zählt erst nach zwei Sekunden", function()
+test("Rekorde: Lauftempo zählt erst nach fünf Sekunden, mit dem Höchstwert des Abschnitts", function()
     local Travel, _, pos, _, _, _, ns = setup()
     stub.now = 100
     Travel:Measure()
-    Run(Travel, pos, 8, 3)
-    eq(ns.records.max["speedmax:1"], nil, "nach 1,5 s noch nichts")
-    Run(Travel, pos, 8, 1)
-    near(ns.records.max["speedmax:1"], 8, "Höchsttempo")
-    near(ns.records.min["speedmin:1"], 8, "Tiefsttempo")
+    Run(Travel, pos, 8, 9)
+    eq(ns.records.max["speedmax:1"], nil, "nach 4,5 s noch nichts")
+    Run(Travel, pos, 9, 1)  -- ein schneller Ausschlag im Abschnitt
+    near(ns.records.max["speedmax:1"], 9, "Höchstwert des Abschnitts")
+    near(ns.records.min["speedmin:1"], 8.1, "Durchschnitt als Tiefstwert")
     eq(#ns.shown.chat, 1, "eine Meldung im Chat")
     eq(#ns.shown.screen, 1, "eine Meldung auf dem Bildschirm")
     assert(ns.shown.chat[1]:find("%d+ km/h"), ns.shown.chat[1])
@@ -591,11 +591,11 @@ test("Rekorde: Meldung erst nach 1 % mehr und höchstens alle 30 s", function()
     local Travel, _, pos, _, _, _, ns = setup()
     stub.now = 100
     Travel:Measure()
-    Run(Travel, pos, 8, 8)
+    Run(Travel, pos, 8, 10)
     local before = #ns.shown.chat
-    Run(Travel, pos, 8.04, 8)
+    Run(Travel, pos, 8.04, 10)
     eq(ns.records.max["speedmax:1"], 8, "unter 1 % mehr bleibt der alte Wert")
-    Run(Travel, pos, 10, 8)
+    Run(Travel, pos, 10, 10)
     near(ns.records.max["speedmax:1"], 10, "neuer Rekord gespeichert")
     eq(#ns.shown.chat, before, "Meldung unterdrückt, weniger als 30 s seit der letzten")
 end)
@@ -609,7 +609,7 @@ test("Rekorde: Reiten lobt das Reittier, Name aus dem Journal", function()
     state.mounted = true
     stub.now = 100
     Travel:Measure()
-    Run(Travel, pos, 14, 5)
+    Run(Travel, pos, 14, 10)
     near(ns.records.max["speedmax:2"], 14, "Reittempo")
     eq(ns.records.max["speedmax:1"], nil, "Laufen bleibt leer")
     assert(ns.shown.chat[1]:find("Brauner Hengst", 1, true), ns.shown.chat[1])
@@ -621,13 +621,12 @@ test("Rekorde: ohne Namen steht ein Ersatzwort, Schalter und Ausgabe wirken", fu
     state.mounted = true
     stub.now = 100
     Travel:Measure()
-    Run(Travel, pos, 14, 5)
+    Run(Travel, pos, 14, 10)
     eq(#ns.shown.chat, 0, "nur Bildschirm")
     assert(ns.shown.screen[1]:find("your mount", 1, true), ns.shown.screen[1])
 
     Travel.recordSettings.profile.mount = false
-    stub.now = 500
-    Run(Travel, pos, 20, 5)
+    Run(Travel, pos, 20, 10)
     near(ns.records.max["speedmax:2"], 20, "Rekord wird trotz ausgeschalteter Meldung gespeichert")
     eq(#ns.shown.screen, 1, "keine neue Meldung")
 end)

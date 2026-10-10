@@ -369,7 +369,7 @@ Die Database kennt neben Zählern Rekorde (`Writer:SetMax/SetMin`, `Reader:GetMa
 `max/min[char][kind][id] = { Wert, Zeit, mapID }`, Import behält den besseren Wert). Das Reise-Modul trägt sie ein
 (`Travel:NewRecord`, nur ab 1 % besser) und meldet sie (`Travel:Announce`, Pause 30 Sekunden je Art, Ausgabe nach
 Option). Gespeichert wird immer, der Schalter betrifft nur die Meldung. Die Erkennung hängt an `Travel:Measure`
-(`RecordsTick`): Tempo aus der Streckenmessung über ein Fenster von 4 Messungen (2 Sekunden), Wasser (Atem, Strecke)
+(`RecordsTick`): Tempo aus der Streckenmessung in Abschnitten von 10 Messungen (5 Sekunden, Höchstwert zählt), Wasser (Atem, Strecke)
 im selben Takt, der Sturz in einem eigenen 0,1-Sekunden-Takt aus der Fallzeit (der Client nennt keine Höhe). Texte
 stehen in `TravelRecordsTexts.lua`; neue Art: Texte dort, Schalter in `RECORD_DEFAULTS` und `TravelRecordsOptions.lua`,
 Zeile in `docs/API.md`.

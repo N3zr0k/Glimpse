@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.36] - 2026-10-10
+
+### Fixed
+- Records: jumping several times in a row is no longer counted as a fall; a fall needs an impact speed of at least 23 yards per second
+
 ## [0.3.35] - 2026-10-10
 
 ### Added

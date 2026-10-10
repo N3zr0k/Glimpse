@@ -712,3 +712,33 @@ test("Rekorde: jeder Meilenstein hat einen Spruch in beiden Sprachen", function(
     end
     _G.GetLocale = nil
 end)
+
+test("Rekorde: viele Sprünge hintereinander sind kein Sturz", function()
+    local Travel, _, _, state, _, _, ns = setup()
+    local now = 10
+    -- Hüpfen: der Client meldet in der Luft Fallen, am Boden kurz nicht; der Messer sieht den Boden nicht immer
+    for _ = 1, 6 do
+        state.falling = false
+        Travel:OnJump()          -- Druck auf die Sprungtaste am Boden
+        state.falling = true
+        for _ = 1, 8 do          -- 0,8 s in der Luft
+            now = now + 0.1
+            Travel:FallTick(now)
+        end
+    end
+    state.falling = false
+    Travel:FallTick(now + 0.1)
+    eq(ns.records.max["fallmax:0"], nil, "kein Sturzrekord durch Hüpfen")
+    eq(#ns.shown.chat, 0, "keine Meldung")
+end)
+
+test("Rekorde: Taste in der Luft startet den Sturz nicht neu", function()
+    local Travel, _, _, state, _, _, ns = setup()
+    state.falling = true
+    Travel:FallTick(10)
+    Travel:FallTick(10.5)
+    Travel:OnJump()              -- in der Luft, zählt nicht und ändert nichts
+    state.falling = false
+    Travel:FallTick(12)
+    near(ns.records.max["fallmax:0"], 0.5 * 19.29 * 4, "zwei Sekunden Fall")
+end)

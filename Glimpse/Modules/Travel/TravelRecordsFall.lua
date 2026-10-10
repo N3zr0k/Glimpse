@@ -2,14 +2,14 @@ local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 local Travel = Glimpse:GetModule("Travel")
 
 -- Fallrekord. Die Tiefe wird aus der Fallzeit geschätzt (freier Fall mit Endgeschwindigkeit), der Client nennt keine
--- Höhe. Gezählt wird ab 14 Yards, wo auch der Fallschaden beginnt; Sprünge liegen deutlich darunter. Das Ende ist
--- die Landung oder das Eintauchen ins Wasser. Prüfung alle 0,1 s, damit die Zeit genau genug ist.
+-- Höhe. Gezählt wird nur, wenn der Aufprall mindestens MIN_SPEED schnell ist (etwa 14 Yards Fallhöhe, wo auch der
+-- Fallschaden beginnt); Sprünge liegen deutlich darunter. Das Ende ist die Landung oder das Eintauchen ins Wasser. Prüfung alle 0,1 s, damit die Zeit genau genug ist.
 
 local api = Travel.api
 
 local GRAVITY = 19.29  -- Yards pro Sekunde zum Quadrat
 local TERMINAL = 60    -- Endgeschwindigkeit in Yards pro Sekunde
-local MIN_DEPTH = 14
+local MIN_SPEED = 23  -- Aufprallgeschwindigkeit in Yards pro Sekunde
 local INTERVAL = 0.1
 
 local startedAt
@@ -34,9 +34,10 @@ function Travel:FallTick(now)
     end
     if not startedAt then return end
 
-    local depth = self:FallDepth(now - startedAt)
+    local seconds = now - startedAt
     startedAt = nil
-    if depth < MIN_DEPTH then return end
+    if math.min(GRAVITY * seconds, TERMINAL) < MIN_SPEED then return end
+    local depth = self:FallDepth(seconds)
     if self:NewRecord("fallmax", 0, depth) then
         self:Announce("fall", { depth = self:FormatDistance(depth) })
     end

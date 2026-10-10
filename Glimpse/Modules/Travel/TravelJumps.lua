@@ -9,6 +9,9 @@ local api = Travel.api
 function Travel:OnJump()
     if Travel.Ask(api.UnitOnTaxi, "player") or Travel.Ask(api.IsSwimming) then return false end
     if Travel.Ask(api.IsFalling) then return false end
+    -- Sprung vom Boden: der Sturzmesser (TravelRecordsFall.lua) fängt neu an, mehrere Sprünge hintereinander
+    -- ergeben so nie einen Sturz
+    self:ResetFall()
     self:Count("jump", 0)
     self:CheckJumpMilestone()
     return true

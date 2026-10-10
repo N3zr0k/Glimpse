@@ -3,7 +3,7 @@
 ## Notes: Data area of Glimpse: Database. Fishing and the other professions. Loaded only when an addon needs it.
 ## Notes-deDE: Datenbereich von Glimpse: Database. Angeln und die anderen Berufe. Wird nur geladen, wenn ein Addon ihn braucht.
 
-## Version: 0.3.35-alpha.1
+## Version: 0.3.36-alpha.1
 ## Author: N3zr0k
 ## X-License: MIT
 ## X-Website: https://github.com/N3zr0k/Glimpse

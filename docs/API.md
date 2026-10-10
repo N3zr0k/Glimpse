@@ -4,7 +4,7 @@ Alle Werte, die die Glimpse-Suite in Glimpse: Database speichert, und wie ein Ad
 eingetragen, sobald sie gespeichert werden (Regel in `REGELN.md`). Die vollständige Database-API steht in
 `DEVELOPER.md`, Kapitel „Glimpse: Database“.
 
-Stand: Core 0.3.35-alpha.1.
+Stand: Core 0.3.36-alpha.1.
 
 ## Grundlagen
 
@@ -94,7 +94,7 @@ Fortbewegungsarten (ID bei `distance` und `traveltime`):
 | `jump` | 0 | Sprünge mit der Leertaste, nur vom Boden |
 | `speedmax` | Fortbewegungsart: 1 gehen, 2 Reittier | **Rekord** (`GetMax`): höchstes Tempo in Yards pro Sekunde, mindestens 2 Sekunden gehalten; nicht beim Fallen, auf Flugroute, Schiff oder Tiefenbahn |
 | `speedmin` | 1 gehen, 2 Reittier | **Rekord** (`GetMin`): niedrigstes Tempo über 1 Yard pro Sekunde, 2 Sekunden gehalten |
-| `fallmax` | 0 | **Rekord**: tiefster Sturz in Yards, geschätzt aus der Fallzeit (ab 14 Yards, Endgeschwindigkeit 60 Yards pro Sekunde) |
+| `fallmax` | 0 | **Rekord**: tiefster Sturz in Yards, geschätzt aus der Fallzeit (Aufprall ab 23 Yards pro Sekunde, etwa 14 Yards Fallhöhe; Endgeschwindigkeit 60; jeder Sprung vom Boden setzt die Messung neu an) |
 | `breathmax` | 0 | **Rekord**: längste Zeit unter Wasser am Stück in Sekunden (ab 5 Sekunden, nur wenn die Atemleiste läuft) |
 | `swimmax` | 0 | **Rekord**: längste Strecke am Stück geschwommen in Yards (ab 20 Yards) |
 | `jumpmilestone` | 0 | **Rekord**: zuletzt gemeldeter Sprung-Meilenstein (100, 500, 1000, 2500, 5000, 10000, 100000, 1000000), je Charakter |

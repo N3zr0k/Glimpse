@@ -2,7 +2,7 @@
 
 Angaben und Texte zum Kopieren in den CurseForge Author Console (Projekt Glimpse, ID 1730173). Texte auf CurseForge
 auf Englisch. Das Repository enthält Glimpse, Glimpse: Database und die vier Datenbereiche; alles gehört zu diesem
-einen Projekt. Stand: Core 0.3.35-alpha.1. Alpha-Versionen gehen nicht auf CurseForge, die Texte sind für beta und
+einen Projekt. Stand: Core 0.3.36-alpha.1. Alpha-Versionen gehen nicht auf CurseForge, die Texte sind für beta und
 latest.
 
 ## Felder

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.31] - 2026-10-10
+
+### Changed
+- New icons for Glimpse and Glimpse: Database
+- Core options are laid out like the extension pages: icon and description above the tabs, version below
+
+### Fixed
+- Combat options: the example follows the switches for kills and deaths
+- Secret values in combat no longer cause errors in the travel measurement and the double click
+
 ## [0.3.25] - 2026-10-10
 
 ### Changed

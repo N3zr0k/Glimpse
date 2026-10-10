@@ -63,6 +63,7 @@ Verbindliche Regeln f체r alle Glimpse-Addons, festgelegt von Sven. Sie gelten f�
 * Logik-Tests f체r jede neue Funktion. Die Tests laufen ohne WoW (`lua tests/run.lua`).
 * luacheck ohne eine einzige Warnung.
 * `python3 tools/check.py` muss durchlaufen.
+* Vor dem Bauen zus채tzlich `python3 tools/check.py --tag v<Version>`: Das pr체ft wie die CI, ob der CHANGELOG einen Abschnitt f체r die Version hat.
 
 ## Versionen und Releases
 

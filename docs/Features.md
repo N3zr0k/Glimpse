@@ -4,7 +4,7 @@ Alle Funktionen, die in diesem Repository (Glimpse und Glimpse: Database) eingeb
 Tabelle am Ende zeigt, welche Funktion Daten in der Datenbank liest, schreibt oder beides. Die Dateien dazu stehen in
 [Files.md](Files.md), alle gespeicherten Werte in [API.md](API.md).
 
-Stand: Core 0.3.40-beta.1.
+Stand: Core 0.3.42-beta.1.
 
 ## Glimpse (Core)
 

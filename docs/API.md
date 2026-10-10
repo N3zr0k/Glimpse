@@ -4,7 +4,7 @@ Alle Werte, die die Glimpse-Suite in Glimpse: Database speichert, und wie ein Ad
 eingetragen, sobald sie gespeichert werden (Regel in `REGELN.md`). Die vollständige Database-API steht in
 `DEVELOPER.md`, Kapitel „Glimpse: Database“.
 
-Stand: Core 0.3.40-beta.1.
+Stand: Core 0.3.42-beta.1.
 
 ## Grundlagen
 

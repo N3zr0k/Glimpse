@@ -1,9 +1,9 @@
 ## Interface: 16001
-## Title: Glimpse |cff00ff00v0.3.25|r
+## Title: Glimpse
 ## Notes: Minimalistic and powerful tooltip enhancement.
 ## Notes-deDE: Minimalistische und leistungsstarke Tooltip-Erweiterung.
 
-## Version: 0.3.40-beta.1
+## Version: 0.3.42-beta.1
 ## Author: N3zr0k
 ## X-Website: https://github.com/N3zr0k/Glimpse
 ## X-Repo: https://github.com/N3zr0k/Glimpse

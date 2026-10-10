@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.42] - 2026-10-10
+
+### Fixed
+- The data areas of Glimpse: Database are now grouped under Glimpse in the addon list
+
+## [0.3.41] - 2026-10-10
+
+### Fixed
+- The addon list showed an old hard-coded version in the Glimpse title; the data areas of Glimpse: Database now have the icon and list Glimpse as a dependency
+
 ## [0.3.40] - 2026-10-10
 
 ### Added

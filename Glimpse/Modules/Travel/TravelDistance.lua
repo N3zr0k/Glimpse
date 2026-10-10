@@ -43,6 +43,8 @@ local function Underwater()
     return false
 end
 
+Travel.IsUnderwater = Underwater
+
 --- Fortbewegungsart für eine Messung, bei der sich die Position geändert hat. carrySteps = Schritte in Folge im Stehen bewegt,
 -- instance = Instanz der Messung (Tiefenbahn)
 function Travel:GetMode(carrySteps, instance, fast)
@@ -125,6 +127,7 @@ function Travel:Measure()
     local yards, mode = Step(self)
     if last then self:TramProfile(last) end
     self:TramTick(mode, yards, last)
+    self:RecordsTick(mode, yards, last)
     return yards
 end
 
@@ -156,6 +159,7 @@ function Travel:StartDistance()
     self:RegisterEvent("PLAYER_LEAVING_WORLD", function()
         self:BeforeLoading(last)
         self:EndTramRide()
+        self:ResetRecords()
         last = nil
         self:FlushDistance()
     end)

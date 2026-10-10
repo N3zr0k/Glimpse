@@ -11,6 +11,12 @@ local Glimpse = LibStub("AceAddon-3.0"):GetAddon((...))
 --   traveltime  Fortbewegungsart                   Sekunden in Bewegung
 --   teleport    0                                  Teleport, Ruhestein, Portal; ohne Strecke
 --   jump        0                                  Sprünge mit der Leertaste
+--   speedmax    Fortbewegungsart (1 gehen, 2 Reittier)   Höchsttempo, Yards pro Sekunde (Rekord, TravelRecords*.lua)
+--   speedmin    wie speedmax                      niedrigstes Tempo über 1 Yard pro Sekunde, 2 s gehalten
+--   fallmax     0                                 tiefster Sturz in Yards (Schätzung)
+--   breathmax   0                                 längste Zeit unter Wasser am Stück, Sekunden
+--   swimmax     0                                 längste Strecke am Stück geschwommen, Yards
+--   jumpmilestone 0                               zuletzt gemeldeter Sprung-Meilenstein
 --   tram        Ziel (1 Sturmwind, 2 Eisenschmiede, 0 unbekannt)  Fahrten mit der Tiefenbahn; Summe über alle IDs = alle Fahrten
 -- Nachrichten (AceEvent, z. B. für eine Ankunftsanzeige):
 --   GLIMPSE_TRAVEL_RIDE_START, kind, id, startTime, seconds   kind "tram" (id = Ziel, 0 = unbekannt; seconds = feste
@@ -43,6 +49,15 @@ Travel.api = {
     IsMounted = IsMounted,
     GetUnitSpeed = GetUnitSpeed,
     IsFalling = IsFalling,
+    C_MountJournal = C_MountJournal,
+    UnitBuff = UnitBuff,
+    ShowNotice = function(text)
+        if RaidNotice_AddMessage and RaidWarningFrame and ChatTypeInfo then
+            RaidNotice_AddMessage(RaidWarningFrame, text, ChatTypeInfo["RAID_WARNING"])
+        elseif UIErrorsFrame then
+            UIErrorsFrame:AddMessage(text, 1, 0.82, 0)
+        end
+    end,
     IsInInstance = IsInInstance,
     HBD = LibStub("HereBeDragons-2.0", true),
 }
@@ -57,7 +72,10 @@ function Travel.Ask(func, ...)
 end
 
 function Travel:OnInitialize()
-    self.debug = Glimpse:NewDebugger("Travel", { "distance", "zone", "flight" })
+    if Glimpse.db and Glimpse.db.RegisterNamespace then
+        self.recordSettings = Glimpse.db:RegisterNamespace("TravelRecords", { profile = self.RECORD_DEFAULTS })
+    end
+    self.debug = Glimpse:NewDebugger("Travel", { "distance", "zone", "flight", "records" })
     Glimpse:RegisterProbe("travel", "tram", function(args) return self:TramProbe(args) end,
         "Stadt, Start und Fahrt der Tiefenbahn; \"profile\" schaltet das Geschwindigkeitsprofil um")
 end
@@ -77,7 +95,9 @@ function Travel:OnEnable()
     self:StartZones()
     self:StartFlights()
     self:StartJumps()
+    self:StartRecords()
     self:RegisterEvent("PLAYER_LOGOUT", function()
+        self:ResetRecords()
         self:FlushDistance()
         self:LeaveZone()
         self:CancelFlight()

@@ -3,6 +3,7 @@
     <Include file="Locations\Locations.xml"/>
     <Include file="Combat\Combat.xml"/>
     <Include file="Travel\Travel.xml"/>
+    <Include file="Save\Save.xml"/>
     <Script file="Example\Example.lua"/>
     <Script file="TooltipDebug\TooltipDebug.lua"/>
 </Ui>

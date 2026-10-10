@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.35] - 2026-10-10
+
+### Added
+- Records: best values for running and riding speed, deepest fall, longest time under water and longest swim, with funny messages on screen and in chat (tab Records)
+- Jump milestones from 100 up to one million jumps, each with its own saying
+- Database: records (highest and lowest values) next to the counters
+
+## [0.3.34] - 2026-10-10
+
+### Added
+- Saving: asks to reload when entering a rest area once enough changes or time have passed, so collected data reaches the disk (sliders in the Data tab)
+
 ## [0.3.33] - 2026-10-10
 
 ### Changed

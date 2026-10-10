@@ -1,0 +1,6 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <!-- Save.lua legt das Modul an, die anderen Dateien erweitern es. -->
+    <Script file="Save.lua"/>
+    <Script file="SavePrompt.lua"/>
+    <Script file="SaveOptions.lua"/>
+</Ui>

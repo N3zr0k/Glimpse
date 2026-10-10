@@ -8,6 +8,7 @@
     <Script file="Namespace\Namespace.lua"/>
     <Script file="Namespace\Query.lua"/>
     <Script file="Namespace\Counters.lua"/>
+    <Script file="Namespace\Records.lua"/>
     <Script file="Namespace\Buckets.lua"/>
     <Script file="Namespace\Days.lua"/>
     <Script file="Namespace\Locations.lua"/>

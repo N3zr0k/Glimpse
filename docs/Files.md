@@ -31,7 +31,7 @@ Namespace `combat` und `travel` liegen im Bereich Core (`GlimpseDB_Core`). Ein S
 | `Core/DoubleClick/DoubleClickDebug.lua` | Log der letzten Doppelklicks, Probe `click handlers` | – | Core/Debug |
 | `Core/Options.lua` | Optionsfenster: Übersicht, Erweiterungen mit Version und Mindestversion, Profile | – | AceConfig, AceConfigDialog, AceDBOptions |
 | `Core/Credits.lua` | Credits der Suite (Autor, Bildnachweise aller Addons, Dank) einmal in der Übersicht | – | Core/Options.lua |
-| `Core/Data.lua` | Tab „Daten“: Bereiche mit Größe, Export, Import, Zurücksetzen; Probe `db migration` | liest alle Bereiche (Größe), Export, Import, Zurücksetzen | Glimpse_Database optional |
+| `Core/Data.lua` | Tab „Daten“: Sichern (Modul Save), Bereiche mit Größe, Export, Import, Zurücksetzen; Probe `db migration` | liest alle Bereiche (Größe), Export, Import, Zurücksetzen | Glimpse_Database optional |
 | `Core/IDs.lua` | ID-Helfer: GUID zerlegen, NPC-ID, Namen von Item/Zauber/Karte, Zonen-Schlüssel, Position | – | Modul Locations |
 | `Core/Debug/Debug.lua` | Debug-Modus an/aus, einfache Ausgabe `module:Debug` | – | AceConfigRegistry |
 | `Core/Debug/DebugTag.lua` | Addon-Kennung `[Glimpse: Name]` in Blau für Debug-Ausgaben in Chat und Tooltip, Addon aus dem Aufrufstapel | – | – |
@@ -66,11 +66,23 @@ Namespace `combat` und `travel` liegen im Bereich Core (`GlimpseDB_Core`). Ein S
 | `Modules/Locations/Units.lua` | Entfernung in Yards/Meilen oder Metern/Kilometern, Option dazu | – (Einstellung in `GlimpseSettings`) | – |
 | `Modules/Locations/Waypoint.lua` | Wegpunkt über TomTom, sonst Spielmarkierung | – | TomTom optional |
 | `Modules/Travel/Travel.xml` | Lädt das Modul Travel | – | – |
+| `Modules/Save/Save.xml` | Lädt das Modul Save | – | – |
+| `Modules/Save/Save.lua` | Modul Save: `api`-Tabelle, Einstellungen, zählt die Änderungen der Database seit dem Start | liest: nur die Änderungsmeldung `EVENT_CHANGED`, keine Daten | Glimpse_Database optional, ohne bleibt das Modul still |
+| `Modules/Save/SavePrompt.lua` | Rückfrage mit Neuladen beim Betreten eines Ruhebereichs, ab Menge oder Zeit | – | Blizzard: `IsResting`, `StaticPopup`, `ReloadUI` |
+| `Modules/Save/SaveOptions.lua` | Block „Sichern“ im Tab „Daten“: Status, Schalter, zwei Regler, „Jetzt sichern“ | – | `Core/Data.lua` hängt ihn ein |
 | `Modules/Travel/Travel.lua` | Modul Travel: `api`-Tabelle, Anmeldung als Schreiber mit Tageswerten, `Count` | **schreibt** `travel` (Anmeldung) | Glimpse_Database optional, HereBeDragons |
 | `Modules/Travel/TravelDistance.lua` | Strecke und Reisezeit je Fortbewegungsart (auch Schiff/Zeppelin, Tiefenbahn, unter Wasser), Sprünge werden verworfen; Takt für die Flugzeit | **schreibt** `travel`: `distance`, `traveltime` | Travel.lua, HereBeDragons |
 | `Modules/Travel/TravelTeleports.lua` | Teleport, Ruhestein, Portal je Charakter, mit und ohne Ladebildschirm | **schreibt** `travel`: `teleport` | Travel.lua, TravelDistance.lua, HereBeDragons |
 | `Modules/Travel/TravelJumps.lua` | Sprünge mit der Leertaste je Charakter (Hook auf JumpOrAscendStart) | **schreibt** `travel`: `jump` | Travel.lua |
 | `Modules/Travel/TravelTram.lua` | Fahrten mit der Tiefenbahn: Startstadt, Ziel, Erkennung in der Instanz (Haltestelle oder Verlassen der Instanz beendet eine Fahrt, Laufen im Wagen nicht), Probe `travel tram` mit Geschwindigkeitsprofil | **schreibt** `travel`: `tram`; sendet `GLIMPSE_TRAVEL_RIDE_*` | Travel.lua, TravelDistance.lua |
+| `Modules/Travel/TravelRecords.lua` | Rekorde: Eintragen in die Database (ab 1 % besser), Meldung mit Pause und Ausgabe (Bildschirm/Chat), Formate für Tempo, Strecke und Zeit, Einstellungen | **schreibt** `travel`: Rekordarten (`speedmax`, `speedmin`, `fallmax`, `breathmax`, `swimmax`, `jumpmilestone`) | Travel.lua, Glimpse_Database (`SetMax`/`SetMin`) |
+| `Modules/Travel/TravelRecordsTexts.lua` | Meldungstexte (mehrere Varianten je Art, ein Text je Sprung-Meilenstein), Deutsch und Englisch | – | – |
+| `Modules/Travel/TravelRecordsSpeed.lua` | Tempo-Rekord zu Fuß und beim Reiten (4 Messungen = 2 Sekunden), Name des Reittiers | **schreibt** `travel`: `speedmax`, `speedmin` | TravelDistance.lua, C_MountJournal oder Buff-Symbol |
+| `Modules/Travel/TravelRecordsFall.lua` | Fallrekord aus der Fallzeit, Prüfung alle 0,1 s | **schreibt** `travel`: `fallmax` | Blizzard: `IsFalling` |
+| `Modules/Travel/TravelRecordsWater.lua` | Zeit unter Wasser am Stück und Schwimmstrecke am Stück, gewertet beim Auftauchen | **schreibt** `travel`: `breathmax`, `swimmax` | TravelDistance.lua, `GetMirrorTimerInfo` |
+| `Modules/Travel/TravelRecordsJumps.lua` | Sprung-Meilensteine mit Spruch, einmal je Charakter | **liest** `travel`: `jump`; **schreibt** `jumpmilestone` | TravelJumps.lua |
+| `Modules/Travel/TravelRecordsList.lua` | Rekordliste im Chat (Knopf „Rekorde anzeigen“) | **liest** `travel`: Rekordarten, Charakter und Account | – |
+| `Modules/Travel/TravelRecordsOptions.lua` | Tab „Rekorde“: Schalter je Art, Ausgabe, Knopf | – (Einstellungen in `GlimpseSettings`) | Core/Options.lua |
 | `Modules/Travel/TravelZones.lua` | Betretene Zonen und Aufenthaltsdauer | **schreibt** `travel`: `zone`, `zonetime` | Travel.lua |
 | `Modules/Travel/TravelFlightPoints.lua` | Flugpunkte von der offenen Flugkarte, bekannte je Charakter | **schreibt** `travel`: Orte, `flightpoint` | Travel.lua, C_TaxiMap |
 | `Modules/Travel/TravelFlights.lua` | Flugzeit und Strecke je Route vom Abheben bis zur Landung | **schreibt** `travel`: `flight`, `flighttime`, `flightdistance` | Travel.lua, TravelFlightPoints.lua |
@@ -98,6 +110,7 @@ Keine Oberfläche, kein Ace3. API über das Global `GlimpseDB`, private Tabelle 
 | `Core/Namespace/Namespace.lua` | Namespaces anmelden (ein Schreiber), Besitzer je Addon-Ordner, lesen, Umzug zwischen Bereichen | schreibt `GlimpseDB_Meta.namespaces` | Areas.lua, `debugstack` |
 | `Core/Namespace/Query.lua` | `scope` und Herkunft (own, imported, baseline, external) für alle Abfragen | liest | – |
 | `Core/Namespace/Counters.lua` | Zähler je Charakter, Art, ID und Zone, Startwerte, Summen | schreibt/liest Namespace-Daten | Buckets.lua |
+| `Core/Namespace/Records.lua` | Rekorde (Höchst- und Tiefstwerte) je Charakter, Art und ID: `SetMax`, `SetMin`, `GetMax`, `GetMin` | schreibt/liest Namespace-Daten (`max`, `min`) | Counters.lua |
 | `Core/Namespace/Buckets.lua` | Stunden-Buckets für Zeiträume | schreibt/liest Namespace-Daten | Time.lua |
 | `Core/Namespace/Days.lua` | Tageswerte (ein Wert je Tag) für Namespaces mit `days = true`, heute und letzte 7 Tage | schreibt/liest Namespace-Daten | Time.lua |
 | `Core/Namespace/Locations.lua` | Orte (Karte, X, Y) verpackt speichern und abfragen | schreibt/liest Namespace-Daten | Adapters.lua |

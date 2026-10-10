@@ -17,6 +17,7 @@ local DB = GlimpseDB
 --     seen[char][kind][id]             { erster, letzter } Zeitstempel
 --     hours[char][kind][hour]          Stunden-Buckets je Art
 --     idHours[char][kind][id][hour]    Stunden-Buckets je ID, dünn besetzt
+--     max/min[char][kind][id]          Rekord { Wert, Zeit, mapID } (Records.lua)
 --     days[char][kind][id][day]        Tageswerte je ID (nur mit days = true), day = lokales Datum JJJJMMTT
 --   places[source][mapID][xy] = id     Orte (Locations.lua), ohne Charakter
 -- Bei imported ist char der Charakter, von dem die Daten stammen.

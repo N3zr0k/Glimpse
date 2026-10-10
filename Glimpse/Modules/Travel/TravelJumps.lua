@@ -10,6 +10,7 @@ function Travel:OnJump()
     if Travel.Ask(api.UnitOnTaxi, "player") or Travel.Ask(api.IsSwimming) then return false end
     if Travel.Ask(api.IsFalling) then return false end
     self:Count("jump", 0)
+    self:CheckJumpMilestone()
     return true
 end
 

@@ -19,6 +19,7 @@ globals = {
 
 -- Blizzard-API und Mixins (nur lesen)
 read_globals = {
+    "C_MountJournal", "UnitBuff", "UIErrorsFrame", "ChatTypeInfo", "RaidWarningFrame", "RaidNotice_AddMessage",
     "LibStub", "CreateFrame", "C_Timer", "C_Item", "C_Loot", "C_AddOns", "C_ClickBindings", "C_Spell",
     "C_Container", "C_TooltipInfo", "C_ActionBar", "Enum", "TooltipDataProcessor",
     "GameTooltip", "ItemRefTooltip", "ShoppingTooltip1", "ShoppingTooltip2", "UIParent", "Settings",
@@ -28,7 +29,7 @@ read_globals = {
     "GetLootSlotLink", "GetLootSourceInfo", "GetBindingKey", "GetBindingText", "GetBindingAction",
     "GetActionInfo", "GetMacroInfo", "GetMacroBody", "GetShapeshiftForm", "GetBonusBarOffset",
     "GetActionBarPage", "GetOverrideBarIndex", "HasVehicleActionBar", "HasOverrideActionBar",
-    "HasBonusActionBar", "GetNumShapeshiftForms", "InCombatLockdown", "GetCVar",
+    "HasBonusActionBar", "GetNumShapeshiftForms", "InCombatLockdown", "IsResting", "UnitIsDeadOrGhost", "ReloadUI", "GetCVar",
     "tinsert", "tremove", "wipe", "format", "strsplit", "strjoin", "strmatch", "strtrim", "strlower",
     "strupper", "strfind", "gsub", "strsub", "tostringall", "date", "time", "ceil", "floor",
     "tContains", "CopyTable", "Mixin", "_G",

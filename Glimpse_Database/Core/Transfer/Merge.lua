@@ -65,3 +65,22 @@ function P.MergePlaces(target, source)
         end
     end
 end
+
+-- Rekorde: records[kind][id] = { Wert, Zeit, mapID }; der bessere Wert gewinnt (higher = true für max)
+function P.MergeRecords(target, source, higher)
+    if type(source) ~= "table" then return end
+    for kind, ids in pairs(source) do
+        if IsKey(kind) and type(ids) == "table" then
+            local into = P.Path(target, kind)
+            for id, entry in pairs(ids) do
+                if IsKey(id) and type(entry) == "table" and IsNumber(entry[1]) and IsNumber(entry[2]) then
+                    local old = into[id]
+                    local better = not old or (higher and entry[1] > old[1]) or (not higher and entry[1] < old[1])
+                    if better then
+                        into[id] = { entry[1], entry[2], IsNumber(entry[3]) and entry[3] or nil }
+                    end
+                end
+            end
+        end
+    end
+end

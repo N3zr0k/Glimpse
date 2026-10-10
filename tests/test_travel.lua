@@ -14,7 +14,7 @@ local function setup()
     stub.load("Core/Debug/Debug.lua", "Glimpse")
     stub.load("Core/Debug/Debugger.lua", "Glimpse")
     stub.load("Core/IDs.lua", "Glimpse")
-    for _, file in ipairs({ "Travel", "TravelDistance", "TravelTeleports", "TravelJumps", "TravelTram", "TravelZones", "TravelFlightPoints", "TravelFlights" }) do
+    for _, file in ipairs({ "Travel", "TravelDistance", "TravelTeleports", "TravelJumps", "TravelTram", "TravelRecords", "TravelRecordsTexts", "TravelRecordsSpeed", "TravelRecordsFall", "TravelRecordsWater", "TravelRecordsJumps", "TravelRecordsList", "TravelZones", "TravelFlightPoints", "TravelFlights" }) do
         stub.load("Modules/Travel/" .. file .. ".lua", "Glimpse")
     end
 
@@ -54,12 +54,34 @@ local function setup()
         for _, entry in ipairs(counts) do if entry.kind == kind and entry.id == id then total = total + entry.amount end end
         return total
     end
+    -- Rekorde: Wert je Art und ID, besser gewinnt
+    local records = { max = {}, min = {} }
+    local function Setter(field, better)
+        return function(_, kind, id, value)
+            local key = kind .. ":" .. id
+            local old = records[field][key]
+            if old and not better(value, old) then return false, old end
+            records[field][key] = value
+            return true, old
+        end
+    end
+    ns.SetMax = Setter("max", function(new, old) return new > old end)
+    ns.SetMin = Setter("min", function(new, old) return new < old end)
+    ns.GetMax = function(_, kind, id) return records.max[kind .. ":" .. id] end
+    ns.GetMin = function(_, kind, id) return records.min[kind .. ":" .. id] end
+    ns.records = records
+
+    local shown = { chat = {}, screen = {} }
+    function Glimpse:Print(text) shown.chat[#shown.chat + 1] = text end
+    Travel.api.ShowNotice = function(text) shown.screen[#shown.screen + 1] = text end
+    ns.shown = shown
+
     _G.CreateFrame = function() return { SetScript = function() end } end
     _G.GlimpseDB = { Register = function() return ns end }
     Travel:OnInitialize()
     Travel:OnEnable()
     _G.GlimpseDB = nil
-    return Travel, counts, pos, state, zone, Glimpse
+    return Travel, counts, pos, state, zone, Glimpse, ns
 end
 
 local function Sum(counts, kind, id)
@@ -538,4 +560,155 @@ test("Reisen: Flug meldet Abheben und Landung", function()
     Travel:OnTaxiState()
     Travel:CancelFlight()
     eq(#Messages(Travel, "GLIMPSE_TRAVEL_RIDE_END"), 2, "Abbruch")
+end)
+
+-- Rekorde (TravelRecords*.lua)
+
+-- Läuft n Messungen im Abstand von 0,5 s mit der Geschwindigkeit speed (Yards pro Sekunde)
+local function Run(Travel, pos, speed, steps)
+    for _ = 1, steps do
+        stub.now = stub.now + 0.5
+        pos.x = pos.x + speed * 0.5
+        Travel:Measure()
+    end
+end
+
+test("Rekorde: Lauftempo zählt erst nach zwei Sekunden", function()
+    local Travel, _, pos, _, _, _, ns = setup()
+    stub.now = 100
+    Travel:Measure()
+    Run(Travel, pos, 8, 3)
+    eq(ns.records.max["speedmax:1"], nil, "nach 1,5 s noch nichts")
+    Run(Travel, pos, 8, 1)
+    near(ns.records.max["speedmax:1"], 8, "Höchsttempo")
+    near(ns.records.min["speedmin:1"], 8, "Tiefsttempo")
+    eq(#ns.shown.chat, 1, "eine Meldung im Chat")
+    eq(#ns.shown.screen, 1, "eine Meldung auf dem Bildschirm")
+    assert(ns.shown.chat[1]:find("%d+ km/h"), ns.shown.chat[1])
+end)
+
+test("Rekorde: Meldung erst nach 1 % mehr und höchstens alle 30 s", function()
+    local Travel, _, pos, _, _, _, ns = setup()
+    stub.now = 100
+    Travel:Measure()
+    Run(Travel, pos, 8, 8)
+    local before = #ns.shown.chat
+    Run(Travel, pos, 8.04, 8)
+    eq(ns.records.max["speedmax:1"], 8, "unter 1 % mehr bleibt der alte Wert")
+    Run(Travel, pos, 10, 8)
+    near(ns.records.max["speedmax:1"], 10, "neuer Rekord gespeichert")
+    eq(#ns.shown.chat, before, "Meldung unterdrückt, weniger als 30 s seit der letzten")
+end)
+
+test("Rekorde: Reiten lobt das Reittier, Name aus dem Journal", function()
+    local Travel, _, pos, state, _, _, ns = setup()
+    Travel.api.C_MountJournal = {
+        GetMountIDs = function() return { 1, 2 } end,
+        GetMountInfoByID = function(id) return id == 2 and "Brauner Hengst" or "Falke", 0, 0, id == 2 end,
+    }
+    state.mounted = true
+    stub.now = 100
+    Travel:Measure()
+    Run(Travel, pos, 14, 5)
+    near(ns.records.max["speedmax:2"], 14, "Reittempo")
+    eq(ns.records.max["speedmax:1"], nil, "Laufen bleibt leer")
+    assert(ns.shown.chat[1]:find("Brauner Hengst", 1, true), ns.shown.chat[1])
+end)
+
+test("Rekorde: ohne Namen steht ein Ersatzwort, Schalter und Ausgabe wirken", function()
+    local Travel, _, pos, state, _, _, ns = setup()
+    Travel.recordSettings = { profile = { mount = true, output = "screen" } }
+    state.mounted = true
+    stub.now = 100
+    Travel:Measure()
+    Run(Travel, pos, 14, 5)
+    eq(#ns.shown.chat, 0, "nur Bildschirm")
+    assert(ns.shown.screen[1]:find("your mount", 1, true), ns.shown.screen[1])
+
+    Travel.recordSettings.profile.mount = false
+    stub.now = 500
+    Run(Travel, pos, 20, 5)
+    near(ns.records.max["speedmax:2"], 20, "Rekord wird trotz ausgeschalteter Meldung gespeichert")
+    eq(#ns.shown.screen, 1, "keine neue Meldung")
+end)
+
+test("Rekorde: kein Tempo-Rekord beim Fallen", function()
+    local Travel, _, pos, state, _, _, ns = setup()
+    state.falling = true
+    stub.now = 100
+    Travel:Measure()
+    Run(Travel, pos, 20, 6)
+    eq(ns.records.max["speedmax:1"], nil, "nichts gespeichert")
+end)
+
+test("Rekorde: Sturz aus der Fallzeit, Sprünge zählen nicht", function()
+    local Travel, _, _, state, _, _, ns = setup()
+    state.falling = true
+    Travel:FallTick(10)
+    state.falling = false
+    Travel:FallTick(10.8)
+    eq(ns.records.max["fallmax:0"], nil, "Sprung ist kein Sturz")
+
+    state.falling = true
+    Travel:FallTick(20)
+    state.falling = false
+    Travel:FallTick(22)
+    near(ns.records.max["fallmax:0"], 0.5 * 19.29 * 4, "zwei Sekunden Fall")
+    eq(#ns.shown.chat, 1, "Meldung")
+
+    -- nach der Endgeschwindigkeit wächst die Tiefe linear
+    near(Travel:FallDepth(4), 0.5 * 19.29 * (60 / 19.29) ^ 2 + 60 * (4 - 60 / 19.29), "Endgeschwindigkeit")
+end)
+
+test("Rekorde: längste Zeit unter Wasser wird beim Auftauchen gewertet", function()
+    local Travel, _, pos, state, _, _, ns = setup()
+    stub.now = 100
+    Travel:Measure()
+    state.swimming, state.under = true, true
+    Run(Travel, pos, 0, 20)
+    eq(ns.records.max["breathmax:0"], nil, "noch unter Wasser")
+    state.under = false
+    Run(Travel, pos, 0, 1)
+    near(ns.records.max["breathmax:0"], 10, "10 Sekunden")
+    assert(ns.shown.chat[1]:find("0:10", 1, true), ns.shown.chat[1])
+end)
+
+test("Rekorde: Schwimmstrecke am Stück", function()
+    local Travel, _, pos, state, _, _, ns = setup()
+    stub.now = 100
+    Travel:Measure()
+    state.swimming = true
+    Run(Travel, pos, 4, 20) -- 40 Yards
+    state.swimming = false
+    Run(Travel, pos, 0, 2)
+    near(ns.records.max["swimmax:0"], 40, "40 Yards")
+    eq(#ns.shown.chat, 1, "Meldung")
+end)
+
+test("Rekorde: Sprung-Meilensteine einmal je Charakter", function()
+    local Travel, _, _, _, _, _, ns = setup()
+    for _ = 1, 99 do Travel:OnJump() end
+    eq(#ns.shown.chat, 0, "99 Sprünge ohne Meldung")
+    Travel:OnJump()
+    eq(#ns.shown.chat, 1, "100 Sprünge")
+    assert(ns.shown.chat[1]:find("100", 1, true), ns.shown.chat[1])
+    eq(ns.records.max["jumpmilestone:0"], 100, "Meilenstein gespeichert")
+    Travel:OnJump()
+    eq(#ns.shown.chat, 1, "nicht doppelt")
+    eq(Travel.JUMP_MILESTONES[#Travel.JUMP_MILESTONES], 1000000, "nach einer Million ist Schluss")
+end)
+
+test("Rekorde: jeder Meilenstein hat einen Spruch in beiden Sprachen", function()
+    local Travel = setup()
+    for _, locale in ipairs({ "enUS", "deDE" }) do
+        _G.GetLocale = function() return locale end
+        local texts = Travel:RecordTexts("jump")
+        for _, milestone in ipairs(Travel.JUMP_MILESTONES) do
+            assert(texts[milestone], locale .. " " .. milestone)
+        end
+        for _, kind in ipairs({ "walk", "mount", "fall", "breath", "swim" }) do
+            assert(#Travel:RecordTexts(kind) >= 3, locale .. " " .. kind)
+        end
+    end
+    _G.GetLocale = nil
 end)

@@ -4,7 +4,7 @@ Alle Werte, die die Glimpse-Suite in Glimpse: Database speichert, und wie ein Ad
 eingetragen, sobald sie gespeichert werden (Regel in `REGELN.md`). Die vollständige Database-API steht in
 `DEVELOPER.md`, Kapitel „Glimpse: Database“.
 
-Stand: Core 0.3.33-alpha.1.
+Stand: Core 0.3.35-alpha.1.
 
 ## Grundlagen
 
@@ -28,6 +28,8 @@ Besitzer des Namespace, lesen jeder.
 | `reader:GetDays(kind, id, scope, count)` | `{ [JJJJMMTT] = n }` der letzten `count` Tage, nur bei Namespaces mit Tageswerten |
 | `reader:GetDayCount(kind, id, scope, count)` | Summe daraus; `count = 1` heute, `7` letzte 7 Tage |
 | `reader:GetLocations(mapID, id, scope)` | Liste `{ mapID, x, y, id, source }` |
+| `reader:GetMax(kind, id, scope)` | Rekord: Höchstwert, Zeit (Unix) und Zone, bester Wert der Charaktere des scope; `nil` ohne Rekord |
+| `reader:GetMin(kind, id, scope)` | Rekord: Tiefstwert, Zeit und Zone, sonst wie `GetMax` |
 
 **scope:** `"char"` (Standard, eingeloggter Charakter), `"account"` (alle eigenen Charaktere), `"all"` (dazu fremde
 aus Importen) oder ein Charakter-Index aus `GlimpseDB:GetCharacters()`. Als Tabelle zusätzlich
@@ -37,6 +39,11 @@ aus Importen) oder ein Charakter-Index aus `GlimpseDB:GetCharacters()`. Als Tabe
 
 **Weltwissen:** Arten, die als Weltwissen markiert sind, gehen beim Export als Summe aller Charaktere raus und dürfen
 von jedem importiert werden. Alle anderen Arten sind persönlich.
+
+**Rekorde:** Neben den Zählern gibt es Höchst- und Tiefstwerte. Der Schreiber meldet mit `writer:SetMax(kind, id, value, mapID)`
+bzw. `writer:SetMin(...)`; gespeichert wird nur ein besserer Wert. Rückgabe: `true` und der alte Wert bei einem Rekord,
+sonst `false` und der Rekord. Rekorde sind persönlich (nicht Weltwissen), zählen nicht in `GetCount`, lösen aber
+`EVENT_CHANGED` aus. Ablage je Charakter: `{ Wert, Zeit, mapID }`. Der Import behält den besseren Wert.
 
 **Änderungen:** `GlimpseDB.RegisterCallback(self, GlimpseDB.EVENT_CHANGED, function(_, nsName, kind, id) end)`;
 `nsName = nil` heißt viele Änderungen auf einmal (Import, Zurücksetzen).
@@ -85,6 +92,12 @@ Fortbewegungsarten (ID bei `distance` und `traveltime`):
 | `zonetime` | Zone | Sekunden in der Zone |
 | `teleport` | 0 | Teleport, Ruhestein, Portal (ohne Strecke) |
 | `jump` | 0 | Sprünge mit der Leertaste, nur vom Boden |
+| `speedmax` | Fortbewegungsart: 1 gehen, 2 Reittier | **Rekord** (`GetMax`): höchstes Tempo in Yards pro Sekunde, mindestens 2 Sekunden gehalten; nicht beim Fallen, auf Flugroute, Schiff oder Tiefenbahn |
+| `speedmin` | 1 gehen, 2 Reittier | **Rekord** (`GetMin`): niedrigstes Tempo über 1 Yard pro Sekunde, 2 Sekunden gehalten |
+| `fallmax` | 0 | **Rekord**: tiefster Sturz in Yards, geschätzt aus der Fallzeit (ab 14 Yards, Endgeschwindigkeit 60 Yards pro Sekunde) |
+| `breathmax` | 0 | **Rekord**: längste Zeit unter Wasser am Stück in Sekunden (ab 5 Sekunden, nur wenn die Atemleiste läuft) |
+| `swimmax` | 0 | **Rekord**: längste Strecke am Stück geschwommen in Yards (ab 20 Yards) |
+| `jumpmilestone` | 0 | **Rekord**: zuletzt gemeldeter Sprung-Meilenstein (100, 500, 1000, 2500, 5000, 10000, 100000, 1000000), je Charakter |
 | `tram` | Ziel: 1 Sturmwind, 2 Eisenschmiede, 0 unbekannt | Fahrten mit der Tiefenbahn; eine Fahrt endet an der Haltestelle (Bahn 3 Sekunden nicht schneller als Laufen) oder beim Verlassen der Instanz, Laufen im Wagen beendet sie nicht; hin und zurück ohne Aussteigen sind 2; alle Fahrten: `GetCount("tram")` |
 Die Fahrt der Tiefenbahn dauert immer gleich lang (58 Sekunden ab Start, `Glimpse.modules.Travel.TRAM_SECONDS`), deshalb wird ihre Zeit nicht gemessen
 und es gibt kein `tramtime`. Je gezählter Fahrt trägt der Core dafür fest 58 Sekunden in `traveltime` (ID 8) ein, damit Auswertungen weiter mit der Reisezeit rechnen können; die Zeit wird nicht gemessen.

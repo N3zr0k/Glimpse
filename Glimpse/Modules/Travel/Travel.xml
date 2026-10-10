@@ -5,6 +5,14 @@
     <Script file="TravelTeleports.lua"/>
     <Script file="TravelJumps.lua"/>
     <Script file="TravelTram.lua"/>
+    <Script file="TravelRecords.lua"/>
+    <Script file="TravelRecordsTexts.lua"/>
+    <Script file="TravelRecordsSpeed.lua"/>
+    <Script file="TravelRecordsFall.lua"/>
+    <Script file="TravelRecordsWater.lua"/>
+    <Script file="TravelRecordsJumps.lua"/>
+    <Script file="TravelRecordsList.lua"/>
+    <Script file="TravelRecordsOptions.lua"/>
     <Script file="TravelZones.lua"/>
     <Script file="TravelFlightPoints.lua"/>
     <Script file="TravelFlights.lua"/>

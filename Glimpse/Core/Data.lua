@@ -67,6 +67,8 @@ function Glimpse:BuildDataOptions(order)
                 name = L["Glimpse: Database is not installed. Without it, Glimpse records no combat or travel data."],
                 hidden = function() return Database() ~= nil end,
             },
+            -- ohne Database gibt es nichts zu sichern
+            save = Glimpse.BuildSaveOptions and Glimpse:BuildSaveOptions(5) or nil,
             areasHeader = {
                 type = "header", order = 10, name = L["Data areas"],
                 hidden = function() return Database() == nil end,

@@ -363,6 +363,25 @@ Zonenkarte), erfasst beim Öffnen der Flugkarte; Namen liefert der Client über 
 Abheben bis zur Landung. `travel` speichert alle Arten zusätzlich als Tageswerte: Strecke und Zeit je Charakter
 insgesamt über `GetCount`, heute und die letzten 7 Tage über `GetDayCount(kind, id, scope, 1 | 7)`. Der Tab "Daten" in den Optionen zeigt die Bereiche, Export, Import und Zurücksetzen.
 
+### Rekorde (`Modules/Travel/TravelRecords*.lua`)
+
+Die Database kennt neben Zählern Rekorde (`Writer:SetMax/SetMin`, `Reader:GetMax/GetMin`, `Records.lua`; Ablage
+`max/min[char][kind][id] = { Wert, Zeit, mapID }`, Import behält den besseren Wert). Das Reise-Modul trägt sie ein
+(`Travel:NewRecord`, nur ab 1 % besser) und meldet sie (`Travel:Announce`, Pause 30 Sekunden je Art, Ausgabe nach
+Option). Gespeichert wird immer, der Schalter betrifft nur die Meldung. Die Erkennung hängt an `Travel:Measure`
+(`RecordsTick`): Tempo aus der Streckenmessung über ein Fenster von 4 Messungen (2 Sekunden), Wasser (Atem, Strecke)
+im selben Takt, der Sturz in einem eigenen 0,1-Sekunden-Takt aus der Fallzeit (der Client nennt keine Höhe). Texte
+stehen in `TravelRecordsTexts.lua`; neue Art: Texte dort, Schalter in `RECORD_DEFAULTS` und `TravelRecordsOptions.lua`,
+Zeile in `docs/API.md`.
+
+### Sichern (`Modules/Save/`)
+
+WoW schreibt SavedVariables nur bei Logout und `/reload`. Das Modul zählt die Änderungsmeldungen von Glimpse: Database
+(`EVENT_CHANGED`, `Save.pending`) und fragt beim Betreten eines Ruhebereichs (`PLAYER_UPDATE_RESTING`, `IsResting`),
+ob neu geladen werden soll. Gefragt wird nur außerhalb von Kampf und nicht als Toter. Auslöser ist die Menge
+(`changes`, 10 bis 1000) oder die Zeit seit Start oder letzter Frage (`minutes`, 0 bis 120, 0 = aus) mit mindestens
+einer Änderung. Das Neuladen löst der Klick im Dialog aus. Optionen im Tab "Daten" (`SaveOptions.lua`).
+
 ### Lokalisierung
 
 Pro Addon ein Ordner `Locales/` mit `enUS.lua` (Default, `L["Text"] = true`) und weiteren Sprachen.

@@ -182,6 +182,7 @@ function Glimpse:BuildOptions()
                 },
             },
             combat = self:BuildCombatOptions(2.5),
+            records = self.BuildRecordOptions and self:BuildRecordOptions(2.6) or nil,
             data = self:BuildDataOptions(3),
             -- "profiles" (order 100) kommt in SetupOptions dazu
         },

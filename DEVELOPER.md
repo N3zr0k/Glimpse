@@ -10,11 +10,16 @@ in [docs/REGELN.md](docs/REGELN.md).
 Glimpse/             Das Addon, nur was WoW lädt (die Junction im AddOns-Ordner zeigt hierher)
   Glimpse.toc        Einzige Quelle für Titel, Version, Notes, Icon (siehe unten)
   Glimpse.xml        Zentrale Ladeliste, nur Include-Zeilen
-  Core/              Init, IDs, Options, Data (Tab "Daten"), Modifiers, Commands, Tooltip
+  Core/              Init, IDs, Modifiers, Commands; je Funktion ein Ordner:
+    Options/         Optionsfenster, Credits, Tab "Daten"
+    Tooltip/         Tooltip-API
+    DoubleClick/     Doppelklick-Verteiler
     Debug/           Debug (Schalter), Debugger (Kategorien, Log), Probes, LogWindow
   Commands/          ein Slash-Befehl = eine Datei (Help, Info, Config, Debug, Probe)
   Locales/           enUS (Default) und deDE, eingetragen in Locales.xml
-  Modules/           interne Module, je Modul ein Ordner (Locations, Combat, Travel, Example als Vorlage, TooltipDebug)
+  Modules/           interne Module, je Modul ein Ordner (Combat, Travel, Save, Example als Vorlage, TooltipDebug)
+    Helper/          gemeinsam genutzte Module für andere Module und Erweiterungen (Locations)
+    Travel/          Travel.lua, darunter je Funktion ein Ordner: Movement, Tram, Records, Flights
   Libs/              Ace3 und HereBeDragons (mitgeliefert, damit ein Klon sofort läuft)
 Glimpse_Database*/   Glimpse: Database und ihre vier Datenbereiche (Kapitel "Glimpse_Database")
 docs/REGELN.md       Regeln für alle Glimpse-Addons
@@ -28,6 +33,8 @@ Alle Glimpse-Repos sind so aufgebaut: ein Ordner je Addon mit dem Namen des Addo
 Regeln für den Addon-Ordner (gelten für alle Glimpse-Addons):
 * Die TOC nennt nur eine XML, alle Lua-Dateien werden über XML geladen (Glimpse.xml als Vorbild).
 * Lieber viele kleine Lua-Dateien als eine große, getrennt nach Thema. Helfer heißen nach ihrer Hauptdatei (`Fishing.lua`, `FishingLure.lua`).
+* Hat eine Funktion mehrere Dateien, bekommt sie einen eigenen Ordner mit eigener XML (z. B. `Modules/Travel/Records/`).
+  Was mehrere Module oder Erweiterungen nutzen, liegt im Core oder in `Modules/Helper/`, nicht in einem Fachmodul.
 * Oberste Ebene nur: `Core/` (eigentliche Funktionen, Unterordner nach Bedarf), `Libs/` (externe Libraries), `Commands/` (Slash-Befehle),
   `Locales/` (Übersetzungen), `Modules/` (Erweiterungen nur für dieses Addon, jede in einem eigenen Ordner), `Media/` (Icons, Bilder).
 
@@ -91,7 +98,7 @@ eingetragen.
 
 ## API-Übersicht
 
-### Tooltips (`Core/Tooltip.lua`)
+### Tooltips (`Core/Tooltip/Tooltip.lua`)
 
 Blizzard erlaubt keinen Callback, der sich wieder entfernen lässt. Glimpse hängt deshalb genau einen
 `TooltipDataProcessor`-PostCall an und verteilt selbst, mit pcall um jeden Provider. Der Aufruf wird erst
@@ -139,7 +146,7 @@ Regeln, die der Core für dich übernimmt:
 Weltobjekte (Erzadern, Kräuter) liefern in `data` kein `id`/`guid`, nur `dataInstanceID` und `type`.
 Der Name steht in der ersten Tooltip-Zeile (`tooltip:GetName() .. "TextLeft1"`).
 
-### Optionen (`Core/Options.lua`)
+### Optionen (`Core/Options/Options.lua`)
 
 | Funktion | Beschreibung |
 | --- | --- |
@@ -214,7 +221,7 @@ lässt sich je Handler die Priorität überschreiben oder der Handler abschalten
 Im Kampf sperrt der Client Bindungen und Secure-Attribute für alle Addons; dann passiert nichts. Diagnose:
 `/gli probe click handlers`, Debug-Kategorie `DoubleClick click`.
 
-### Orte (`Modules/Locations/`)
+### Orte (`Modules/Helper/Locations/`)
 
 Das Modul `Locations` bündelt alles rund um Karten, Position, Entfernungen und Wegpunkte, damit Erweiterungen es nicht
 selbst bauen müssen. Es benutzt nur Spielfunktionen; TomTom ist optional (keine harte Abhängigkeit). Schnittstellenversion:
@@ -252,7 +259,7 @@ Der Spieler stellt die Einheit in den Glimpse-Optionen (Allgemein) ein: automati
 `Glimpse:FormatDistance`, `Glimpse:GetDistanceUnit` und `Glimpse:BuildDistanceOptions` gibt es weiterhin als Kurzwege.
 Für Tests ersetzt man Einträge in `Locations.api` (die Blizzard-Funktionen).
 
-### Credits (`Core/Credits.lua`)
+### Credits (`Core/Options/Credits.lua`)
 
 Die Credits der ganzen Suite stehen einmal in der Core-Übersicht unter einer Trennlinie mit Überschrift: Autor aus der
 TOC (`## Author`), Mitwirkende, Bildnachweise und Dank. Erweiterungen haben keinen eigenen Credits-Tab. Bildnachweise
@@ -327,6 +334,11 @@ end
 `:DescribeSpell(id)`, `:DescribeMap(mapID)` (Text `Name [ID]`), `:ZoneKey()` (uiMapID, in Instanzen `-instanceID`) und
 `:Where()` (mapID, x, y, Zonenname).
 
+Namen (`Core/IDsNames.lua`, Namespace `names` in Database): `:NPCName(id)`, `:ObjectName(id)` geben den gelernten Namen in
+der Clientsprache oder nil. Der Core lernt NPCs beim Zielwechsel und bei Angreifern (`:LearnUnit(unit)`); wer weitere Namen
+kennt, meldet sie mit `:LearnName("npc" | "object", id, name)`. Die Daten stehen mit in jedem Export und bleiben beim
+Import erhalten.
+
 ### Daten (Glimpse: Database)
 
 Alle gespeicherten Daten der Suite mit Beispielen zum Abruf stehen in `docs/API.md`.
@@ -363,7 +375,7 @@ Zonenkarte), erfasst beim Öffnen der Flugkarte; Namen liefert der Client über 
 Abheben bis zur Landung. `travel` speichert alle Arten zusätzlich als Tageswerte: Strecke und Zeit je Charakter
 insgesamt über `GetCount`, heute und die letzten 7 Tage über `GetDayCount(kind, id, scope, 1 | 7)`. Der Tab "Daten" in den Optionen zeigt die Bereiche, Export, Import und Zurücksetzen.
 
-### Rekorde (`Modules/Travel/TravelRecords*.lua`)
+### Rekorde (`Modules/Travel/Records/`)
 
 Die Database kennt neben Zählern Rekorde (`Writer:SetMax/SetMin`, `Reader:GetMax/GetMin`, `Records.lua`; Ablage
 `max/min[char][kind][id] = { Wert, Zeit, mapID }`, Import behält den besseren Wert). Das Reise-Modul trägt sie ein
@@ -408,7 +420,6 @@ Glimpse_Database/               Hauptaddon, immer geladen. SavedVariables: Glimp
                                 Areas (Bereiche laden, Größe, Zurücksetzen), Events (ADDON_LOADED, PLAYER_LOGIN)
     Namespace/                  Namespace (Register, Get), Query (scope, Herkunft), Counters, Buckets, Locations, Adapters
     Transfer/                   Async (Arbeit über Frames), Codec (Text), Export, Merge (Prüfen und Zusammenführen), Import
-    AlphaMigration.lua          Übernahme aus Statistics und GatheringDB, nur in Alpha-Versionen
   Libs/                         LibStub, CallbackHandler-1.0, LibSerialize, LibDeflate
 Glimpse_Database_Gathering/     LoadOnDemand-Bereiche, nur TOC und SavedVariables GlimpseDB_<Bereich>
 Glimpse_Database_Professions/
@@ -445,8 +456,7 @@ Meldet ein anderer Ordner denselben Namespace an, bekommt er `nil, "NOT_OWNER"`,
 lädt. Code ohne Addon-Ordner (z. B. `loadstring`) bekommt `nil, "NO_ADDON"`. Lesen über `DB:Get` darf jeder.
 
 Die Namespaces aus der Zeit vor dem Schutz haben feste Besitzer: `combat` und `travel` (Glimpse), `fishing`
-(Glimpse_Professions), `gathering` (Glimpse_Gathering, früher Glimpse_GatheringDB; ein gespeicherter alter Besitzer zählt als der neue,
-`P.OWNER_RENAMES`). Nach dem Umbenennen eines Addon-Ordners gibt
+(Glimpse_Professions), `gathering` (Glimpse_Gathering). Nach dem Umbenennen eines Addon-Ordners gibt
 `/gli db owner <Namespace> reset` den Namespace frei (`DB:ResetOwner`, nur aus Glimpse); der nächste Register wird
 Besitzer. `/gli db owner <Namespace>` zeigt den Besitzer.
 
@@ -472,6 +482,7 @@ ns:Count(kind, id, mapID, amount)     -- id Standard 0, amount Standard 1; schre
 ns:SetBaseline(kind, id, value)       -- Startwert vor Glimpse, nur einmal
 ns:AddLocation(id, mapID, x, y)       -- x, y von 0 bis 1
 ns:RemoveLocation(mapID, x, y)
+ns:SetLabel(kind, id, name, locale)   -- Name zur ID, Sprache Standard: Client; lesen mit ns:GetLabel(kind, id, locale)
 
 -- Lesen (jeder, auch der Schreiber)
 local reader = DB:Get("fishing")      -- lädt den Bereich bei Bedarf; nil, wenn unbekannt
@@ -537,40 +548,6 @@ places[source][mapID][x * 10000 + y] = id
 - Exportiert wird nur `own`; zusammengeführt per Maximum, ein doppelter Import zählt nicht doppelt.
 - Exporte derselben Installation werden abgelehnt (`SAME_INSTALL`).
 - Unterschiedliche Schema-Version eines Namespace: der Namespace wird übersprungen (`skipped`).
-
-### Übernahme alter Daten
-
-`Glimpse_Database/Core/AlphaMigration.lua` übernimmt beim Login die SavedVariables von Glimpse: Statistics
-(`GlimpseStatisticsDB`) und Glimpse: GatheringDB (`GlimpseGatheringDB`) in den Block `own`. Die SavedVariables sind
-nur da, solange das alte Addon aktiv ist; sonst wartet die Übernahme auf den nächsten Login mit aktivem Addon.
-Erledigtes steht mit Zeitpunkt in `GlimpseDB_Meta.migrated` (`DB:GetMigrations()`, im Spiel `/gli probe db migration`).
-Die alten Addons behalten ihre Daten und laufen unverändert weiter.
-
-Charaktere werden nur über die GUID zugeordnet. Statistics speichert je "Name - Realm"; übernommen wird nur der
-eingeloggte Charakter, jeder Twink bei seinem eigenen Login (`migrated.statistics[Charakter-Schlüssel]`, auch wenn er
-in Statistics keine Daten hat). GatheringDB ist Weltwissen und wird beim ersten Login übernommen, ohne Charakter: es steht unter dem Eintrag
-`world` (Schlüssel "world"), der zum Account zählt, aber in `DB:GetCharacters()` fehlt. Abfragen brauchen dafür den
-scope "account" oder "all".
-
-| Namespace | Art | ID | Herkunft |
-| --- | --- | --- | --- |
-| combat | kill, death | NPC (0 = ohne Zuordnung) | Statistics, Startwerte im Block baseline |
-| fishing | cast, catch | 0, je Zone | Statistics, Startwert für catch |
-| fishing | fish | Item, je Zone | Statistics |
-| fishing | looted, loot:\<Zone>, drop:\<Zone> | Zone, Item | Glimpse_Gathering (Weltwissen), dazu Orte |
-| gathering | herb, ore, other, skin | Objekt bzw. NPC | Statistics |
-| gathering | node, nodeloot:\<Objekt>, nodedrop:\<Objekt> | Objekt, Item | Glimpse_Gathering (Weltwissen), dazu Zonen und Orte |
-| gathering | npc, npcloot:\<NPC>, npcdrop:\<NPC> | NPC, Item | Glimpse_Gathering (Weltwissen), Versuche = Kills |
-| gathering | skinned, skinloot:\<NPC>, skindrop:\<NPC> | NPC, Item | Glimpse_Gathering (Weltwissen) |
-
-`*loot` zählt die Menge, `*drop` die Beutefenster mit dem Item (Grundlage der Drop-Chance). Wer einen dieser
-Namespaces später als Schreiber anmeldet, übernimmt die Arten und die `world`-Liste aus `AlphaMigration.lua`.
-
-### Alpha-Migration
-
-Die Übernahme läuft nur in `-alpha`-Versionen (Versions-Check am Anfang der Datei), ohne eigene Optionen. Alte Exporte
-(`GSTAT1:`, `GGDB1:`) werden nicht umgewandelt, weil sie keine GUID enthalten. `tools/check.py` bricht ab, wenn es die
-Datei in einer anderen Version noch gibt: vor der ersten Beta Datei und XML-Zeile löschen.
 
 ## Prüfen
 

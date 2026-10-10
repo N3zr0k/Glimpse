@@ -66,6 +66,25 @@ function P.MergePlaces(target, source)
     end
 end
 
+-- Namen: labels[Sprache][Art][ID] = Text; vorhandene Namen bleiben
+function P.MergeLabels(target, source)
+    if type(source) ~= "table" then return end
+    for locale, kinds in pairs(source) do
+        if type(locale) == "string" and #locale <= 8 and type(kinds) == "table" then
+            for kind, ids in pairs(kinds) do
+                if IsKey(kind) and type(ids) == "table" then
+                    local into = P.Path(target, locale, kind)
+                    for id, name in pairs(ids) do
+                        if IsKey(id) and type(name) == "string" and name ~= "" and #name <= 120 and into[id] == nil then
+                            into[id] = name
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
 -- Rekorde: records[kind][id] = { Wert, Zeit, mapID }; der bessere Wert gewinnt (higher = true für max)
 function P.MergeRecords(target, source, higher)
     if type(source) ~= "table" then return end

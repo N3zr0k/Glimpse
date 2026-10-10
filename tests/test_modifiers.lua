@@ -51,12 +51,12 @@ test("Modifiers: Optionsgruppe schreibt in die Einstellungen und meldet die Änd
     eq(changed, 1, "onChange")
 end)
 
--- Version unter dem Rahmen einer Seite mit Tabs (Core/Options.lua)
+-- Version unter dem Rahmen einer Seite mit Tabs (Core/Options/Options.lua)
 local function footerSetup()
     local Glimpse = stub.newGlimpse()
     Glimpse.GetMeta = function(_, key) return key == "Version" and "1.2.3" or nil end
     Glimpse.L = Glimpse.L or {}
-    stub.load("Core/Options.lua", "Glimpse")
+    stub.load("Core/Options/Options.lua", "Glimpse")
     return Glimpse
 end
 

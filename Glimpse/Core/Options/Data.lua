@@ -126,19 +126,3 @@ function Glimpse:BuildDataOptions(order)
     }
 end
 
--- /gli probe db migration: welche Daten alter Addons schon übernommen sind
-local MIGRATIONS = { statistics = "Glimpse: Statistics", gathering = "Glimpse: Gathering" }
-
-Glimpse:RegisterProbe("db", "migration", function()
-    local DB = Database()
-    if not DB then return L["Glimpse: Database is not installed. Without it, Glimpse records no combat or travel data."] end
-    if not DB.GetMigrations then return L["No migration in this version"] end
-
-    local done, lines = DB:GetMigrations(), {}
-    for _, name in ipairs({ "statistics", "gathering" }) do
-        local stamp = done[name]
-        lines[#lines + 1] = stamp and format(L["%s: taken over on %s"], MIGRATIONS[name], date("%Y-%m-%d %H:%M", stamp))
-            or format(L["%s: not yet (addon not active)"], MIGRATIONS[name])
-    end
-    return lines
-end, L["Shows which data of the old addons was taken over"])

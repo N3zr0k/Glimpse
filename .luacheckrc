@@ -11,7 +11,7 @@ ignore = {
 
 -- Globale, die die Addons selbst setzen
 globals = {
-    "Glimpse", "GlimpseSettings", "GlimpseGatheringDB", "GlimpseStatisticsDB", "SLASH_GLIMPSE1", "StaticPopupDialogs",
+    "Glimpse", "GlimpseSettings", "SLASH_GLIMPSE1", "StaticPopupDialogs",
     -- Glimpse_Database: API und SavedVariables
     "GlimpseDB", "GlimpseDB_Meta", "GlimpseDB_Core", "GlimpseDB_Gathering", "GlimpseDB_Professions",
     "GlimpseDB_Reputation", "GlimpseDB_Misc",

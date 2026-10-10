@@ -57,6 +57,7 @@ function Combat:OnTargetEvent(event)
     local guid = Clean(api.UnitGUID("target"))
     if type(guid) == "string" then
         targetGUID = guid
+        if event == "PLAYER_TARGET_CHANGED" then Glimpse.IDs:LearnUnit("target") end
     elseif event == "PLAYER_TARGET_CHANGED" then
         targetGUID = nil
     end

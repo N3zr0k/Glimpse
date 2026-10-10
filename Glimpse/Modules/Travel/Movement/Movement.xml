@@ -1,0 +1,7 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <!-- Strecke, Teleports, Sprünge und Zonen; Travel.lua legt das Modul an. -->
+    <Script file="TravelDistance.lua"/>
+    <Script file="TravelTeleports.lua"/>
+    <Script file="TravelJumps.lua"/>
+    <Script file="TravelZones.lua"/>
+</Ui>

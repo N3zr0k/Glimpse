@@ -10,12 +10,18 @@ local function setup()
     _G.LibStub = function() return { GetAddon = function() return Glimpse end } end
     stub.load("Core/Debug/DebugTag.lua", "Glimpse")
     stub.load("Core/Debug/Probes.lua", "Glimpse")
-    stub.load("Core/Data.lua", "Glimpse")
+    stub.load("Core/Options/Data.lua", "Glimpse")
     stub.load("Core/Debug/Debug.lua", "Glimpse")
     stub.load("Core/Debug/Debugger.lua", "Glimpse")
     stub.load("Core/IDs.lua", "Glimpse")
+    stub.load("Core/IDsNames.lua", "Glimpse")
+    local folders = {
+        TravelDistance = "Movement", TravelTeleports = "Movement", TravelJumps = "Movement", TravelZones = "Movement",
+        TravelTram = "Tram", TravelFlightPoints = "Flights", TravelFlights = "Flights",
+    }
     for _, file in ipairs({ "Travel", "TravelDistance", "TravelTeleports", "TravelJumps", "TravelTram", "TravelRecords", "TravelRecordsTexts", "TravelRecordsSpeed", "TravelRecordsFall", "TravelRecordsWater", "TravelRecordsWalk", "TravelRecordsJumps", "TravelRecordsList", "TravelZones", "TravelFlightPoints", "TravelFlights" }) do
-        stub.load("Modules/Travel/" .. file .. ".lua", "Glimpse")
+        local folder = folders[file] or (file:find("^TravelRecords") and "Records")
+        stub.load("Modules/Travel/" .. (folder and (folder .. "/") or "") .. file .. ".lua", "Glimpse")
     end
 
     local zone = { map = 1429 }

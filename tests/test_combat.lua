@@ -10,10 +10,11 @@ local function setup()
     _G.tContains = function(t, v) for _, x in ipairs(t) do if x == v then return true end end return false end
     stub.load("Core/Debug/DebugTag.lua", "Glimpse")
     stub.load("Core/Debug/Probes.lua", "Glimpse")
-    stub.load("Core/Data.lua", "Glimpse")
+    stub.load("Core/Options/Data.lua", "Glimpse")
     stub.load("Core/Debug/Debug.lua", "Glimpse")
     stub.load("Core/Debug/Debugger.lua", "Glimpse")
     stub.load("Core/IDs.lua", "Glimpse")
+    stub.load("Core/IDsNames.lua", "Glimpse")
     for _, file in ipairs({ "Combat", "CombatKills", "CombatDeaths", "CombatLoot", "CombatTime", "CombatTooltip" }) do
         stub.load("Modules/Combat/" .. file .. ".lua", "Glimpse")
     end
@@ -175,7 +176,7 @@ test("Kampf: ohne Database still", function()
     _G.tContains = function() return false end
     stub.load("Core/Debug/DebugTag.lua", "Glimpse")
     stub.load("Core/Debug/Probes.lua", "Glimpse")
-    stub.load("Core/Data.lua", "Glimpse")
+    stub.load("Core/Options/Data.lua", "Glimpse")
     stub.load("Core/Debug/Debug.lua", "Glimpse")
     stub.load("Core/Debug/Debugger.lua", "Glimpse")
     stub.load("Modules/Combat/Combat.lua", "Glimpse")

@@ -34,6 +34,5 @@ frame:SetScript("OnEvent", function(_, event, name)
     elseif event == "PLAYER_LOGIN" then
         P.CurrentChar()
         P.ApplyPending()
-        if P.RunAlphaMigration then P.RunAlphaMigration() end
     end
 end)

@@ -87,6 +87,7 @@ local function Apply(payload)
         if data and type(part) == "table" then
             P.MergeMax(P.Path(data, "imported", "counts", origin), part.counts)
             P.MergePlaces(P.Path(data, "places", "imported"), part.places)
+            P.MergeLabels(P.Path(data, "labels"), part.labels)
             result.namespaces = result.namespaces + 1
         else
             result.skipped[name] = reason

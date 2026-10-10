@@ -1,6 +1,6 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
     <!-- Interne Module, je Modul ein Ordner. Externe Erweiterungen kommen als eigenes Addon. -->
-    <Include file="Locations\Locations.xml"/>
+    <Include file="Helper\Locations\Locations.xml"/>
     <Include file="Combat\Combat.xml"/>
     <Include file="Travel\Travel.xml"/>
     <Include file="Save\Save.xml"/>

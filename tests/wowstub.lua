@@ -99,7 +99,7 @@ end
 -- Danach ist `Locations.api` leer (ohne Spielfunktionen), Tests setzen, was sie brauchen.
 function stub.loadLocations()
     for _, file in ipairs({ "Locations", "Maps", "Position", "Distance", "Units", "Coords", "Waypoint" }) do
-        stub.load("Modules/Locations/" .. file .. ".lua", "Glimpse")
+        stub.load("Modules/Helper/Locations/" .. file .. ".lua", "Glimpse")
     end
     local module = LibStub():GetAddon():GetModule("Locations")
     module.api = {}

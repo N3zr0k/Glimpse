@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.40] - 2026-10-10
+
+### Added
+- Names: the Core learns NPC names (target, attackers) and stores them per client language; other addons read them with `Glimpse.IDs:NPCName` and `:ObjectName`
+- Database: names next to counters and records (`SetLabel`, `GetLabel`), part of export and import
+
+### Removed
+- Taking over old data from Statistics and GatheringDB (the first beta starts with an empty database)
+
 ## [0.3.39] - 2026-10-10
 
 ### Added

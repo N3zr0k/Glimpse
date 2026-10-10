@@ -1,0 +1,5 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+    <!-- Flugpunkte und Flüge; Travel.lua legt das Modul an. -->
+    <Script file="TravelFlightPoints.lua"/>
+    <Script file="TravelFlights.lua"/>
+</Ui>

@@ -26,11 +26,14 @@ Verbindliche Regeln für alle Glimpse-Addons, festgelegt von Sven. Sie gelten f�
   Braucht eine Datei Helfer, wird ihr Name verlängert (`CombatDeathsHelper.lua`; `Fishing.lua`, `FishingLure.lua`).
 * Erfassen und Anzeigen sind getrennt: Erfassung in `<Modul><Thema>.lua` (`CombatKills.lua`), die Anzeige in
   `<Modul>Tooltip.lua` (`CombatTooltip.lua`).
+* Hat eine Funktion mehrere Dateien, bekommt sie einen eigenen Ordner mit eigener XML (z. B. `Modules/Travel/Records/`).
+  Gemeinsam genutzte Dinge liegen im Core oder in `Modules/Helper/`, nicht in einem Fachmodul.
 * Oberste Ebene eines Addon-Ordners nur: `Core/`, `Libs/`, `Commands/`, `Locales/`, `Modules/`, `Media/`.
 * Im Repo hat jedes Addon einen eigenen Unterordner mit nur den Dateien, die WoW lädt. Tests, Tools, Doku und CI liegen
   daneben.
 * TOC-Titel immer `Glimpse: Name`.
 * Alle Glimpse-Addons (Core, Database, Erweiterungen) tragen `## Category: Tooltip` (Sven, 2026-10-10).
+* `tools/check.py` prüft, dass jede Lua- und XML-Datei von einer TOC oder XML geladen wird und in `docs/Files.md` steht.
 * `docs/Files.md` listet als Tabelle alle Dateien des Addons (nur was WoW lädt) mit kurzer Beschreibung, ob die Datei
   in die Datenbank schreibt oder daraus liest und in welchen Namespace bzw. Bereich, und weiteren wichtigen
   Abhängigkeiten. Bei jeder neuen, umbenannten oder gelöschten Datei mitpflegen.

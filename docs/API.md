@@ -4,7 +4,7 @@ Alle Werte, die die Glimpse-Suite in Glimpse: Database speichert, und wie ein Ad
 eingetragen, sobald sie gespeichert werden (Regel in `REGELN.md`). Die vollständige Database-API steht in
 `DEVELOPER.md`, Kapitel „Glimpse: Database“.
 
-Stand: Core 0.3.39-alpha.1.
+Stand: Core 0.3.40-beta.1.
 
 ## Grundlagen
 
@@ -28,6 +28,7 @@ Besitzer des Namespace, lesen jeder.
 | `reader:GetDays(kind, id, scope, count)` | `{ [JJJJMMTT] = n }` der letzten `count` Tage, nur bei Namespaces mit Tageswerten |
 | `reader:GetDayCount(kind, id, scope, count)` | Summe daraus; `count = 1` heute, `7` letzte 7 Tage |
 | `reader:GetLocations(mapID, id, scope)` | Liste `{ mapID, x, y, id, source }` |
+| `reader:GetLabel(kind, id, locale)` | Name zur ID in der Clientsprache (oder `locale`); fehlt er, einer aus anderer Sprache, dazu deren Sprache. Nur im Namespace `names` gefüllt, einfacher über `Glimpse.IDs:NPCName(id)` |
 | `reader:GetMax(kind, id, scope)` | Rekord: Höchstwert, Zeit (Unix) und Zone, bester Wert der Charaktere des scope; `nil` ohne Rekord |
 | `reader:GetMin(kind, id, scope)` | Rekord: Tiefstwert, Zeit und Zone, sonst wie `GetMax` |
 
@@ -47,6 +48,23 @@ sonst `false` und der Rekord. Rekorde sind persönlich (nicht Weltwissen), zähl
 
 **Änderungen:** `GlimpseDB.RegisterCallback(self, GlimpseDB.EVENT_CHANGED, function(_, nsName, kind, id) end)`;
 `nsName = nil` heißt viele Änderungen auf einmal (Import, Zurücksetzen).
+
+## Namespace `names`
+
+Besitzer: Glimpse (Core), Bereich `Misc`. Namen zu IDs, getrennt nach Clientsprache, Weltwissen: Der Export enthält sie, ein Import behält vorhandene Namen. Keine Zähler, nur Texte. Der Core lernt NPC-Namen beim Zielwechsel und bei Angreifern; Objekte meldet Glimpse_Gathering über `Glimpse.IDs:LearnName("object", id, name)`.
+
+| Art (kind) | ID | Text |
+| --- | --- | --- |
+| `npc` | NPC-ID | Name der Kreatur |
+| `object` | Objekt-ID | Name des Objekts (z. B. Kupfervorkommen) |
+
+```lua
+Glimpse.IDs:NPCName(299)          -- "Wolf" (Clientsprache), nil solange unbekannt
+Glimpse.IDs:ObjectName(1731)      -- "Kupfervorkommen"
+GlimpseDB:Get("names"):GetLabel("npc", 299, "deDE")   -- Name in einer bestimmten Sprache
+```
+
+Schreiben (nur Besitzer Glimpse): `ns:SetLabel(kind, id, name, locale)`; Erweiterungen nutzen `Glimpse.IDs:LearnName(kind, id, name)`.
 
 ## Namespace `combat`
 
@@ -170,7 +188,7 @@ fishing:GetCounts("loot:1429", "all")                              -- Fänge in 
 
 ## Namespace `gathering`
 
-Besitzer: Glimpse_Gathering (früher Glimpse_GatheringDB; ein gespeicherter alter Besitzer zählt als der neue). Bereich `Gathering`, mit Zonen. Fundorte als Orte.
+Besitzer: Glimpse_Gathering. Bereich `Gathering`, mit Zonen. Fundorte als Orte.
 
 | Art | ID | Wert | Weltwissen |
 | --- | --- | --- | --- |
@@ -185,8 +203,7 @@ Besitzer: Glimpse_Gathering (früher Glimpse_GatheringDB; ein gespeicherter alte
 | `skinloot:<NPC-ID>`, `skindrop:<NPC-ID>` | Item-ID | wie bei node | ja |
 
 Orte: Fundorte der Vorkommen, `id` = Objekt-ID; in der Database liegen nur eigene Orte. Fremde Fundorte (GatherMate2)
-hängt Glimpse_Gathering selbst live an, nicht über einen Database-Adapter. Namen der Objekte und NPCs stehen in Glimpse_Gathering
-(SavedVariables `GlimpseGatheringNames`), nicht in der Database.
+hängt Glimpse_Gathering selbst live an, nicht über einen Database-Adapter. Namen der Objekte und NPCs liefert der Core im Namespace `names` (`Glimpse.IDs:NPCName`, `:ObjectName`).
 
 ```lua
 local gathering = GlimpseDB:Get("gathering")

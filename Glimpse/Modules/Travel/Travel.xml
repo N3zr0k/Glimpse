@@ -1,20 +1,8 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-    <!-- Travel.lua legt das Modul an, die anderen Dateien erweitern es. -->
+    <!-- Travel.lua legt das Modul an, die Ordner erweitern es: je Funktion einer. -->
     <Script file="Travel.lua"/>
-    <Script file="TravelDistance.lua"/>
-    <Script file="TravelTeleports.lua"/>
-    <Script file="TravelJumps.lua"/>
-    <Script file="TravelTram.lua"/>
-    <Script file="TravelRecords.lua"/>
-    <Script file="TravelRecordsTexts.lua"/>
-    <Script file="TravelRecordsSpeed.lua"/>
-    <Script file="TravelRecordsFall.lua"/>
-    <Script file="TravelRecordsWater.lua"/>
-    <Script file="TravelRecordsWalk.lua"/>
-    <Script file="TravelRecordsJumps.lua"/>
-    <Script file="TravelRecordsList.lua"/>
-    <Script file="TravelRecordsOptions.lua"/>
-    <Script file="TravelZones.lua"/>
-    <Script file="TravelFlightPoints.lua"/>
-    <Script file="TravelFlights.lua"/>
+    <Include file="Movement\Movement.xml"/>
+    <Include file="Tram\Tram.xml"/>
+    <Include file="Records\Records.xml"/>
+    <Include file="Flights\Flights.xml"/>
 </Ui>

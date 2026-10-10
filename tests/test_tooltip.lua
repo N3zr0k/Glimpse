@@ -1,7 +1,7 @@
 -- luacheck: ignore 111 113 122 143 432
 local stub = require("wowstub")
 
--- Tooltip-Zeilen von Erweiterungen (Core/Tooltip.lua): Trennlinien
+-- Tooltip-Zeilen von Erweiterungen (Core/Tooltip/Tooltip.lua): Trennlinien
 local SEPARATOR = "|TInterface\\Common\\UI-TooltipDivider-Transparent:8:"
 
 local function setup()
@@ -11,7 +11,7 @@ local function setup()
     _G.Enum.TooltipDataType = { Spell = 1, Item = 2 }
     _G.TooltipDataProcessor = { AddTooltipPostCall = function(_, func) dispatch = func end }
     _G.geterrorhandler = function() return function(err) error(err, 0) end end
-    stub.load("Core/Tooltip.lua", "Glimpse")
+    stub.load("Core/Tooltip/Tooltip.lua", "Glimpse")
 
     -- ein Tooltip, der seine Zeilen als TextLeft<n> festhält
     local tooltip = { lines = {} }

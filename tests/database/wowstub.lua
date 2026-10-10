@@ -59,7 +59,7 @@ function stub.reset()
         end,
     }
 
-    -- Version wie in der TOC (AlphaMigration.lua prüft sie)
+    -- Version wie in der TOC
     local toc = io.open(ROOT .. "/Glimpse_Database/Glimpse_Database.toc"):read("*a")
     stub.version = toc:match("## Version: (%S+)")
 
@@ -79,7 +79,7 @@ function stub.reset()
     end
 
     for _, name in ipairs({ "GlimpseDB", "GlimpseDB_Meta", "GlimpseDB_Core", "GlimpseDB_Gathering",
-        "GlimpseDB_Professions", "GlimpseDB_Reputation", "GlimpseDB_Misc", "GlimpseStatisticsDB", "GlimpseGatheringDB" }) do
+        "GlimpseDB_Professions", "GlimpseDB_Reputation", "GlimpseDB_Misc" }) do
         _G[name] = nil
     end
 end

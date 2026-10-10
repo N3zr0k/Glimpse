@@ -4,7 +4,7 @@ Alle Funktionen, die in diesem Repository (Glimpse und Glimpse: Database) eingeb
 Tabelle am Ende zeigt, welche Funktion Daten in der Datenbank liest, schreibt oder beides. Die Dateien dazu stehen in
 [Files.md](Files.md), alle gespeicherten Werte in [API.md](API.md).
 
-Stand: Core 0.3.39-alpha.1.
+Stand: Core 0.3.40-beta.1.
 
 ## Glimpse (Core)
 
@@ -25,7 +25,6 @@ Stand: Core 0.3.39-alpha.1.
 | Daten | Tab „Daten“: Bereiche mit Größe, Export und Import als Text, Zurücksetzen. |
 | Rekorde | Merkt sich Bestwerte: höchstes und niedrigstes Tempo zu Fuß und beim Reiten, tiefsten Sturz, längste Zeit mit angehaltenem Atem, längste Tauchstrecke, längste Schwimmstrecke und längste Laufstrecke am Stück. Bei einem neuen Rekord kommt eine Meldung mit lustigem Text (auf dem Bildschirm, im Chat oder beides, Standard beides); beim Reiten wird das Reittier gelobt. Dazu Sprung-Meilensteine bei 100, 500, 1000, 2500, 5000, 10000, 100000 und 1000000 Sprüngen mit je einem eigenen Spruch. Tab „Rekorde“: Schalter je Art, Ausgabe und die Liste „Rekorde anzeigen“. |
 | Sichern | Zählt die Änderungen seit dem Start und fragt beim Betreten eines Ruhebereichs, ob neu geladen werden soll, damit die Daten auf die Platte kommen. Grenzen als Regler im Tab „Daten“: Änderungen (10 bis 1000, Standard 100) und Minuten (0 bis 120, Standard 30, 0 = aus). Mit Anzeige der ungesicherten Änderungen und „Jetzt sichern“. |
-| Übernahme (nur Alpha) | Übernimmt beim Login die alten Daten von Statistics und GatheringDB in die Database. |
 | Beispielmodul | Vorlage für eigene Module. |
 
 ## Glimpse: Database
@@ -36,6 +35,7 @@ Stand: Core 0.3.39-alpha.1.
 | Rekorde | Höchst- und Tiefstwerte je Charakter, Art und ID (`SetMax`, `SetMin`, `GetMax`, `GetMin`) mit Zeit und Zone; Import und Export behalten den besseren Wert. |
 | Zähler | Werte je Charakter, Art, ID und optional Zone, mit Summen für den Charakter, den Account oder alle. |
 | Zeiträume | Stundenwerte (heute, Woche, Monat, frei wählbar) und Tageswerte (ein Wert je Tag, letzte 7 Tage). |
+| Namen | Texte zu IDs je Clientsprache (`SetLabel`, `GetLabel`), Weltwissen: im Export, ein Import behält vorhandene Namen. |
 | Orte | Karte, X und Y, kompakt gespeichert; fremde Fundorte (z. B. GatherMate2) werden live gelesen und nie kopiert. |
 | Herkunft | Eigene, importierte, Blizzard-Startwerte und externe Daten bleiben getrennt. |
 | Datenbereiche | Große Teile liegen in vier Bereichen (Gathering, Professions, Reputation, Misc), die erst bei Bedarf laden. |
@@ -52,11 +52,11 @@ Spalten **Liest**, **Schreibt** und **Beides**: ein Haken zeigt, wie die Funktio
 | Kampf: Kreatur-Tooltip | `combat` | ✔ | | |
 | Reisen: Strecke, Zeit, Zonen, Teleports, Sprünge, Flugpunkte, Flüge, Tiefenbahn | `travel` | | ✔ | |
 | Rekorde: Tempo, Sturz, Atem, Schwimmstrecke, Sprung-Meilensteine | `travel` | ✔ | ✔ | ✔ |
+| Namensdienst: NPC- und Objektnamen zu IDs (`Glimpse.IDs:NPCName`, `:ObjectName`) | `names` | ✔ | ✔ | ✔ |
 | Rekorde: Liste „Rekorde anzeigen“ | `travel` | ✔ | | |
 | Daten-Tab: Größe, Export, Import, Zurücksetzen | alle | | | ✔ |
 | Sichern: zählt Änderungsmeldungen | alle (nur die Meldung, keine Daten) | ✔ | | |
 | Probe `db sources` | alle | ✔ | | |
 | Befehl `/gli db owner` | Besitzer der Namespaces (`GlimpseDB_Meta`) | | | ✔ |
-| Übernahme (Alpha) | alte Daten von Statistics und GatheringDB, Ziel `combat`, `fishing`, `gathering` | | | ✔ |
 | Glimpse: Database | alle (`GlimpseDB_Core` und die Bereiche) | | | ✔ |
 | Übrige Funktionen (Optionen, Tooltip-API, Doppelklick, Debug, Locations, ID-Helfer) | – | | | |

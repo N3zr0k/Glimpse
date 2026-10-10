@@ -4,7 +4,6 @@
   * jede TOC hat Interface, Title und eine Version X.Y.Z-PHASE.N (PHASE = alpha, beta oder latest)
   * jede in einer TOC oder XML genannte Datei existiert (Groß-/Kleinschreibung zählt, wie unter Linux)
   * jede XML-Datei ist wohlgeformt
-  * AlphaMigration.lua gibt es nur, solange die Version eine -alpha-Version ist
   * mit --tag vX.Y.Z-PHASE.N: alle TOC-Versionen sind genau diese Version und im CHANGELOG
     steht ein Abschnitt "## [X.Y.Z]" (bei Alpha reicht auch "## [Unreleased]")
   * mit --version: gibt die gemeinsame TOC-Version aus (Fehler, wenn die TOCs abweichen)
@@ -88,6 +87,40 @@ def check_xml(path):
             name = node.getAttribute("file")
             if name and not exists(os.path.join(base, name.replace("\\", "/"))):
                 error(f"{path}: Datei '{name}' fehlt")
+
+
+def check_files():
+    """Jede Lua- und XML-Datei eines Addons wird geladen (TOC oder XML) und steht in docs/Files.md."""
+    try:
+        with open(os.path.join("docs", "Files.md"), encoding="utf-8") as handle:
+            files_doc = handle.read()
+    except OSError:
+        files_doc = None
+
+    for toc in [p for p in walk(".") if p.endswith(".toc")]:
+        addon = os.path.dirname(toc)
+        loaded = set()
+        for path in walk(addon):
+            base = os.path.dirname(path)
+            if path.endswith(".toc"):
+                names = [l.strip() for l in open(path, encoding="utf-8") if l.strip() and not l.startswith("#")]
+            elif path.endswith(".xml"):
+                document = minidom.parse(path)
+                names = [n.getAttribute("file") for tag in ("Script", "Include")
+                         for n in document.getElementsByTagName(tag)]
+            else:
+                continue
+            loaded.update(os.path.normpath(os.path.join(base, n.replace("\\", "/"))) for n in names if n)
+
+        for path in walk(addon):
+            relative = os.path.relpath(path, addon).replace(os.sep, "/")
+            if not path.endswith((".lua", ".xml")) or relative.startswith("Libs/"):
+                continue
+            if os.path.normpath(path) not in loaded:
+                error(f"{path}: wird von keiner TOC oder XML geladen")
+            elif files_doc is not None and os.path.basename(addon) in ("Glimpse", "Glimpse_Database") \
+                    and relative not in files_doc and not relative.startswith("Locales/"):
+                error(f"{path}: fehlt in docs/Files.md")
 
 
 STAGES = ("alpha", "beta", "latest")
@@ -175,14 +208,7 @@ def main():
 
     if not versions:
         error("keine TOC-Datei gefunden")
-
-    # Die Alpha-Migration alter Exporte fliegt vor der ersten Beta raus (Datei und XML-Zeile löschen)
-    for path in walk("."):
-        if os.path.basename(path) == "AlphaMigration.lua":
-            for toc, version in versions.items():
-                if version and "-alpha." not in version:
-                    error(f"{path}: nur in Alpha-Versionen erlaubt ({toc} hat {version})")
-                    break
+    check_files()
 
     if args.version:
         found = set(versions.values())

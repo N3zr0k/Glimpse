@@ -34,6 +34,7 @@ local function Attacker(unit)
     local guid = Clean(api.UnitGUID(unit))
     local npc = Glimpse.IDs:NPCFromGUID(guid)
     if not npc then return nil end
+    Glimpse.IDs:LearnUnit(unit)
     if Ask(api.UnitCanAttack, "player", unit) ~= true or Ask(api.UnitIsDead, unit) == true then return nil end
     if Ask(api.UnitIsUnit, unit .. "target", "player") ~= true then return nil end
     return guid, npc

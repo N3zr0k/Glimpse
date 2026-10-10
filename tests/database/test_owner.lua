@@ -71,16 +71,3 @@ test("Besitzer: ohne debugstack (Tests der Erweiterungen) kein Schutz", function
     eq(DB:Register("gathering", { area = "Gathering" }) ~= nil, true, "angelegt")
     eq(DB:GetOwner("gathering"), "Glimpse_Gathering", "Besitzer bleibt vorgegeben")
 end)
-
-test("Besitzer: gespeicherter alter Ordner GatheringDB zählt als Glimpse_Gathering", function()
-    local DB = stub.load()
-    stub.useStack("Glimpse_Gathering")
-    eq(DB:Register("gathering", { area = "Gathering" }) ~= nil, true, "angelegt")
-    local saved = stub.saved()
-    saved.GlimpseDB_Meta.namespaces.gathering.owner = "Glimpse_GatheringDB"
-    DB = stub.restart(saved)
-    eq(DB:GetOwner("gathering"), "Glimpse_Gathering", "umgeschrieben")
-    stub.useStack("Glimpse_Gathering")
-    eq(DB:Register("gathering", { area = "Gathering" }) ~= nil, true, "darf")
-    eq(stub.saved().GlimpseDB_Meta.namespaces.gathering.owner, "Glimpse_Gathering", "gespeichert")
-end)

@@ -25,6 +25,7 @@ local function Source()
     loot:Count("drop", 2589, nil, 4)
     loot:Count("drop:299", 2589, nil, 2)
     loot:AddLocation(1617, 1429, 0.4, 0.5)
+    loot:SetLabel("npc", 299, "Wolf", "enUS")
     return Export(DB)
 end
 
@@ -45,6 +46,7 @@ test("Import auf einem anderen Rechner, gleicher Charakter", function()
     eq(DB:Get("fishing"):GetZones("catch", 6303)[1429], 3, "Zone")
     eq(#DB:Get("loot"):GetLocations(1429), 1, "Ort")
     eq(DB:Get("loot"):GetCount("drop", 2589), 4, "Weltwissen beim eigenen Charakter")
+    eq(DB:Get("loot"):GetLabel("npc", 299, "enUS"), "Wolf", "Name")
 
     Import(DB, text)
     eq(DB:Get("fishing"):GetCount("catch", 6303), 3, "zweiter Import zählt nicht doppelt")

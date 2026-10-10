@@ -30,7 +30,6 @@ local function setup(namespaces)
             return info
         end,
     }
-    _G.GlimpseStatisticsDB, _G.GlimpseGatheringDB = nil, nil
     return Glimpse
 end
 
@@ -69,15 +68,12 @@ test("Sources: nicht geladener Bereich nennt den Grund", function()
     eq(Has(Output(G), "Professions (not loaded: DISABLED)"), true, "Grund")
 end)
 
-test("Sources: alte SavedVariables und Angaben der Erweiterungen", function()
+test("Sources: Angaben der Erweiterungen", function()
     local G = setup({})
-    _G.GlimpseGatheringDB = {}
     G:RegisterDataSource("Glimpse_Gathering", function() return { "names: GlimpseGatheringNames" } end)
     G:RegisterDataSource("Glimpse_Broken", function() error("kaputt") end)
     G:RunProbe("db", "sources")
     local text = Output(G)
-    eq(Has(text, "Old data GlimpseStatisticsDB: not loaded (addon not active)"), true, "Statistics fehlt")
-    eq(Has(text, "Old data GlimpseGatheringDB: loaded"), true, "GatheringDB geladen")
     eq(Has(text, "Glimpse_Gathering|r: names: GlimpseGatheringNames"), true, "Erweiterung")
     eq(Has(text, "kaputt"), true, "Fehler einer Erweiterung wird gezeigt")
     eq(Has(text, "Glimpse: Database holds no data yet."), true, "leer")

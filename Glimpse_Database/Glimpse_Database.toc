@@ -3,7 +3,7 @@
 ## Notes: Stores the data of all Glimpse addons in one place, with export and import.
 ## Notes-deDE: Speichert die Daten aller Glimpse-Addons an einem Ort, mit Export und Import.
 
-## Version: 0.3.39-alpha.1
+## Version: 0.3.40-beta.1
 ## Author: N3zr0k
 ## X-License: MIT
 ## X-Website: https://github.com/N3zr0k/Glimpse

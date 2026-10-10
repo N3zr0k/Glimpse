@@ -1,7 +1,7 @@
 -- luacheck: ignore 111 113 122 143 432
 local stub = require("wowstub")
 
--- Entfernungen für alle Erweiterungen (Modules/Locations)
+-- Entfernungen für alle Erweiterungen (Modules/Helper/Locations)
 local function setup(unit)
     local Glimpse = stub.newGlimpse()
     Glimpse.db = { profile = { distanceUnit = unit } }

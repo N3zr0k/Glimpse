@@ -30,6 +30,7 @@ local function WorldPart(info, data)
         P.Yield()
     end
     if data.places and data.places.own then part.places = data.places.own end
+    if data.labels then part.labels = data.labels end
     if next(part) then return part end
 end
 

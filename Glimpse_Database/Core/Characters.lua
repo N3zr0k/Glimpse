@@ -34,14 +34,6 @@ function P.CharIndex(key, info)
     return index
 end
 
---- Index für Weltwissen, das keinem Charakter gehört (z. B. aus alten Addons)
-function P.WorldChar()
-    local index = P.CharIndex("world")
-    local entry = P.meta.characters[index]
-    entry.foreign, entry.world = nil, true
-    return index
-end
-
 --- Index des eingeloggten Charakters, nil solange die GUID noch nicht bekannt ist
 function P.CurrentChar()
     if P.char then return P.char end

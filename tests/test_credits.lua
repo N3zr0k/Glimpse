@@ -1,7 +1,7 @@
 -- luacheck: ignore 111 113 122 143 432
 local stub = require("wowstub")
 
--- Credits der Suite, einmal in der Core-Übersicht (Core/Credits.lua)
+-- Credits der Suite, einmal in der Core-Übersicht (Core/Options/Credits.lua)
 local function setup()
     local Glimpse = stub.newGlimpse()
     local titles = { Glimpse_Gathering = "Glimpse: Gathering", Glimpse_Statistics = "Glimpse: Statistics",
@@ -10,11 +10,11 @@ local function setup()
         if key == "Title" and addonName then return titles[addonName] end
         return ({ Author = "N3zr0k", Title = "Glimpse", Version = "1.0" })[key]
     end
-    stub.load("Core/Options.lua", "Glimpse")
-    stub.load("Core/Credits.lua", "Glimpse")
+    stub.load("Core/Options/Options.lua", "Glimpse")
+    stub.load("Core/Options/Credits.lua", "Glimpse")
     stub.load("Core/Debug/DebugTag.lua", "Glimpse")
     stub.load("Core/Debug/Probes.lua", "Glimpse")
-    stub.load("Core/Data.lua", "Glimpse")
+    stub.load("Core/Options/Data.lua", "Glimpse")
     _G.GetBuildInfo = function() return "1.0", "1", "date", 16001 end
     return Glimpse
 end

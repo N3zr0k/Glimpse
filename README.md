@@ -33,8 +33,15 @@ For WoW Forever (interface 16001).
 
 * One place for all extensions: each one is a separate addon with its own page under Glimpse in the game options.
 * Overview of the installed extensions with icon and version, and a warning if an extension needs a newer Glimpse.
-* Records kills, deaths, combat time, loot per creature, distance travelled (walking, riding, swimming, flight paths,
-  as a ghost) and time per zone for every character. Extensions such as Statistics show the numbers.
+* Records kills, deaths and combat time, distance and time per way of travelling (walking, riding, swimming, diving,
+  flight paths, ships, the Deeprun Tram), zones, teleports, jumps, flight points and flights for every character.
+  Extensions such as Statistics show the numbers.
+* Records and funny messages: fastest and slowest speed on foot and mounted (your mount gets praised), deepest fall,
+  longest time holding your breath, longest dive, swim and walk without a break, and jump milestones up to a million.
+* Double click: extensions register double-click actions; Glimpse detects the click, checks the situation (standing,
+  swimming, mounted ...) and runs the right action, with one central key.
+* Saving: WoW writes the data only on logout or reload; Glimpse asks to reload when you enter a rest area after enough
+  changes or time, so a crash does not lose what you collected.
 * Knows where data comes from: recorded by Glimpse, imported, the game's own statistic before Glimpse, or read live
   from another addon such as GatherMate2 (never copied).
 * Export and import as a text you can copy. Knowledge about the world (places, loot) can be shared with anyone;
@@ -54,11 +61,14 @@ Open them with `/gli config` or in the game options under Addons > Glimpse.
 
 * **Overview:** installed extensions and, below a divider, the credits of the whole suite: author, contributors,
   image credits of all extensions and thanks.
-* **General:** debug mode and the distance unit for all extensions (automatic by client language, yards or metres).
+* **General:** debug mode, the distance unit for all extensions (automatic by client language, yards or metres) and the
+  double click (central key, priority per action).
 * **Combat:** kills and deaths in creature tooltips, with account values and position next to the name, the level or
   in an own line.
-* **Data:** the data areas of Glimpse: Database with their size, export and import (to share or move to another computer),
-  and resetting an area.
+* **Records:** a switch per message (running, riding, falling, jumps, breath, diving, swimming, walking), where the
+  messages appear (screen, chat or both) and a list of your records.
+* **Data:** saving (limits for changes and minutes, "Save now"), the data areas of Glimpse: Database with their size,
+  export and import (to share or move to another computer), and resetting an area.
 * **Profiles:** settings per profile, can be copied, reset and shared between characters.
 
 Extensions can offer "Only while a key is held": their tooltip lines then appear only while Shift, Ctrl and/or Alt are held.

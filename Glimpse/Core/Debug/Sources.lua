@@ -15,7 +15,6 @@ function Glimpse:RegisterDataSource(addon, func)
 end
 
 -- SavedVariables der alten Addons, aus denen Database übernimmt
-local LEGACY = { "GlimpseStatisticsDB", "GlimpseGatheringDB" }
 
 local function Sorted(t)
     local keys = {}
@@ -60,10 +59,6 @@ local function Overview(DB)
     end
     if #lines == 0 then lines[1] = L["Glimpse: Database holds no data yet."] end
 
-    for _, global in ipairs(LEGACY) do
-        lines[#lines + 1] = format(L["Old data %s: %s"], global,
-            type(_G[global]) == "table" and L["loaded"] or L["not loaded (addon not active)"])
-    end
     for _, addon in ipairs(Sorted(Glimpse.dataSources)) do
         local ok, result = pcall(Glimpse.dataSources[addon])
         if type(result) ~= "table" then result = { tostring(result) } end

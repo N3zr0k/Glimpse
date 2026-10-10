@@ -2,7 +2,7 @@
 
 Angaben und Texte zum Kopieren in den CurseForge Author Console (Projekt Glimpse, ID 1730173). Texte auf CurseForge
 auf Englisch. Das Repository enthält Glimpse, Glimpse: Database und die vier Datenbereiche; alles gehört zu diesem
-einen Projekt. Stand: Core 0.3.39-alpha.1. Alpha-Versionen gehen nicht auf CurseForge, die Texte sind für beta und
+einen Projekt. Stand: Core 0.3.40-beta.1. Alpha-Versionen gehen nicht auf CurseForge, die Texte sind für beta und
 latest.
 
 ## Felder
@@ -42,6 +42,7 @@ For WoW Forever (interface 16001).
 - **Per character and account-wide:** all numbers are kept per character and can be summed for the account.
 - **Backup and sharing:** export and import as text you can copy. Knowledge about the world (places, loot) can be shared with anyone, personal numbers only go back to the same character.
 - **Debug mode:** diagnostic messages with the addon name in the chat, a log window to copy and test probes for testers.
+- **Saving:** WoW writes data only on logout or reload. Glimpse asks to reload when you enter a rest area after enough changes or time, so a crash does not lose what you collected.
 - German and English.
 
 ## Included addons
